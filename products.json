@@ -1,5 +1,20 @@
 [
   {
+    "id": 1790589653841,
+    "name": "Поло Tommy Hilfiger белая оригинал XL (52)",
+    "brand": "Tommy Hilfiger",
+    "type": "Поло",
+    "price": 4950,
+    "oldPrice": 5500,
+    "stock": 1,
+    "badge": "Скидка",
+    "desc": "XL L",
+    "imgs": [
+      "images/1790589649518_pzc2s.jpg",
+      "images/1790589651683_tovxt.jpg"
+    ]
+  },
+  {
     "id": 1790589226473,
     "name": "Поло Tommy Hilfiger оригинал XXL",
     "brand": "Tommy Hilfiger",

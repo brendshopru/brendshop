@@ -1,5 +1,20 @@
 [
   {
+    "id": 1790606319494,
+    "name": "Пуховик Tommy Hilfiger оригинал S,M,XL,XXL",
+    "brand": "Tommy Hilfiger",
+    "type": "Пуховик",
+    "price": 13050,
+    "oldPrice": 14500,
+    "stock": 2,
+    "badge": "Скидка",
+    "desc": "",
+    "imgs": [
+      "images/1790606314305_zg7vi.jpg",
+      "images/1790606316651_cqugf.jpg"
+    ]
+  },
+  {
     "id": 1790606124544,
     "name": "Пуховик Tommy Hilfiger оригинал серый (46-56)",
     "brand": "Tommy Hilfiger",

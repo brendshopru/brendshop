@@ -1,5 +1,20 @@
 [
   {
+    "id": 1790612716495,
+    "name": "Пуховик Tommy Jeans синий XXL (54-56)",
+    "brand": "Tommy Hilfiger",
+    "type": "Пуховик",
+    "price": 9450,
+    "oldPrice": 10500,
+    "stock": 1,
+    "badge": "Новинка",
+    "desc": "",
+    "imgs": [
+      "images/1790612710707_8ticd.jpg",
+      "images/1790612714166_j6ik2.jpg"
+    ]
+  },
+  {
     "id": 1790612622080,
     "name": "Пуховик Tommy Jeans синий L (50-52)",
     "brand": "Tommy Hilfiger",

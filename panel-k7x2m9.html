@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex,nofollow">
+<meta name="color-scheme" content="dark">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BRENDSHOP — Админка</title>
+<style>
+:root{--bg:#0b0b0b;--card:#141414;--fg:#f5f5f0;--muted:#8a8a85;--accent:#d4ff3f;--line:#2a2a2a;--red:#ff5c5c;box-sizing:border-box}
+*{box-sizing:inherit;margin:0;padding:0}
+html,body{min-height:100%;background:var(--bg);color:var(--fg);font-family:-apple-system,'Helvetica Neue',Arial,sans-serif}
+input,textarea,select{width:100%;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;color:var(--fg);font-size:14px;font-family:inherit}
+input:focus,textarea:focus,select:focus{outline:1px solid var(--accent)}
+input[type=checkbox]{width:auto}
+input[type=color]{padding:2px;height:44px}
+label{font-size:12px;color:var(--muted);display:block;margin:14px 0 6px}
+button{font:inherit;cursor:pointer}
+.btn{background:var(--accent);color:#0b0b0b;border:none;border-radius:10px;padding:13px;font-weight:700;font-size:14px;width:100%;margin-top:14px}
+.btn.sec{background:transparent;color:var(--fg);border:1px solid var(--line)}
+.btn.sm{width:auto;padding:8px 12px;font-size:12px;margin:0}
+.btn:disabled{opacity:.5}
+.wrap{max-width:760px;margin:0 auto;padding:calc(20px + env(safe-area-inset-top,0px)) 16px 80px}
+h1{font-size:22px;font-weight:800}
+.sub{color:var(--muted);font-size:13px;margin:4px 0 18px}
+.hint{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.tabs{display:flex;gap:8px;margin:14px 0}
+.tab{flex:1;padding:11px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--muted);font-weight:700;font-size:13px}
+.tab.on{background:var(--accent);color:#0b0b0b;border-color:var(--accent)}
+.row{display:flex;gap:12px;align-items:center;background:var(--card);border-radius:14px;padding:10px;margin-bottom:10px}
+.row img{width:54px;height:68px;object-fit:cover;border-radius:8px;background:#1c1c1c;flex-shrink:0}
+.row .meta{flex:1;min-width:0}
+.row .name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .sub2{font-size:12px;color:var(--muted);margin-top:2px}
+.row .pr{font-size:13px;color:var(--accent);font-weight:700;margin-top:3px}
+.row .pr s{color:var(--muted);font-weight:400;margin-right:6px}
+.acts{display:flex;flex-direction:column;gap:6px}
+.tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 6px;border-radius:5px;margin-left:6px;vertical-align:middle}
+.tag.sold{background:#963030;color:#fff}.tag.low{background:#b47800;color:#fff}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.photos{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.ph{position:relative;width:72px;height:90px}
+.ph img{width:100%;height:100%;object-fit:cover;border-radius:8px}
+.ph .x{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:var(--red);color:#fff;border:none;font-size:12px}
+.ph .n{position:absolute;bottom:3px;left:3px;background:rgba(0,0,0,.65);font-size:10px;padding:1px 5px;border-radius:4px}
+.ph .mv{position:absolute;bottom:3px;right:3px;background:rgba(0,0,0,.65);color:#fff;border:none;font-size:11px;padding:1px 6px;border-radius:4px}
+#login,#app,#formBox,#setBox{display:none}
+#login.show,#app.show,#formBox.show,#setBox.show{display:block}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--line);padding:12px 18px;border-radius:12px;font-size:13px;z-index:50;opacity:0;transition:opacity .25s;pointer-events:none;max-width:90vw}
+#toast.on{opacity:1}#toast.err{border-color:var(--red)}
+.chk{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:14px}
+.count{color:var(--muted);font-size:12px;margin:8px 0 12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div id="login" class="show">
+  <h1>Админка BRENDSHOP</h1>
+  <div class="sub">Вход через GitHub: товары и настройки сохраняются прямо в репозиторий сайта</div>
+  <label>GitHub Personal Access Token</label>
+  <input id="ghToken" type="password" placeholder="github_pat_... или ghp_..." autocomplete="off">
+  <label>Репозиторий (пользователь/название)</label>
+  <input id="ghRepo" placeholder="например andrei/brendshop">
+  <button class="btn" onclick="login()">Войти</button>
+  <div class="hint">Токен создаётся один раз: GitHub → Settings → Developer settings → Personal access tokens. Права: доступ к этому репозиторию, Contents: Read and write. Токен хранится только в этом браузере.</div>
+</div>
+
+<div id="app">
+  <div class="top">
+    <div><h1>BRENDSHOP</h1><div class="sub" id="repoLabel"></div></div>
+    <button class="btn sec sm" onclick="logout()">Выйти</button>
+  </div>
+  <div class="tabs">
+    <button class="tab on" id="tabP" onclick="tab('p')">Товары</button>
+    <button class="tab" id="tabS" onclick="tab('s')">Настройки сайта</button>
+  </div>
+
+  <div id="listBox">
+    <input id="q" placeholder="Поиск по названию или бренду" oninput="renderList()">
+    <div class="count" id="count"></div>
+    <div id="list"></div>
+    <button class="btn" onclick="openForm(null)">+ Добавить товар</button>
+  </div>
+
+  <div id="formBox">
+    <h1 id="formTitle">Новый товар</h1>
+    <label>Название</label>
+    <input id="fName" placeholder="Поло Tommy Hilfiger оригинал">
+    <div class="g2">
+      <div><label>Бренд</label><input id="fBrand" list="brands" placeholder="Tommy Hilfiger"></div>
+      <div><label>Тип</label><input id="fType" list="types" placeholder="Поло"></div>
+    </div>
+    <datalist id="brands"></datalist><datalist id="types"></datalist>
+    <div class="g2">
+      <div><label>Цена, ₽</label><input id="fPrice" type="number" inputmode="numeric" placeholder="5175"></div>
+      <div><label>Старая цена, ₽ (для скидки)</label><input id="fOld" type="number" inputmode="numeric" placeholder="6500"></div>
+    </div>
+    <div class="hint" id="discHint"></div>
+    <div class="g2">
+      <div><label>Наличие, шт. (0 = продано)</label><input id="fStock" type="number" inputmode="numeric" value="1"></div>
+      <div><label>Бейдж на фото</label>
+        <select id="fBadge"><option value="">Без бейджа</option><option>Новинка</option><option>Скидка</option><option>Хит</option></select>
+      </div>
+    </div>
+    <label>Описание (напишите здесь размеры)</label>
+    <textarea id="fDesc" rows="4" placeholder="Оригинал, новое, с биркой. Размеры: M, L, XL"></textarea>
+    <label>Фото: первое — спереди, второе — сзади, дальше любые</label>
+    <input id="fPhotos" type="file" accept="image/*" multiple>
+    <div class="photos" id="photos"></div>
+    <div class="hint">Фото автоматически уменьшаются до 1200 px, чтобы сайт открывался быстро.</div>
+    <button class="btn" id="saveBtn" onclick="saveProduct()">Сохранить и опубликовать</button>
+    <button class="btn sec" onclick="closeForm()">Отмена</button>
+  </div>
+
+  <div id="setBox">
+    <h1>Настройки сайта</h1>
+    <div class="chk"><input type="checkbox" id="sBanner"><label style="margin:0;font-size:14px;color:var(--fg)" for="sBanner">Показывать баннер скидки</label></div>
+    <label>Текст баннера</label>
+    <input id="sText" placeholder="Скидка 20% при заказе от 3 товаров">
+    <label>Акцентный цвет сайта</label>
+    <input id="sColor" type="color" value="#d4ff3f">
+    <div class="chk"><input type="checkbox" id="sSound"><label style="margin:0;font-size:14px;color:var(--fg)" for="sSound">Звук на сайте включён по умолчанию</label></div>
+    <button class="btn" id="saveSetBtn" onclick="saveSettings()">Сохранить настройки</button>
+    <div class="hint">Изменения появляются на сайте через 1–2 минуты после сохранения.</div>
+  </div>
+</div>
+</div>
+<div id="toast"></div>
+
+<script>
+const API='https://api.github.com';
+let token='',repo='',products=[],pSha='',settings={},sSha='',editing=null,formImgs=[];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const enc=s=>btoa(unescape(encodeURIComponent(s)));
+const dec=b=>decodeURIComponent(escape(atob(b.replace(/\n/g,''))));
+
+function toast(msg,err){const t=$('toast');t.textContent=msg;t.className='on'+(err?' err':'');clearTimeout(t._t);t._t=setTimeout(()=>t.className='',err?5000:2500)}
+function hdr(){return {Authorization:'Bearer '+token,Accept:'application/vnd.github+json'}}
+async function gh(path,opt){
+  const r=await fetch(API+'/repos/'+repo+path,Object.assign({headers:hdr()},opt||{}));
+  return r;
+}
+async function getFile(path){
+  const r=await gh('/contents/'+path+'?t='+Date.now());
+  if(r.status===404) return {json:null,sha:''};
+  if(!r.ok) throw new Error('GitHub '+r.status);
+  const d=await r.json();
+  return {json:JSON.parse(dec(d.content)),sha:d.sha};
+}
+async function putFile(path,contentB64,sha,msg){
+  const body={message:msg,content:contentB64};if(sha)body.sha=sha;
+  const r=await gh('/contents/'+path,{method:'PUT',headers:Object.assign({'Content-Type':'application/json'},hdr()),body:JSON.stringify(body)});
+  if(!r.ok){const e=await r.json().catch(()=>({}));const err=new Error(e.message||r.status);err.status=r.status;throw err}
+  return (await r.json()).content.sha;
+}
+async function saveJSON(path,data,shaRef,msg){
+  const b64=enc(JSON.stringify(data,null,2));
+  try{ return await putFile(path,b64,shaRef,msg); }
+  catch(e){
+    if(e.status===409||e.status===422){ // stale sha: refetch and retry once
+      const cur=await getFile(path); return await putFile(path,b64,cur.sha,msg);
+    }
+    throw e;
+  }
+}
+
+async function login(){
+  token=$('ghToken').value.trim();repo=$('ghRepo').value.trim().replace(/^https?:\/\/github\.com\//,'').replace(/\/$/,'');
+  if(!token||!repo){toast('Заполните токен и репозиторий',1);return}
+  try{
+    const p=await getFile('products.json');
+    products=Array.isArray(p.json)?p.json:[];pSha=p.sha;
+    const s=await getFile('settings.json');
+    settings=s.json||{};sSha=s.sha;
+  }catch(e){toast('Не удалось подключиться: проверьте токен и название репозитория',1);return}
+  localStorage.setItem('bs_admin_token',token);localStorage.setItem('bs_admin_repo',repo);
+  $('login').classList.remove('show');$('app').classList.add('show');
+  $('repoLabel').textContent=repo;
+  fillSettings();renderList();fillLists();
+}
+function logout(){localStorage.removeItem('bs_admin_token');location.reload()}
+
+function tab(t){
+  $('tabP').classList.toggle('on',t==='p');$('tabS').classList.toggle('on',t==='s');
+  $('listBox').style.display=t==='p'?'block':'none';
+  $('setBox').classList.toggle('show',t==='s');
+  $('formBox').classList.remove('show');
+}
+function fillLists(){
+  const u=k=>[...new Set(products.map(p=>p[k]).filter(Boolean))];
+  const base={brands:['Tommy Hilfiger','Ralph Lauren','Lacoste','Autograph','Calvin Klein','Timberland','La Martina','DKNY','New Balance','Cerruti 1881','Bikkembergs','Tommy Jeans'],
+    types:['Поло','Футболка','Джемпер','Свитшот','Бомбер','Куртка','Пуховик','Жилет','Шорты','Кроссовки','Кеды','Сумка']};
+  $('brands').innerHTML=[...new Set([...base.brands,...u('brand')])].map(x=>`<option value="${esc(x)}">`).join('');
+  $('types').innerHTML=[...new Set([...base.types,...u('type')])].map(x=>`<option value="${esc(x)}">`).join('');
+}
+const fmt=n=>Number(n).toLocaleString('ru-RU')+' ₽';
+function renderList(){
+  const q=$('q').value.toLowerCase().trim();
+  const list=products.map((p,i)=>({p,i})).filter(({p})=>(p.name+' '+(p.brand||'')+' '+(p.type||'')).toLowerCase().includes(q));
+  $('count').textContent=`Товаров: ${products.length}`+(q?` · найдено: ${list.length}`:'');
+  $('list').innerHTML=list.map(({p,i})=>{
+    const st=p.stock===0?'<span class="tag sold">Продано</span>':(p.stock!=null&&p.stock<=2?`<span class="tag low">Осталось ${p.stock}</span>`:'');
+    return `<div class="row">
+      <img loading="lazy" src="${esc((p.imgs&&p.imgs[0])||'')}" alt="">
+      <div class="meta"><div class="name">${esc(p.name)}${st}</div>
+        <div class="sub2">${esc(p.brand||'—')} · ${esc(p.type||'—')}</div>
+        <div class="pr">${p.oldPrice?`<s>${fmt(p.oldPrice)}</s>`:''}${fmt(p.price)}</div></div>
+      <div class="acts">
+        <button class="btn sm" onclick="openForm(${i})">Изменить</button>
+        <button class="btn sec sm" onclick="toggleSold(${i})">${p.stock===0?'В наличии':'Продано'}</button>
+        <button class="btn sec sm" style="color:var(--red)" onclick="delProduct(${i})">Удалить</button>
+      </div></div>`}).join('')||'<div class="sub">Ничего не найдено</div>';
+}
+
+function openForm(i){
+  editing=i;const p=i==null?{}:products[i];
+  $('formTitle').textContent=i==null?'Новый товар':'Изменить товар';
+  $('fName').value=p.name||'';$('fBrand').value=p.brand||'';$('fType').value=p.type||'';
+  $('fPrice').value=p.price||'';$('fOld').value=p.oldPrice||'';
+  $('fStock').value=p.stock==null?1:p.stock;$('fBadge').value=p.badge||'';$('fDesc').value=p.desc||'';
+  formImgs=(p.imgs||[]).filter(u=>!u.startsWith('data:')).map(u=>({url:u}));
+  $('fPhotos').value='';renderPhotos();discHint();
+  $('listBox').style.display='none';$('formBox').classList.add('show');scrollTo(0,0);
+}
+function closeForm(){$('formBox').classList.remove('show');$('listBox').style.display='block'}
+function discHint(){
+  const pr=+$('fPrice').value,old=+$('fOld').value;
+  $('discHint').textContent=(old&&pr&&old>pr)?`Скидка на сайте: −${Math.round((1-pr/old)*100)}%`:(old?'Старая цена должна быть больше новой':'Пусто — скидки нет');
+}
+$('fPrice').oninput=$('fOld').oninput=discHint;
+function renderPhotos(){
+  $('photos').innerHTML=formImgs.map((im,i)=>`<div class="ph"><img src="${esc(im.preview||im.url)}"><button class="x" onclick="rmPhoto(${i})">✕</button><span class="n">${i+1}</span>${i>0?`<button class="mv" onclick="mvPhoto(${i})">◀</button>`:''}</div>`).join('');
+}
+function rmPhoto(i){formImgs.splice(i,1);renderPhotos()}
+function mvPhoto(i){const t=formImgs[i];formImgs[i]=formImgs[i-1];formImgs[i-1]=t;renderPhotos()}
+$('fPhotos').onchange=async e=>{
+  for(const f of e.target.files){
+    try{const c=await compress(f);formImgs.push({b64:c.b64,preview:c.preview,name:f.name})}
+    catch(err){toast('Не удалось обработать '+f.name,1)}
+  }
+  e.target.value='';renderPhotos();
+};
+function compress(file){
+  return new Promise((res,rej)=>{
+    const url=URL.createObjectURL(file),img=new Image();
+    img.onload=()=>{
+      const M=1200,k=Math.min(1,M/Math.max(img.width,img.height));
+      const cv=document.createElement('canvas');cv.width=Math.round(img.width*k);cv.height=Math.round(img.height*k);
+      cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+      const data=cv.toDataURL('image/jpeg',0.85);URL.revokeObjectURL(url);
+      res({b64:data.split(',')[1],preview:data});
+    };
+    img.onerror=()=>rej(new Error('img'));img.src=url;
+  });
+}
+
+async function saveProduct(){
+  const name=$('fName').value.trim(),price=+$('fPrice').value,old=+$('fOld').value||null;
+  if(!name){toast('Введите название',1);return}
+  if(!price){toast('Введите цену',1);return}
+  if(old&&old<=price){toast('Старая цена должна быть больше новой',1);return}
+  if(!formImgs.length){toast('Добавьте хотя бы одно фото',1);return}
+  const btn=$('saveBtn');btn.disabled=true;
+  try{
+    const imgs=[];let n=0;const total=formImgs.filter(x=>x.b64).length;
+    for(const im of formImgs){
+      if(im.url){imgs.push(im.url);continue}
+      n++;btn.textContent=`Загружаю фото ${n}/${total}…`;
+      const path=`images/${Date.now()}_${Math.random().toString(36).slice(2,7)}.jpg`;
+      await putFile(path,im.b64,'','photo');
+      imgs.push(path);
+    }
+    btn.textContent='Сохраняю…';
+    const prod={id:editing==null?Date.now():products[editing].id,name,brand:$('fBrand').value.trim(),type:$('fType').value.trim(),
+      price,oldPrice:old,stock:Math.max(0,parseInt($('fStock').value,10)||0),badge:$('fBadge').value,desc:$('fDesc').value.trim(),imgs};
+    const next=products.slice();
+    if(editing==null) next.unshift(prod); else next[editing]=prod;
+    pSha=await saveJSON('products.json',next,pSha,editing==null?'add product':'edit product');
+    products=next;
+    toast('Сохранено. На сайте появится через 1–2 минуты');
+    closeForm();renderList();fillLists();
+  }catch(e){toast('Ошибка: '+e.message,1)}
+  btn.disabled=false;btn.textContent='Сохранить и опубликовать';
+}
+async function commitList(next,msg){
+  try{pSha=await saveJSON('products.json',next,pSha,msg);products=next;renderList();fillLists();toast('Сохранено')}
+  catch(e){toast('Ошибка: '+e.message,1)}
+}
+async function toggleSold(i){
+  const next=products.slice();const p=Object.assign({},next[i]);
+  p.stock=p.stock===0?1:0;next[i]=p;await commitList(next,'toggle sold');
+}
+async function delProduct(i){
+  if(!confirm('Удалить «'+products[i].name+'»?'))return;
+  const next=products.slice();next.splice(i,1);await commitList(next,'delete product');
+}
+
+function fillSettings(){
+  $('sBanner').checked=settings.discountEnabled!==false;
+  $('sText').value=settings.discountText||'Скидка 20% при заказе от 3 товаров';
+  $('sColor').value=/^#[0-9a-f]{6}$/i.test(settings.accent||'')?settings.accent:'#d4ff3f';
+  $('sSound').checked=settings.sound!==false;
+}
+async function saveSettings(){
+  const s={discountEnabled:$('sBanner').checked,discountText:$('sText').value.trim(),accent:$('sColor').value,sound:$('sSound').checked};
+  const b=$('saveSetBtn');b.disabled=true;
+  try{sSha=await saveJSON('settings.json',s,sSha,'update settings');settings=s;toast('Настройки сохранены')}
+  catch(e){toast('Ошибка: '+e.message,1)}
+  b.disabled=false;
+}
+
+const st=localStorage.getItem('bs_admin_token'),sr=localStorage.getItem('bs_admin_repo');
+if(st&&sr){$('ghToken').value=st;$('ghRepo').value=sr;login()}
+</script>
+</body>
+</html>

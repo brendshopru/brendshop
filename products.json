@@ -1,5 +1,21 @@
 [
   {
+    "id": 1790684776256,
+    "name": "Кеды Lacoste оригинал 40",
+    "brand": "Lacoste",
+    "type": "Кеды",
+    "price": 10125,
+    "oldPrice": 13500,
+    "stock": 1,
+    "badge": "Хит",
+    "desc": "",
+    "imgs": [
+      "images/1790684769060_0ll12.jpg",
+      "images/1790684771556_374yw.jpg",
+      "images/1790684774051_6qjy4.jpg"
+    ]
+  },
+  {
     "id": 1790684480057,
     "name": "Кеды Lacoste оригинал 44р",
     "brand": "Lacoste",

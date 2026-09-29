@@ -1,5 +1,21 @@
 [
   {
+    "id": 1790681151501,
+    "name": "Кеды Lacoste оригинал 38",
+    "brand": "Lacoste",
+    "type": "Кеды",
+    "price": 10125,
+    "oldPrice": 13500,
+    "stock": 1,
+    "badge": "Новинка",
+    "desc": "",
+    "imgs": [
+      "images/1790681144919_td764.jpg",
+      "images/1790681147349_kd7gj.jpg",
+      "images/1790681149266_xzi8x.jpg"
+    ]
+  },
+  {
     "id": 1790680582009,
     "name": "Кроссовки Lacoste оригинал 41, 43",
     "brand": "Lacoste",

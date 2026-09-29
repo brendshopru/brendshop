@@ -1,5 +1,21 @@
 [
   {
+    "id": 1790681446939,
+    "name": "Кеды мужские Lacoste оригинал 42",
+    "brand": "Lacoste",
+    "type": "Кеды",
+    "price": 10125,
+    "oldPrice": 13500,
+    "stock": 1,
+    "badge": "Новинка",
+    "desc": "",
+    "imgs": [
+      "images/1790681440736_drq1w.jpg",
+      "images/1790681442867_y9u4l.jpg",
+      "images/1790681444727_648hu.jpg"
+    ]
+  },
+  {
     "id": 1790681151501,
     "name": "Кеды Lacoste оригинал 38",
     "brand": "Lacoste",

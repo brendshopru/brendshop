@@ -1,5 +1,21 @@
 [
   {
+    "id": 1790679502534,
+    "name": "Кроссовки Lacoste оригинал 42",
+    "brand": "Lacoste",
+    "type": "Кроссовки",
+    "price": 11625,
+    "oldPrice": 15500,
+    "stock": 1,
+    "badge": "Скидка",
+    "desc": "",
+    "imgs": [
+      "images/1790679495619_vcm5o.jpg",
+      "images/1790679498184_kytty.jpg",
+      "images/1790679500531_ek5fn.jpg"
+    ]
+  },
+  {
     "id": 1790678545014,
     "name": "Кроссовки Lacoste оригинал 40",
     "brand": "Lacoste",

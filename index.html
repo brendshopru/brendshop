@@ -770,14 +770,32 @@ function showToast(msg){
   toast._t=setTimeout(()=>{toast.style.transition='opacity .3s';toast.style.opacity='0'},2200);
 }
 function shareProduct(){
+  if(!currentProduct)return;
   const url=location.href.split('#')[0]+'#product-'+currentProduct.id;
-  const text=encodeURIComponent(currentProduct.name+' — '+fmt(currentProduct.price)+' '+url);
+  const shareTitle=currentProduct.name||'BRendShop';
+  const shareText=shareTitle+' — '+fmt(currentProduct.price);
+
+  // На телефоне сначала используем системное меню «Поделиться».
+  if(navigator.share){
+    navigator.share({title:shareTitle,text:shareText,url:url}).catch(()=>{});
+    return;
+  }
+
+  // Если системного меню нет — показываем привычные варианты.
+  const text=encodeURIComponent(shareText+' '+url);
   document.getElementById('shareWa').href=`https://wa.me/?text=${text}`;
-  document.getElementById('shareTg').href=`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(currentProduct.name)}`;
+  document.getElementById('shareTg').href=`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(shareTitle)}`;
   document.getElementById('shareVk').href=`https://vk.com/share.php?url=${encodeURIComponent(url)}`;
-  document.getElementById('shareCopy').onclick=()=>{
-    navigator.clipboard.writeText(url);
-    showToast('Ссылка скопирована');
+  document.getElementById('shareCopy').onclick=async()=>{
+    try{
+      await navigator.clipboard.writeText(url);
+      showToast('Ссылка скопирована');
+    }catch(e){
+      const ta=document.createElement('textarea');
+      ta.value=url;document.body.appendChild(ta);ta.select();
+      try{document.execCommand('copy');showToast('Ссылка скопирована')}catch(_){showToast('Не удалось скопировать ссылку')}
+      ta.remove();
+    }
     document.getElementById('shareMenu').classList.remove('open');
   };
   document.getElementById('shareMenu').classList.add('open');

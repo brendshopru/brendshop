@@ -191,6 +191,7 @@ footer .addr{color:var(--muted);font-size:13px;margin-bottom:20px}
 .cart-item .name{font-size:13px}
 .cart-item .price{color:var(--accent);font-size:13px;font-weight:700;margin-top:2px}
 .cart-total{display:flex;justify-content:space-between;font-weight:800;font-size:16px;padding:16px 0}
+.cart-discount{display:flex;justify-content:space-between;gap:12px;color:var(--accent);font-size:13px;font-weight:700;padding:4px 0 0}
 .checkout-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
 .checkout-row a{display:flex;align-items:center;justify-content:center;padding:12px;border-radius:12px;background:var(--card);border:1px solid #2a2a2a44;font-size:12px;font-weight:600}
 
@@ -215,10 +216,23 @@ footer .addr{color:var(--muted);font-size:13px;margin-bottom:20px}
   .about p{font-size:15px;max-width:760px}
   .contact-btn{padding:16px}
   #overlay .info{max-width:600px;margin:0 auto}
+  .shop-hero{padding-top:4px;padding-bottom:16px}
+  .shop-hero-box{padding:18px 22px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:24px}
+  .shop-hero h3{font-size:38px;margin-bottom:7px}
+  .shop-hero p{font-size:13px;line-height:1.45;margin:0;max-width:760px}
+  .shop-hero-box .hero-actions{margin-top:0;min-width:410px}
+  .feature-strip{padding-bottom:14px}
+  .feature-strip-title{margin-bottom:6px}
+  .feature-card{min-height:62px;padding:10px 12px}
+  .discount-banner{margin-top:0;margin-bottom:12px}
+  .search-row{margin-bottom:0}
+  .filter-panel{margin-top:8px;margin-bottom:12px}
+  main{padding-bottom:3vh}
+  .grid{gap:18px}
 }
 
 /* BRENDSHOP upgrades: existing colors are preserved */
-.shop-hero{max-width:1240px;margin:0 auto;padding:10px 5vw 26px}.shop-hero-box{background:var(--card);border:1px solid #2a2a2a55;border-radius:18px;padding:22px}.shop-hero-kicker{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px}.shop-hero h3{font-size:clamp(25px,5vw,46px);line-height:1.02;margin-bottom:10px}.shop-hero p{font-size:14px;line-height:1.55;color:var(--muted);max-width:650px}.hero-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.hero-action{border:1px solid var(--line);background:transparent;color:var(--fg);border-radius:10px;padding:10px 13px;font-weight:700;font-size:12px}.hero-action.active{background:var(--accent);color:#0b0b0b;border-color:var(--accent)}.feature-strip{padding:0 5vw 22px;max-width:1240px;margin:auto}.feature-strip-title{font-size:12px;color:var(--muted);margin-bottom:9px}.feature-row{display:flex;gap:9px;overflow:auto;scrollbar-width:none}.feature-row::-webkit-scrollbar{display:none}.feature-card{flex:0 0 145px;min-height:76px;border:1px solid #2a2a2a55;border-radius:14px;background:var(--card);padding:12px;cursor:pointer}.feature-card b{display:block;font-size:13px;margin-bottom:4px}.feature-card span{font-size:11px;color:var(--muted)}.how-order{max-width:1240px;margin:0 auto;padding:5vh 5vw}.how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.how-step{background:var(--card);border-radius:14px;padding:14px}.how-step strong{font-size:12px;color:var(--accent)}.how-step b{display:block;font-size:14px;margin:6px 0}.how-step span{font-size:12px;line-height:1.45;color:var(--muted)}.recommend{padding:18px 0 4px}.recommend-title{font-size:12px;color:var(--muted);margin-bottom:9px}.recommend-row{display:flex;gap:9px;overflow:auto}.recommend-item{flex:0 0 92px;cursor:pointer}.recommend-item img{width:92px;height:112px;object-fit:cover;border-radius:10px;background:var(--card)}.recommend-item div{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:5px}.size-box{margin-top:15px}.size-title{font-size:12px;color:var(--muted);margin-bottom:8px}.size-row{display:flex;gap:7px;flex-wrap:wrap}.size-btn{min-width:42px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:transparent;color:var(--fg);font-size:12px;font-weight:700}.size-btn.on{background:var(--accent);color:#0b0b0b;border-color:var(--accent)}.fav-drawer{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:70;display:none}.fav-drawer.open{display:block}.fav-sheet{position:absolute;right:0;top:0;height:100%;width:min(430px,92vw);background:var(--bg);padding:24px 18px;overflow:auto}.fav-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid #2a2a2a55;cursor:pointer}.fav-item img{width:58px;height:72px;object-fit:cover;border-radius:8px}.fav-item .m{flex:1;min-width:0}.fav-item b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fav-item span{display:block;font-size:12px;color:var(--accent);margin-top:4px}.cart-progress{margin:0 0 14px;padding:11px 12px;border:1px solid #2a2a2a55;border-radius:12px;background:var(--card)}.cart-progress-text{font-size:12px;margin-bottom:7px}.cart-progress-bar{height:5px;background:#2a2a2a;border-radius:5px;overflow:hidden}.cart-progress-bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .25s}@media(max-width:700px){.how-grid{grid-template-columns:1fr 1fr}}@media(max-width:430px){.how-grid{grid-template-columns:1fr}.shop-hero{padding-top:2px}}
+.shop-hero{max-width:1240px;margin:0 auto;padding:10px 5vw 26px}.shop-hero-box{background:var(--card);border:1px solid #2a2a2a55;border-radius:18px;padding:22px}.shop-hero-kicker{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px}.shop-hero h3{font-size:clamp(25px,5vw,46px);line-height:1.02;margin-bottom:10px}.shop-hero p{font-size:14px;line-height:1.55;color:var(--muted);max-width:650px}.hero-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:16px}.hero-action{border:1px solid var(--line);background:transparent;color:var(--fg);border-radius:10px;padding:10px 8px;font-weight:700;font-size:12px;min-width:0;white-space:nowrap}.hero-action.active{background:var(--accent);color:#0b0b0b;border-color:var(--accent)}.feature-strip{padding:0 5vw 22px;max-width:1240px;margin:auto}.feature-strip-title{font-size:12px;color:var(--muted);margin-bottom:9px}.feature-row{display:flex;gap:9px;overflow:auto;scrollbar-width:none}.feature-row::-webkit-scrollbar{display:none}.feature-card{flex:0 0 145px;min-height:76px;border:1px solid #2a2a2a55;border-radius:14px;background:var(--card);padding:12px;cursor:pointer}.feature-card b{display:block;font-size:13px;margin-bottom:4px}.feature-card span{font-size:11px;color:var(--muted)}.how-order{max-width:1240px;margin:0 auto;padding:5vh 5vw}.how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.how-step{background:var(--card);border-radius:14px;padding:14px}.how-step strong{font-size:12px;color:var(--accent)}.how-step b{display:block;font-size:14px;margin:6px 0}.how-step span{font-size:12px;line-height:1.45;color:var(--muted)}.recommend{padding:18px 0 4px}.recommend-title{font-size:12px;color:var(--muted);margin-bottom:9px}.recommend-row{display:flex;gap:9px;overflow:auto}.recommend-item{flex:0 0 92px;cursor:pointer}.recommend-item img{width:92px;height:112px;object-fit:cover;border-radius:10px;background:var(--card)}.recommend-item div{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:5px}.size-box{margin-top:15px}.size-title{font-size:12px;color:var(--muted);margin-bottom:8px}.size-row{display:flex;gap:7px;flex-wrap:wrap}.size-btn{min-width:42px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:transparent;color:var(--fg);font-size:12px;font-weight:700}.size-btn.on{background:var(--accent);color:#0b0b0b;border-color:var(--accent)}.fav-drawer{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:70;display:none}.fav-drawer.open{display:block}.fav-sheet{position:absolute;right:0;top:0;height:100%;width:min(430px,92vw);background:var(--bg);padding:24px 18px;overflow:auto}.fav-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid #2a2a2a55;cursor:pointer}.fav-item img{width:58px;height:72px;object-fit:cover;border-radius:8px}.fav-item .m{flex:1;min-width:0}.fav-item b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fav-item span{display:block;font-size:12px;color:var(--accent);margin-top:4px}.cart-progress{margin:0 0 14px;padding:11px 12px;border:1px solid #2a2a2a55;border-radius:12px;background:var(--card)}.cart-progress-text{font-size:12px;margin-bottom:7px}.cart-progress-bar{height:5px;background:#2a2a2a;border-radius:5px;overflow:hidden}.cart-progress-bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .25s}@media(max-width:700px){.how-grid{grid-template-columns:1fr 1fr}.hero-action{padding:10px 4px;font-size:11px}}@media(max-width:430px){.how-grid{grid-template-columns:1fr}.shop-hero{padding-top:2px}}
 @media(min-width:1250px){
   .topbar,header,.search,.chips,main,.about,.reviews,footer,.shop-hero,.feature-strip,.how-order,.search-row,.filter-panel{max-width:1440px}
   .grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:22px}
@@ -376,7 +390,7 @@ footer .addr{color:var(--muted);font-size:13px;margin-bottom:20px}
   <div class="sheet">
     <h2 style="font-size:18px;font-weight:800;margin-bottom:14px">Корзина</h2>
     <div id="cartProgress" class="cart-progress" style="display:none"><div class="cart-progress-text" id="cartProgressText"></div><div class="cart-progress-bar"><i id="cartProgressBar"></i></div></div><div id="cartItems"></div>
-    <div class="cart-total"><span>Итого</span><span id="cartTotal">0 ₽</span></div>
+    <div class="cart-discount" id="cartDiscount" style="display:none"><span id="cartDiscountLabel">Скидка</span><span id="cartDiscountValue">−0 ₽</span></div><div class="cart-total"><span>Итого</span><span id="cartTotal">0 ₽</span></div>
     <div style="font-size:12px;color:var(--muted)">Оформить заказ:</div>
     <div class="checkout-row">
       <a id="checkoutWa" target="_blank">WhatsApp</a>
@@ -400,6 +414,7 @@ let products=[
 const favs=new Set(JSON.parse(localStorage.getItem('bs_favs')||'[]'));
 let recent=JSON.parse(localStorage.getItem('bs_recent')||'[]');
 let cart=JSON.parse(localStorage.getItem('bs_cart')||'{}'); // {productId: qty}
+let siteSettings={discountEnabled:true,discountPercent:20,discountMinQty:3};
 const grid=document.getElementById('grid');
 let currentProduct=null;
 
@@ -438,21 +453,36 @@ function renderFavs(){const box=document.getElementById('favItems'),arr=products
 function renderCart(){
   const wrap=document.getElementById('cartItems');
   const ids=Object.keys(cart),totalQty=ids.reduce((n,id)=>n+(cart[id]||0),0),prog=document.getElementById('cartProgress');
-  if(totalQty){prog.style.display='block';const left=Math.max(0,3-totalQty);document.getElementById('cartProgressText').textContent=left?`До скидки 20% осталось: ${left} ${left===1?'товар':'товара'}`:'Скидка 20% активирована';document.getElementById('cartProgressBar').style.width=Math.min(100,totalQty/3*100)+'%'}else prog.style.display='none';
+  const minQty=Math.max(1,Number(siteSettings.discountMinQty)||3);
+  const discountPercent=Math.max(0,Math.min(100,Number(siteSettings.discountPercent)||20));
+  if(totalQty){
+    prog.style.display='block';
+    const left=Math.max(0,minQty-totalQty);
+    document.getElementById('cartProgressText').textContent=left?`До скидки ${discountPercent}% осталось: ${left} ${left===1?'товар':'товара'}`:`Скидка ${discountPercent}% активирована`;
+    document.getElementById('cartProgressBar').style.width=Math.min(100,totalQty/minQty*100)+'%';
+  }else prog.style.display='none';
   if(!ids.length){wrap.innerHTML='<div style="color:var(--muted);font-size:13px;padding:10px 0">Корзина пуста</div>';}
   else{
     wrap.innerHTML=ids.map(id=>{
       const p=products.find(x=>x.id===Number(id)); if(!p)return'';
-      return `<div class="cart-item"><div><div class="name">${p.name} × ${cart[id]}</div><div class="price">${fmt(p.price*cart[id])}</div></div>
+      return `<div class="cart-item"><div><div class="name">${esc(p.name)} × ${cart[id]}</div><div class="price">${fmt(p.price*cart[id])}</div></div>
         <div class="qty-stepper" style="position:static">
           <button onclick="changeQty(${id},-1)">−</button><span>${cart[id]}</span><button onclick="changeQty(${id},1)">+</button>
         </div></div>`;
     }).join('');
   }
-  const total=ids.reduce((sum,id)=>{const p=products.find(x=>x.id===Number(id)); return sum+(p?p.price*cart[id]:0)},0);
+  const subtotal=ids.reduce((sum,id)=>{const p=products.find(x=>x.id===Number(id)); return sum+(p?p.price*cart[id]:0)},0);
+  const discountActive=totalQty>=minQty && discountPercent>0;
+  const discount=discountActive?Math.round(subtotal*discountPercent/100):0;
+  const total=subtotal-discount;
+  const dc=document.getElementById('cartDiscount');
+  dc.style.display=discount?'flex':'none';
+  document.getElementById('cartDiscountLabel').textContent=`Скидка ${discountPercent}%`;
+  document.getElementById('cartDiscountValue').textContent=`−${fmt(discount)}`;
   document.getElementById('cartTotal').textContent=fmt(total);
   const lines=ids.map(id=>{const p=products.find(x=>x.id===Number(id)); return p?`${p.name} x${cart[id]} — ${fmt(p.price*cart[id])}`:''}).filter(Boolean);
-  const messageText=`Здравствуйте! Хочу заказать:\n${lines.join('\n')}\n\nИтого: ${fmt(total)}`;
+  const discountLine=discount?`\nСкидка ${discountPercent}%: −${fmt(discount)}`:'';
+  const messageText=`Здравствуйте! Хочу заказать:\n${lines.join('\n')}\n\nСумма: ${fmt(subtotal)}${discountLine}\nИтого: ${fmt(total)}`;
   document.getElementById('checkoutWa').href=`https://wa.me/79201085073?text=${encodeURIComponent(messageText)}`;
   document.getElementById('checkoutTg').href=`https://t.me/AndreiAndriichuk?text=${encodeURIComponent(messageText)}`;
   document.getElementById('checkoutVk').href=`https://vk.com/im?sel=420778533`;
@@ -734,6 +764,7 @@ function buildChips(id,attr,allLabel,field){
 function syncChips(){/* chips are static, not rebuilt from products */}
 function applySettings(s){
   if(!s)return;
+  siteSettings=Object.assign({},siteSettings,s);
   if(s.about) document.getElementById('aboutText').textContent=s.about;
   if(s.reviewsLine) document.getElementById('reviewsLine').textContent=s.reviewsLine;
   try{localStorage.setItem('bs_settings',JSON.stringify(s))}catch(e){}

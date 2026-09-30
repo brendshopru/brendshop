@@ -746,8 +746,6 @@ function closeOverlay(){
   popModalIfMine('overlay');
 }
 (function bindOverlayButtons(){
-  const descBtn=document.getElementById('ovDescriptionToggle');
-  if(descBtn) descBtn.addEventListener('click',()=>document.getElementById('ovDescription').classList.toggle('open'));
   const goCart=document.getElementById('goCartBtn');
   if(goCart) goCart.addEventListener('click',goToCartFromOverlay);
   const shareBtn=document.getElementById('shareBtn');

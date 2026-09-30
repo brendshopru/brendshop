@@ -53,7 +53,7 @@ h1{font-size:22px;font-weight:800}
 .count{color:var(--muted);font-size:12px;margin:8px 0 12px}
 
 /* Admin upgrades — existing color variables are unchanged */
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.stat{background:var(--card);border-radius:12px;padding:12px}.stat b{display:block;font-size:18px}.stat span{font-size:11px;color:var(--muted)}.toolbar{display:flex;gap:8px;align-items:center;margin-bottom:10px}.toolbar select{width:auto;flex:0 0 145px}.row .thumb{position:relative}.row .featured{font-size:10px;color:var(--accent);margin-top:2px}.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.switch{display:flex;align-items:center;gap:9px;font-size:13px;margin-top:10px}.switch input{width:auto}.danger{color:var(--red)!important}.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.char-required{border-left:3px solid var(--accent);padding-left:10px;margin-top:14px}.char-required-title{font-size:13px;font-weight:800;margin-bottom:2px}.admin-note{background:var(--card);border:1px solid #2a2a2a55;border-radius:12px;padding:11px 12px;font-size:12px;color:var(--muted);line-height:1.45}@media(max-width:520px){.settings-grid{grid-template-columns:1fr}}@media(max-width:520px){.stats{grid-template-columns:1fr 1fr}.toolbar{flex-wrap:wrap}.toolbar select{width:100%;flex:1}}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.stat{background:var(--card);border-radius:12px;padding:12px}.stat b{display:block;font-size:18px}.stat span{font-size:11px;color:var(--muted)}.toolbar{display:flex;gap:8px;align-items:center;margin-bottom:10px}.toolbar select{width:auto;flex:0 0 145px}.row .thumb{position:relative}.row .featured{font-size:10px;color:var(--accent);margin-top:2px}.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.switch{display:flex;align-items:center;gap:9px;font-size:13px;margin-top:10px}.switch input{width:auto}.danger{color:var(--red)!important}.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.char-required{border-left:3px solid var(--accent);padding-left:10px;margin-top:14px}.char-required-title{font-size:13px;font-weight:800;margin-bottom:2px}.desc-required{margin-top:16px}.admin-note{background:var(--card);border:1px solid #2a2a2a55;border-radius:12px;padding:11px 12px;font-size:12px;color:var(--muted);line-height:1.45}@media(max-width:520px){.settings-grid{grid-template-columns:1fr}}@media(max-width:520px){.stats{grid-template-columns:1fr 1fr}.toolbar{flex-wrap:wrap}.toolbar select{width:100%;flex:1}}
 </style>
 </head>
 <body>
@@ -122,8 +122,21 @@ h1{font-size:22px;font-weight:800}
       <input id="fBadgeCustom" placeholder="Свой текст бейджа" style="display:none;margin-top:8px">
       </div>
     </div>
-    <label>Описание (напишите здесь размеры)</label>
-    <textarea id="fDesc" rows="4" placeholder="Оригинал, новое, с биркой. Размеры: M, L, XL"></textarea>
+    <div class="char-required desc-required"><div class="char-required-title">Описание товара</div><div class="hint" style="margin-top:4px">Этот текст будет показан покупателю сразу под характеристиками.</div></div>
+    <textarea id="fDesc" rows="7" placeholder="В продаже кеды Lacoste оригинал.
+Цвет: чёрный
+Качество отличное 👍
+Страна производитель — Вьетнам VN
+Размер: 44
+
+Наружный материал: натуральная кожа
+Внутренний материал: текстиль
+Материал стельки: текстиль
+Материал подошвы: резина
+Сезон: демисезон
+
+Комплект: коробка, навесная бирка
+По необходимости можно запросить замеры."></textarea>
     <label>Фото — можно выбрать сразу много или добавлять по одному. Первое фото спереди, второе сзади, остальные в любом порядке</label>
     <input id="fPhotos" type="file" accept="image/*" multiple>
     <button class="btn sec sm" type="button" onclick="$('fPhotos').click()" style="margin-top:8px">+ Добавить ещё фото</button>

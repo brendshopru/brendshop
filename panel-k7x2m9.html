@@ -53,7 +53,7 @@ h1{font-size:22px;font-weight:800}
 .count{color:var(--muted);font-size:12px;margin:8px 0 12px}
 
 /* Admin upgrades — existing color variables are unchanged */
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.stat{background:var(--card);border-radius:12px;padding:12px}.stat b{display:block;font-size:18px}.stat span{font-size:11px;color:var(--muted)}.toolbar{display:flex;gap:8px;align-items:center;margin-bottom:10px}.toolbar select{width:auto;flex:0 0 145px}.row .thumb{position:relative}.row .featured{font-size:10px;color:var(--accent);margin-top:2px}.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.switch{display:flex;align-items:center;gap:9px;font-size:13px;margin-top:10px}.switch input{width:auto}.danger{color:var(--red)!important}.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.admin-note{background:var(--card);border:1px solid #2a2a2a55;border-radius:12px;padding:11px 12px;font-size:12px;color:var(--muted);line-height:1.45}@media(max-width:520px){.settings-grid{grid-template-columns:1fr}}@media(max-width:520px){.stats{grid-template-columns:1fr 1fr}.toolbar{flex-wrap:wrap}.toolbar select{width:100%;flex:1}}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.stat{background:var(--card);border-radius:12px;padding:12px}.stat b{display:block;font-size:18px}.stat span{font-size:11px;color:var(--muted)}.toolbar{display:flex;gap:8px;align-items:center;margin-bottom:10px}.toolbar select{width:auto;flex:0 0 145px}.row .thumb{position:relative}.row .featured{font-size:10px;color:var(--accent);margin-top:2px}.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.switch{display:flex;align-items:center;gap:9px;font-size:13px;margin-top:10px}.switch input{width:auto}.danger{color:var(--red)!important}.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.char-required{border-left:3px solid var(--accent);padding-left:10px;margin-top:14px}.char-required-title{font-size:13px;font-weight:800;margin-bottom:2px}.admin-note{background:var(--card);border:1px solid #2a2a2a55;border-radius:12px;padding:11px 12px;font-size:12px;color:var(--muted);line-height:1.45}@media(max-width:520px){.settings-grid{grid-template-columns:1fr}}@media(max-width:520px){.stats{grid-template-columns:1fr 1fr}.toolbar{flex-wrap:wrap}.toolbar select{width:100%;flex:1}}
 </style>
 </head>
 <body>
@@ -101,6 +101,7 @@ h1{font-size:22px;font-weight:800}
       <div><label>Размеры</label><input id="fSizes" placeholder="M, L, XL или 42, 43, 44"></div>
       <div><label>Витрина</label><label class="switch"><input type="checkbox" id="fFeatured"> Показывать как рекомендованный товар</label></div>
     </div>
+    <div class="char-required"><div class="char-required-title">Характеристики товара</div><div class="hint" style="margin-top:4px">Заполни эти поля — они будут показаны покупателю в карточке товара.</div></div>
     <div class="g2">
       <div><label>Материал</label><input id="fMaterial" placeholder="Хлопок"></div>
       <div><label>Цвет</label><input id="fColor" placeholder="Коричневый"></div>
@@ -319,8 +320,11 @@ async function saveProduct(){
       imgs.push(path);
     }
     btn.textContent='Сохраняю…';
-    const prod={id:editing==null?Date.now():products[editing].id,name,brand:$('fBrand').value.trim(),type:$('fType').value.trim(),
-      price,oldPrice:old,sizes:$('fSizes').value.split(',').map(x=>x.trim()).filter(Boolean),material:$('fMaterial').value.trim(),color:$('fColor').value.trim(),season:$('fSeason').value.trim(),condition:$('fCondition').value.trim(),featured:$('fFeatured').checked,stock:Math.max(0,parseInt($('fStock').value,10)||0),badge:badgeValue(),desc:$('fDesc').value.trim(),imgs};
+    const brand=$('fBrand').value.trim(),type=$('fType').value.trim(),sizes=$('fSizes').value.split(',').map(x=>x.trim()).filter(Boolean),material=$('fMaterial').value.trim(),color=$('fColor').value.trim(),season=$('fSeason').value.trim(),condition=$('fCondition').value.trim();
+    const missing=[['Бренд',brand],['Тип',type],['Размеры',sizes.join(', ')],['Материал',material],['Цвет',color],['Сезон',season],['Состояние',condition]].filter(x=>!x[1]).map(x=>x[0]);
+    if(missing.length){toast('Заполни характеристики: '+missing.join(', '),1);btn.disabled=false;btn.textContent='Сохранить товар';return}
+    const prod={id:editing==null?Date.now():products[editing].id,name,brand,type,
+      price,oldPrice:old,sizes,material,color,season,condition,featured:$('fFeatured').checked,stock:Math.max(0,parseInt($('fStock').value,10)||0),badge:badgeValue(),desc:$('fDesc').value.trim(),imgs};
     const next=products.slice();
     if(editing==null) next.unshift(prod); else next[editing]=prod;
     pSha=await saveJSON('products.json',next,pSha,editing==null?'add product':'edit product');

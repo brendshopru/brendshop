@@ -118,6 +118,7 @@ main.show{opacity:1;transition:opacity .4s ease}
 #overlay .close{position:sticky;top:16px;margin-left:5vw;width:38px;height:38px;background:var(--card);border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:2;cursor:pointer}
 #overlay .close svg{width:16px;height:16px;stroke:var(--fg);fill:none;stroke-width:2}
 #overlay .gallery{aspect-ratio:4/5;margin-top:-38px}
+#overlay .gallery-nav,#overlay .gallery-dots{display:none}
 #overlay .gallery img{transition:transform .3s;transform-origin:center}
 #overlay .gallery img.zoomed{transform:scale(2)}
 #overlay .info{padding:20px 5vw}
@@ -207,8 +208,15 @@ footer .addr{color:var(--muted);font-size:13px;margin-bottom:20px}
   #overlay{background:rgba(0,0,0,.78);backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:32px 5vw;gap:28px}
   #overlay.open{display:flex}
   #overlay .close{position:absolute;top:24px;left:24px;margin:0;width:42px;height:42px}
-  #overlay .gallery{width:min(48vw,560px);height:min(72vh,700px);aspect-ratio:4/5;margin:0;border-radius:18px;overflow:hidden;background:var(--card);flex:0 1 560px}
-  #overlay .gallery img{width:100%;height:100%;object-fit:contain;background:var(--card)}
+  #overlay .gallery{width:min(48vw,560px);height:min(72vh,700px);aspect-ratio:4/5;margin:0;border-radius:18px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-behavior:smooth;background:var(--card);flex:0 1 560px;position:relative}
+  #overlay .gallery img{width:100%;height:100%;flex:0 0 100%;scroll-snap-align:center;object-fit:contain;background:var(--card);cursor:zoom-in}
+  #overlay .gallery::-webkit-scrollbar{display:none}
+  #overlay .gallery-nav{display:flex;position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);display:flex;justify-content:space-between;padding:0 12px;pointer-events:none;z-index:3}
+  #overlay .gallery-nav button{pointer-events:auto;width:42px;height:42px;border:1px solid #ffffff22;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;display:flex;align-items:center;justify-content:center;font-size:25px;line-height:1;cursor:pointer;backdrop-filter:blur(5px)}
+  #overlay .gallery-nav button:disabled{opacity:.25;cursor:default}
+  #overlay .gallery-dots{display:flex;position:absolute;left:0;right:0;bottom:12px;display:flex;justify-content:center;gap:6px;z-index:3;pointer-events:none}
+  #overlay .gallery-dots i{width:7px;height:7px;border-radius:50%;background:#777;opacity:.8}
+  #overlay .gallery-dots i.on{background:var(--accent);opacity:1}
   #overlay .info{width:min(44vw,520px);max-height:min(72vh,700px);overflow-y:auto;background:var(--card);border-radius:18px;padding:28px 30px;flex:0 1 520px}
   #overlay .info .name{font-size:24px}
   #overlay .info .price{font-size:28px}
@@ -388,7 +396,7 @@ footer .addr{color:var(--muted);font-size:13px;margin-bottom:20px}
 
 <div id="overlay">
   <div class="close" onclick="closeOverlay()"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></div>
-  <div class="gallery" id="ovGallery"></div>
+  <div class="gallery" id="ovGallery"><div class="gallery-nav"><button id="ovPrev" type="button" aria-label="Предыдущее фото">‹</button><button id="ovNext" type="button" aria-label="Следующее фото">›</button></div><div class="gallery-dots" id="ovGalleryDots"></div></div>
   <div class="info">
     <div class="name" id="ovName"></div>
     <div class="price-row" id="ovPriceRow"></div>
@@ -671,8 +679,35 @@ window.addEventListener('popstate',()=>{
   if(name==='overlay') document.getElementById('overlay').classList.remove('open');
   else if(name==='cart') document.getElementById('cartDrawer').classList.remove('open');
 });
+document.addEventListener('keydown',e=>{
+  if(!document.getElementById('overlay').classList.contains('open'))return;
+  if(e.key==='ArrowLeft')document.getElementById('ovPrev')?.click();
+  if(e.key==='ArrowRight')document.getElementById('ovNext')?.click();
+  if(e.key==='Escape')closeOverlay();
+});
 
-function openOverlay(p){currentProduct=p;document.getElementById('ovGallery').innerHTML=p.imgs.map(s=>`<img src="${esc(s)}">`).join('');document.querySelectorAll('#ovGallery img').forEach(img=>img.ondblclick=()=>img.classList.toggle('zoomed'));document.getElementById('ovName').textContent=p.name;document.getElementById('ovPrice').textContent=fmt(p.price);document.getElementById('ovPriceRow').innerHTML=p.oldPrice?`<span class="price-old">${fmt(p.oldPrice)}</span><span class="discount-pct">-${Math.round((1-p.price/p.oldPrice)*100)}%</span>`:'';document.getElementById('ovDesc').textContent=p.desc||'';const cb=document.getElementById('ovCharacteristicsBody'),cw=document.getElementById('ovCharacteristics');const chars=[['Бренд',p.brand],['Тип',p.type],['Состояние',p.condition],['Сезон',p.season],['Размер',Array.isArray(p.sizes)?p.sizes.join(', '):p.sizes],['Материал',p.material],['Цвет',p.color]].filter(x=>String(x[1]||'').trim());cb.innerHTML=chars.length?chars.map(x=>`<div class="char-row"><span class="k">${esc(x[0])}</span><span class="v">${esc(x[1])}</span></div>`).join(''):'<div class="char-empty">Характеристики пока не заполнены</div>';cw.classList.remove('open');const sizes=Array.isArray(p.sizes)?p.sizes:[],sb=document.getElementById('ovSizes'),sr=document.getElementById('ovSizeRow');sb.style.display=sizes.length?'block':'none';let selectedSize=sizes[0]||'';sr.innerHTML=sizes.map(x=>`<button class="size-btn${x===selectedSize?' on':''}" type="button">${esc(x)}</button>`).join('');sr.querySelectorAll('.size-btn').forEach(b=>b.onclick=()=>{selectedSize=b.textContent;sr.querySelectorAll('.size-btn').forEach(x=>x.classList.remove('on'));b.classList.add('on')});const add=document.getElementById('ovAdd');add.disabled=p.stock===0;add.textContent=p.stock===0?'Продано':'В корзину';add.onclick=()=>{if(p.stock>0){addToCart(p.id);showToast('Добавлено в корзину'+(selectedSize?' · размер '+selectedSize:''))}};const rec=products.filter(x=>x.id!==p.id&&((p.brand&&key(x.brand)===key(p.brand))||(p.type&&key(x.type)===key(p.type)))).slice(0,6),rb=document.getElementById('ovRecommend'),rr=document.getElementById('recommendRow');rb.style.display=rec.length?'block':'none';rr.innerHTML=rec.map(x=>`<div class="recommend-item" onclick="openOverlay(products.find(p=>p.id===${x.id}))"><img src="${esc(x.imgs[0]||PH)}"><div>${esc(x.name)}</div></div>`).join('');document.getElementById('overlay').classList.add('open');pushModal('overlay');if(navigator.vibrate)navigator.vibrate(8);recent=[p.id,...recent.filter(id=>id!==p.id)].slice(0,6);localStorage.setItem('bs_recent',JSON.stringify(recent));renderRecent()}
+function openOverlay(p){
+  currentProduct=p;
+  const gal=document.getElementById('ovGallery');
+  const dots=document.getElementById('ovGalleryDots');
+  const imgs=(p.imgs&&p.imgs.length?p.imgs:[PH]);
+  gal.querySelectorAll('img').forEach(x=>x.remove());
+  gal.insertAdjacentHTML('afterbegin',imgs.map(s=>`<img src="${esc(s)}" alt="${esc(p.name||'Товар')}">`).join(''));
+  dots.innerHTML=imgs.map((_,i)=>`<i class="${i===0?'on':''}"></i>`).join('');
+  const imageEls=[...gal.querySelectorAll('img')];
+  let photoIndex=0;
+  const goPhoto=(idx)=>{photoIndex=Math.max(0,Math.min(imageEls.length-1,idx));imageEls[photoIndex].scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});dots.querySelectorAll('i').forEach((d,i)=>d.classList.toggle('on',i===photoIndex));prev.disabled=photoIndex===0;next.disabled=photoIndex===imageEls.length-1};
+  const prev=document.getElementById('ovPrev'),next=document.getElementById('ovNext');
+  prev.disabled=imageEls.length<2; next.disabled=imageEls.length<2;
+  prev.onclick=e=>{e.stopPropagation();goPhoto(photoIndex-1)}; next.onclick=e=>{e.stopPropagation();goPhoto(photoIndex+1)};
+  imageEls.forEach((img,i)=>{img.ondblclick=()=>img.classList.toggle('zoomed');img.onclick=()=>{if(window.matchMedia('(min-width:900px)').matches&&img.classList.contains('zoomed'))img.classList.remove('zoomed');else if(window.matchMedia('(min-width:900px)').matches)goPhoto(i+1<imageEls.length?i+1:0)}});
+  gal.onscroll=()=>{const idx=Math.round(gal.scrollLeft/Math.max(1,gal.clientWidth));if(idx!==photoIndex){photoIndex=Math.max(0,Math.min(imageEls.length-1,idx));dots.querySelectorAll('i').forEach((d,i)=>d.classList.toggle('on',i===photoIndex));prev.disabled=photoIndex===0;next.disabled=photoIndex===imageEls.length-1}};
+  document.getElementById('ovName').textContent=p.name;document.getElementById('ovPrice').textContent=fmt(p.price);document.getElementById('ovPriceRow').innerHTML=p.oldPrice?`<span class="price-old">${fmt(p.oldPrice)}</span><span class="discount-pct">-${Math.round((1-p.price/p.oldPrice)*100)}%</span>`:'';document.getElementById('ovDesc').textContent=p.desc||'';
+  const cb=document.getElementById('ovCharacteristicsBody'),cw=document.getElementById('ovCharacteristics');
+  const chars=[['Бренд',p.brand],['Тип',p.type],['Состояние',p.condition],['Сезон',p.season],['Размер',Array.isArray(p.sizes)?p.sizes.join(', '):p.sizes],['Материал',p.material],['Цвет',p.color]];
+  cb.innerHTML=chars.map(x=>`<div class="char-row"><span class="k">${esc(x[0])}</span><span class="v">${esc(String(x[1]||'Не указано'))}</span></div>`).join('');
+  cw.classList.remove('open');
+  const sizes=Array.isArray(p.sizes)?p.sizes:[],sb=document.getElementById('ovSizes'),sr=document.getElementById('ovSizeRow');sb.style.display=sizes.length?'block':'none';let selectedSize=sizes[0]||'';sr.innerHTML=sizes.map(x=>`<button class="size-btn${x===selectedSize?' on':''}" type="button">${esc(x)}</button>`).join('');sr.querySelectorAll('.size-btn').forEach(b=>b.onclick=()=>{selectedSize=b.textContent;sr.querySelectorAll('.size-btn').forEach(x=>x.classList.remove('on'));b.classList.add('on')});const add=document.getElementById('ovAdd');add.disabled=p.stock===0;add.textContent=p.stock===0?'Продано':'В корзину';add.onclick=()=>{if(p.stock>0){addToCart(p.id);showToast('Добавлено в корзину'+(selectedSize?' · размер '+selectedSize:''))}};const rec=products.filter(x=>x.id!==p.id&&((p.brand&&key(x.brand)===key(p.brand))||(p.type&&key(x.type)===key(p.type)))).slice(0,6),rb=document.getElementById('ovRecommend'),rr=document.getElementById('recommendRow');rb.style.display=rec.length?'block':'none';rr.innerHTML=rec.map(x=>`<div class="recommend-item" onclick="openOverlay(products.find(p=>p.id===${x.id}))"><img src="${esc(x.imgs[0]||PH)}"><div>${esc(x.name)}</div></div>`).join('');document.getElementById('overlay').classList.add('open');pushModal('overlay');if(navigator.vibrate)navigator.vibrate(8);recent=[p.id,...recent.filter(id=>id!==p.id)].slice(0,6);localStorage.setItem('bs_recent',JSON.stringify(recent));renderRecent()}
 function closeOverlay(){
   document.getElementById('overlay').classList.remove('open');
   popModalIfMine('overlay');
@@ -897,6 +932,13 @@ if(window.matchMedia('(min-width:900px)').matches){
       el.scrollLeft=scrollLeft-(e.pageX-startX);
     });
   });
+  const ovGal=document.getElementById('ovGallery');
+  if(ovGal) ovGal.addEventListener('wheel',e=>{
+    if(!document.getElementById('overlay').classList.contains('open')||ovGal.scrollWidth<=ovGal.clientWidth)return;
+    e.preventDefault();
+    ovGal.scrollBy({left:e.deltaY||e.deltaX,behavior:'smooth'});
+  },{passive:false});
+
   document.addEventListener('mousemove',e=>{
     const gal=e.target.closest('.gallery');
     if(!gal||gal.closest('#overlay'))return;

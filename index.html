@@ -279,6 +279,19 @@ footer .addr{color:var(--muted);font-size:13px;margin-bottom:20px}
   <div class="chip" data-type="Кеды">Кеды</div>
   <div class="chip" data-type="Сумка">Сумки</div>
 </div>
+  <div class="chip" data-type="Поло">Поло</div>
+  <div class="chip" data-type="Футболка">Футболка</div>
+  <div class="chip" data-type="Джемпер">Джемпер</div>
+  <div class="chip" data-type="Свитшот">Свитшот</div>
+  <div class="chip" data-type="Бомбер">Бомбер</div>
+  <div class="chip" data-type="Куртка">Куртки</div>
+  <div class="chip" data-type="Пуховик">Пуховик</div>
+  <div class="chip" data-type="Жилет">Жилет</div>
+  <div class="chip" data-type="Шорты">Шорты</div>
+  <div class="chip" data-type="Кроссовки">Кроссовки</div>
+  <div class="chip" data-type="Кеды">Кеды</div>
+  <div class="chip" data-type="Сумка">Сумки</div>
+</div>
 
 <div class="recent" id="recentBlock" style="display:none">
   <div class="recent-head"><div class="lbl">Недавно смотрели</div><div class="recent-close" id="recentClose">✕</div></div>
@@ -307,20 +320,13 @@ footer .addr{color:var(--muted);font-size:13px;margin-bottom:20px}
 
 <div class="about">
   <div class="lbl">О магазине</div>
-  <p>BRENDSHOP — это оригинальная одежда, обувь и аксессуары от ведущих фабрик Вьетнама, Бангладеш, Камбоджи.</p>
-  <ul class="about-list">
-    <li>Все товары новые и с бирками</li>
-    <li>Отличное качество</li>
-    <li>Доступные цены</li>
-    <li>Возможна отправка дополнительных фото перед покупкой</li>
-  </ul>
-  <p class="about-note">Возврат и обмен возможен только, если вы не забрали заказ из пункта выдачи.</p>
+  <p id="aboutText">BRENDSHOP — это оригинальная одежда, обувь и аксессуары от ведущих фабрик Вьетнама, Бангладеш, Камбоджи. Все товары новые и с бирками. Отличное качество. Доступные цены. Возможна отправка дополнительных фото перед покупкой. Возврат и обмен возможен только, если вы не забрали заказ из пункта выдачи.</p>
 </div>
 
 <div class="reviews">
   <div class="lbl">Отзывы</div>
   <div class="stars">5,0 ★★★★★</div>
-  <div class="sub">39 отзывов на Авито · 108 подписчиков</div>
+  <div class="sub" id="reviewsLine">39 отзывов на Авито · 108 подписчиков</div>
   <a class="reviews-btn" href="https://www.avito.ru/brands/original.shop" target="_blank">Посмотреть отзывы на Авито</a>
 </div>
 
@@ -450,9 +456,13 @@ function renderCart(){
 }
 function openCart(){
   document.getElementById('cartDrawer').classList.add('open');
+  pushModal('cart');
   try{ renderCart(); }catch(e){ console.error('cart render error', e); }
 }
-function closeCart(){document.getElementById('cartDrawer').classList.remove('open')}
+function closeCart(){
+  document.getElementById('cartDrawer').classList.remove('open');
+  popModalIfMine('cart');
+}
 document.getElementById('cartBtn').onclick=openCart;
 updateCartBadge();
 
@@ -508,7 +518,7 @@ function render(list,opts){
       </div>`;
     const gal=c.querySelector('.gallery');
     const dots=c.querySelectorAll('.dots span');
-    gal.onclick=e=>{e.stopPropagation();if(gal.dataset.dragged)return;openOverlay(p)};
+    gal.onclick=e=>{e.stopPropagation();openOverlay(p)};
     let lastIdx=0;
     gal.addEventListener('scroll',()=>{
       const idx=Math.round(gal.scrollLeft/gal.clientWidth);
@@ -599,6 +609,24 @@ function toggleFav(id,el){
   if(navigator.vibrate) navigator.vibrate(favs.has(id)?[10,30,10]:8);
   playTick();
 }
+let modalStack=[];
+function pushModal(name){
+  if(modalStack[modalStack.length-1]===name)return;
+  modalStack.push(name);
+  history.pushState({bsModal:name},'');
+}
+function popModalIfMine(name){
+  const idx=modalStack.lastIndexOf(name);
+  if(idx===-1)return;
+  modalStack.splice(idx,1);
+  if(history.state&&history.state.bsModal===name) history.back();
+}
+window.addEventListener('popstate',()=>{
+  const name=modalStack.pop();
+  if(name==='overlay') document.getElementById('overlay').classList.remove('open');
+  else if(name==='cart') document.getElementById('cartDrawer').classList.remove('open');
+});
+
 function openOverlay(p){
   currentProduct=p;
   document.getElementById('ovGallery').innerHTML=p.imgs.map(s=>`<img src="${s}">`).join('');
@@ -610,12 +638,16 @@ function openOverlay(p){
   document.getElementById('ovPriceRow').innerHTML=p.oldPrice?`<span class="price-old">${fmt(p.oldPrice)}</span><span class="discount-pct">-${Math.round((1-p.price/p.oldPrice)*100)}%</span>`:'';
   document.getElementById('ovDesc').textContent=p.desc;
   document.getElementById('overlay').classList.add('open');
+  pushModal('overlay');
   if(navigator.vibrate) navigator.vibrate(8);
   recent=[p.id,...recent.filter(id=>id!==p.id)].slice(0,6);
   localStorage.setItem('bs_recent',JSON.stringify(recent));
   renderRecent();
 }
-function closeOverlay(){document.getElementById('overlay').classList.remove('open')}
+function closeOverlay(){
+  document.getElementById('overlay').classList.remove('open');
+  popModalIfMine('overlay');
+}
 (function bindOverlayButtons(){
   const shareBtn=document.getElementById('shareBtn');
   if(shareBtn) shareBtn.addEventListener('click', shareProduct);
@@ -661,13 +693,14 @@ document.getElementById('recentClose').onclick=()=>{
   document.getElementById('recentBlock').style.display='none';
 };
 
+function key(s){return String(s||'').trim().toLowerCase()}
 function currentFilter(){
   const q=document.getElementById('search').value.toLowerCase().trim();
   const brand=document.querySelector('#chips .chip.active').dataset.brand;
   const maxPrice=Number(document.querySelector('#priceChips .chip.active').dataset.max);
   const type=document.querySelector('#typeChips .chip.active').dataset.type;
   return products.filter(p=>
-    (brand==='all'||p.brand===brand)&&(type==='all'||p.type===type)&&
+    (brand==='all'||key(p.brand)===key(brand))&&(type==='all'||key(p.type)===key(type))&&
     p.price<=maxPrice&&(p.name+' '+p.brand).toLowerCase().includes(q));
 }
 function updateMore(){
@@ -695,16 +728,27 @@ document.getElementById('search').oninput=filterAndRender;
     ch.classList.add('active'); filterAndRender();
   });
 });
-function syncChips(){
-  const add=(id,attr,val)=>{
-    const box=document.getElementById(id);
-    if(!val||[...box.children].some(x=>x.dataset[attr]===val))return;
-    const d=document.createElement('div');d.className='chip';d.dataset[attr]=val;d.textContent=val;box.appendChild(d);
-  };
-  products.forEach(p=>{add('chips','brand',p.brand);add('typeChips','type',p.type)});
+function buildChips(id,attr,allLabel,field){
+  const box=document.getElementById(id);
+  const act=box.querySelector('.chip.active');
+  let activeKey=act&&act.dataset[attr]!=='all'?key(act.dataset[attr]):'all';
+  const map=new Map();
+  products.forEach(p=>{
+    const v=String(p[field]||'').trim(); if(!v)return;
+    const k=key(v); const e=map.get(k)||{v:new Map(),n:0};
+    e.n++; e.v.set(v,(e.v.get(v)||0)+1); map.set(k,e);
+  });
+  if(activeKey!=='all'&&!map.has(activeKey)) activeKey='all';
+  const items=[...map.entries()].map(([k,e])=>({k,n:e.n,label:[...e.v.entries()].sort((a,b)=>b[1]-a[1])[0][0]}))
+    .sort((a,b)=>b.n-a.n||a.label.localeCompare(b.label,'ru'));
+  box.innerHTML=`<div class="chip${activeKey==='all'?' active':''}" data-${attr}="all">${allLabel}</div>`+
+    items.map(it=>`<div class="chip${it.k===activeKey?' active':''}" data-${attr}="${esc(it.label)}">${esc(it.label)}</div>`).join('');
 }
+function syncChips(){/* chips are static, not rebuilt from products */}
 function applySettings(s){
   if(!s)return;
+  if(s.about) document.getElementById('aboutText').textContent=s.about;
+  if(s.reviewsLine) document.getElementById('reviewsLine').textContent=s.reviewsLine;
   try{localStorage.setItem('bs_settings',JSON.stringify(s))}catch(e){}
   const b=document.getElementById('discountBanner');
   if(s.discountEnabled===false){b.style.display='none'}
@@ -805,7 +849,7 @@ if(window.matchMedia('(min-width:900px)').matches){
   document.addEventListener('mouseout',e=>{if(e.target.closest('.card'))cursor.classList.remove('hover')});
 
   document.addEventListener('wheel',e=>{
-    const el=e.target.closest('.gallery, .chips');
+    const el=e.target.closest('.chips');
     if(el){
       e.preventDefault();
       el.scrollLeft+=e.deltaY;
@@ -821,19 +865,17 @@ if(window.matchMedia('(min-width:900px)').matches){
       el.scrollLeft=scrollLeft-(e.pageX-startX);
     });
   });
-  document.addEventListener('mousedown',e=>{
+  document.addEventListener('mousemove',e=>{
     const gal=e.target.closest('.gallery');
-    if(!gal)return;
-    let startX=e.pageX, scrollLeft=gal.scrollLeft, moved=false;
-    function onMove(ev){moved=true; gal.scrollLeft=scrollLeft-(ev.pageX-startX);}
-    function onUp(){
-      window.removeEventListener('mousemove',onMove);
-      window.removeEventListener('mouseup',onUp);
-      if(moved) gal.dataset.dragged='1';
-      setTimeout(()=>delete gal.dataset.dragged,50);
-    }
-    window.addEventListener('mousemove',onMove);
-    window.addEventListener('mouseup',onUp);
+    if(!gal||gal.closest('#overlay'))return;
+    const imgs=gal.children.length;
+    if(imgs<2)return;
+    const rect=gal.getBoundingClientRect();
+    const ratio=Math.min(0.999,Math.max(0,(e.clientX-rect.left)/rect.width));
+    const idx=Math.floor(ratio*imgs);
+    gal.scrollLeft=idx*gal.clientWidth;
+    const dots=gal.parentElement.querySelectorAll('.dots span');
+    dots.forEach((d,i)=>d.style.background=i===idx?'var(--accent)':'#3a3a3a');
   });
 }
 </script>

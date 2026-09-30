@@ -89,8 +89,8 @@ h1{font-size:22px;font-weight:800}
     <label>Название</label>
     <input id="fName" placeholder="Поло Tommy Hilfiger оригинал">
     <div class="g2">
-      <div><label>Бренд</label><input id="fBrand" list="brands" placeholder="Tommy Hilfiger"></div>
-      <div><label>Тип</label><input id="fType" list="types" placeholder="Поло"></div>
+      <div><label>Бренд (выберите из списка или впишите новый)</label><input id="fBrand" list="brands" placeholder="Tommy Hilfiger"></div>
+      <div><label>Тип (выберите или впишите новый)</label><input id="fType" list="types" placeholder="Поло"></div>
     </div>
     <datalist id="brands"></datalist><datalist id="types"></datalist>
     <div class="g2">
@@ -101,15 +101,18 @@ h1{font-size:22px;font-weight:800}
     <div class="g2">
       <div><label>Наличие, шт. (0 = продано)</label><input id="fStock" type="number" inputmode="numeric" value="1"></div>
       <div><label>Бейдж на фото</label>
-        <select id="fBadge"><option value="">Без бейджа</option><option>Новинка</option><option>Скидка</option><option>Хит</option></select>
+        <select id="fBadge" onchange="onBadgeSel()"><option value="">Без бейджа</option><option>Новинка</option><option>Скидка</option><option>Хит продаж</option><option>Топ</option><option>Эксклюзив</option><option>Ограниченная серия</option><option>Последний размер</option><option value="__custom">Свой текст…</option></select>
+      <input id="fBadgeCustom" placeholder="Свой текст бейджа" style="display:none;margin-top:8px">
       </div>
     </div>
     <label>Описание (напишите здесь размеры)</label>
     <textarea id="fDesc" rows="4" placeholder="Оригинал, новое, с биркой. Размеры: M, L, XL"></textarea>
-    <label>Фото: первое — спереди, второе — сзади, дальше любые</label>
+    <label>Фото — можно выбрать сразу много или добавлять по одному. Первое фото спереди, второе сзади, остальные в любом порядке</label>
     <input id="fPhotos" type="file" accept="image/*" multiple>
+    <button class="btn sec sm" type="button" onclick="$('fPhotos').click()" style="margin-top:8px">+ Добавить ещё фото</button>
+    <div class="hint" id="photoCount"></div>
     <div class="photos" id="photos"></div>
-    <div class="hint">Фото автоматически уменьшаются до 1200 px, чтобы сайт открывался быстро.</div>
+    <div class="hint">Фото автоматически уменьшаются до 1200 px, чтобы сайт открывался быстро. Можно добавить сколько угодно фото.</div>
     <button class="btn" id="saveBtn" onclick="saveProduct()">Сохранить и опубликовать</button>
     <button class="btn sec" onclick="closeForm()">Отмена</button>
   </div>
@@ -122,6 +125,10 @@ h1{font-size:22px;font-weight:800}
     <label>Акцентный цвет сайта</label>
     <input id="sColor" type="color" value="#d4ff3f">
     <div class="chk"><input type="checkbox" id="sSound"><label style="margin:0;font-size:14px;color:var(--fg)" for="sSound">Звук на сайте включён по умолчанию</label></div>
+    <label>Текст «О магазине»</label>
+    <textarea id="sAbout" rows="4" placeholder="BRENDSHOP — это оригинальная одежда..."></textarea>
+    <label>Строка с рейтингом/отзывами</label>
+    <input id="sReviews" placeholder="39 отзывов на Авито · 108 подписчиков">
     <button class="btn" id="saveSetBtn" onclick="saveSettings()">Сохранить настройки</button>
     <div class="hint">Изменения появляются на сайте через 1–2 минуты после сохранения.</div>
   </div>
@@ -137,7 +144,7 @@ const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;'
 const enc=s=>btoa(unescape(encodeURIComponent(s)));
 const dec=b=>decodeURIComponent(escape(atob(b.replace(/\n/g,''))));
 
-function toast(msg,err){const t=$('toast');t.textContent=msg;t.className='on'+(err?' err':'');clearTimeout(t._t);t._t=setTimeout(()=>t.className='',err?5000:2500)}
+function toast(msg,err){const t=$('toast');t.textContent=msg;t.className='on'+(err?' err':'');clearTimeout(t._t);t._t=setTimeout(()=>t.className='',err?9000:2500)}
 function hdr(){return {Authorization:'Bearer '+token,Accept:'application/vnd.github+json'}}
 async function gh(path,opt){
   const r=await fetch(API+'/repos/'+repo+path,Object.assign({headers:hdr()},opt||{}));
@@ -168,14 +175,24 @@ async function saveJSON(path,data,shaRef,msg){
 }
 
 async function login(){
-  token=$('ghToken').value.trim();repo=$('ghRepo').value.trim().replace(/^https?:\/\/github\.com\//,'').replace(/\/$/,'');
+  token=$('ghToken').value.replace(/\s+/g,'');repo=$('ghRepo').value.trim().replace(/^https?:\/\/github\.com\//,'').replace(/\/$/,'').replace(/\.git$/,'');
   if(!token||!repo){toast('Заполните токен и репозиторий',1);return}
+  if(!/^[\w.-]+\/[\w.-]+$/.test(repo)){toast('Репозиторий пишите так: логин/название, например brendshopru/brendshop',1);return}
   try{
+    const r=await gh('');
+    if(!r.ok){
+      const why={401:'Токен не подходит: неверный, обрезан при копировании или истёк. Создайте новый и скопируйте целиком (ghp_… ~40 знаков или github_pat_… ~90 знаков). Сейчас длина: '+token.length,
+        403:'Доступ запрещён. Проверьте права токена: Contents → Read and write',
+        404:'Репозиторий не найден или у токена нет доступа к нему. Проверьте название и что в токене выбран именно этот репозиторий'}[r.status]||('Ошибка GitHub '+r.status);
+      toast(why,1);return;
+    }
+    const info=await r.json();
+    if(info.permissions&&info.permissions.push===false){toast('У токена нет права записи. Нужно: Contents → Read and write',1);return}
     const p=await getFile('products.json');
     products=Array.isArray(p.json)?p.json:[];pSha=p.sha;
     const s=await getFile('settings.json');
     settings=s.json||{};sSha=s.sha;
-  }catch(e){toast('Не удалось подключиться: проверьте токен и название репозитория',1);return}
+  }catch(e){toast(e instanceof TypeError?'Нет соединения с GitHub. Проверьте интернет и попробуйте ещё раз':'Ошибка: '+e.message,1);return}
   localStorage.setItem('bs_admin_token',token);localStorage.setItem('bs_admin_repo',repo);
   $('login').classList.remove('show');$('app').classList.add('show');
   $('repoLabel').textContent=repo;
@@ -191,8 +208,8 @@ function tab(t){
 }
 function fillLists(){
   const u=k=>[...new Set(products.map(p=>p[k]).filter(Boolean))];
-  const base={brands:['Tommy Hilfiger','Ralph Lauren','Lacoste','Autograph','Calvin Klein','Timberland','La Martina','DKNY','New Balance','Cerruti 1881','Bikkembergs','Tommy Jeans'],
-    types:['Поло','Футболка','Джемпер','Свитшот','Бомбер','Куртка','Пуховик','Жилет','Шорты','Кроссовки','Кеды','Сумка']};
+  const base={brands:['Tommy Hilfiger','Ralph Lauren','Lacoste','Autograph','Calvin Klein','Timberland','La Martina','DKNY','New Balance','Cerruti 1881','Bikkembergs','Tommy Jeans','Armani','Emporio Armani','Armani Exchange','Armani Jeans','Boss','Hugo','Polo Ralph Lauren','Nike','Adidas','Levi\'s','Diesel','Guess','Versace','Dolce & Gabbana','Moncler','The North Face','Stone Island','Fred Perry','Champion'],
+    types:['Поло','Футболка','Рубашка','Пуловер','Джемпер','Свитшот','Худи','Кофта','Лонгслив','Бомбер','Ветровка','Куртка','Пуховик','Парка','Пальто','Жилет','Костюм','Брюки','Джинсы','Шорты','Кроссовки','Кеды','Кепка','Шапка','Ремень','Носки','Сумка','Рюкзак','Аксессуар']};
   $('brands').innerHTML=[...new Set([...base.brands,...u('brand')])].map(x=>`<option value="${esc(x)}">`).join('');
   $('types').innerHTML=[...new Set([...base.types,...u('type')])].map(x=>`<option value="${esc(x)}">`).join('');
 }
@@ -211,6 +228,7 @@ function renderList(){
       <div class="acts">
         <button class="btn sm" onclick="openForm(${i})">Изменить</button>
         <button class="btn sec sm" onclick="toggleSold(${i})">${p.stock===0?'В наличии':'Продано'}</button>
+        ${i>0?`<button class="btn sec sm" onclick="moveProduct(${i},-1)">▲ Выше</button>`:''}
         <button class="btn sec sm" style="color:var(--red)" onclick="delProduct(${i})">Удалить</button>
       </div></div>`}).join('')||'<div class="sub">Ничего не найдено</div>';
 }
@@ -220,18 +238,25 @@ function openForm(i){
   $('formTitle').textContent=i==null?'Новый товар':'Изменить товар';
   $('fName').value=p.name||'';$('fBrand').value=p.brand||'';$('fType').value=p.type||'';
   $('fPrice').value=p.price||'';$('fOld').value=p.oldPrice||'';
-  $('fStock').value=p.stock==null?1:p.stock;$('fBadge').value=p.badge||'';$('fDesc').value=p.desc||'';
+  $('fStock').value=p.stock==null?1:p.stock;$('fDesc').value=p.desc||'';
+  const known=['','Новинка','Скидка','Хит продаж','Топ','Эксклюзив','Ограниченная серия','Последний размер'];
+  if(p.badge&&!known.includes(p.badge)){$('fBadge').value='__custom';$('fBadgeCustom').value=p.badge}
+  else{$('fBadge').value=p.badge||'';$('fBadgeCustom').value=''}
+  onBadgeSel();
   formImgs=(p.imgs||[]).filter(u=>!u.startsWith('data:')).map(u=>({url:u}));
   $('fPhotos').value='';renderPhotos();discHint();
   $('listBox').style.display='none';$('formBox').classList.add('show');scrollTo(0,0);
 }
 function closeForm(){$('formBox').classList.remove('show');$('listBox').style.display='block'}
+function onBadgeSel(){$('fBadgeCustom').style.display=$('fBadge').value==='__custom'?'block':'none'}
+function badgeValue(){return $('fBadge').value==='__custom'?$('fBadgeCustom').value.trim():$('fBadge').value}
 function discHint(){
   const pr=+$('fPrice').value,old=+$('fOld').value;
   $('discHint').textContent=(old&&pr&&old>pr)?`Скидка на сайте: −${Math.round((1-pr/old)*100)}%`:(old?'Старая цена должна быть больше новой':'Пусто — скидки нет');
 }
 $('fPrice').oninput=$('fOld').oninput=discHint;
 function renderPhotos(){
+  $('photoCount').textContent=formImgs.length?`Фото добавлено: ${formImgs.length}`:'Фото ещё не добавлены';
   $('photos').innerHTML=formImgs.map((im,i)=>`<div class="ph"><img src="${esc(im.preview||im.url)}"><button class="x" onclick="rmPhoto(${i})">✕</button><span class="n">${i+1}</span>${i>0?`<button class="mv" onclick="mvPhoto(${i})">◀</button>`:''}</div>`).join('');
 }
 function rmPhoto(i){formImgs.splice(i,1);renderPhotos()}
@@ -275,7 +300,7 @@ async function saveProduct(){
     }
     btn.textContent='Сохраняю…';
     const prod={id:editing==null?Date.now():products[editing].id,name,brand:$('fBrand').value.trim(),type:$('fType').value.trim(),
-      price,oldPrice:old,stock:Math.max(0,parseInt($('fStock').value,10)||0),badge:$('fBadge').value,desc:$('fDesc').value.trim(),imgs};
+      price,oldPrice:old,stock:Math.max(0,parseInt($('fStock').value,10)||0),badge:badgeValue(),desc:$('fDesc').value.trim(),imgs};
     const next=products.slice();
     if(editing==null) next.unshift(prod); else next[editing]=prod;
     pSha=await saveJSON('products.json',next,pSha,editing==null?'add product':'edit product');
@@ -293,6 +318,10 @@ async function toggleSold(i){
   const next=products.slice();const p=Object.assign({},next[i]);
   p.stock=p.stock===0?1:0;next[i]=p;await commitList(next,'toggle sold');
 }
+async function moveProduct(i,dir){
+  const next=products.slice(); const j=i+dir; if(j<0||j>=next.length)return;
+  [next[i],next[j]]=[next[j],next[i]]; await commitList(next,'reorder');
+}
 async function delProduct(i){
   if(!confirm('Удалить «'+products[i].name+'»?'))return;
   const next=products.slice();next.splice(i,1);await commitList(next,'delete product');
@@ -302,10 +331,10 @@ function fillSettings(){
   $('sBanner').checked=settings.discountEnabled!==false;
   $('sText').value=settings.discountText||'Скидка 20% при заказе от 3 товаров';
   $('sColor').value=/^#[0-9a-f]{6}$/i.test(settings.accent||'')?settings.accent:'#d4ff3f';
-  $('sSound').checked=settings.sound!==false;
+  $('sSound').checked=settings.sound!==false;$('sAbout').value=settings.about||'';$('sReviews').value=settings.reviewsLine||'';
 }
 async function saveSettings(){
-  const s={discountEnabled:$('sBanner').checked,discountText:$('sText').value.trim(),accent:$('sColor').value,sound:$('sSound').checked};
+  const s={discountEnabled:$('sBanner').checked,discountText:$('sText').value.trim(),accent:$('sColor').value,sound:$('sSound').checked,about:$('sAbout').value.trim(),reviewsLine:$('sReviews').value.trim()};
   const b=$('saveSetBtn');b.disabled=true;
   try{sSha=await saveJSON('settings.json',s,sSha,'update settings');settings=s;toast('Настройки сохранены')}
   catch(e){toast('Ошибка: '+e.message,1)}

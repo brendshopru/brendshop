@@ -205,9 +205,8 @@ footer .addr{color:var(--muted);font-size:13px;margin-bottom:20px}
 }
 .search-row{display:flex;gap:10px;align-items:stretch;max-width:1240px;margin:0 auto;padding:0 5vw}.search-row .search{flex:1;min-width:0}.filter-toggle{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:12px;padding:0 18px;font-size:13px;font-weight:700;cursor:pointer;min-width:118px}.filter-toggle:active,.filter-toggle.open{background:var(--accent);color:#0b0b0b;border-color:var(--accent)}.filter-toggle span{margin-left:4px}.filter-panel{display:none;max-width:1240px;margin:10px auto 18px;padding:14px 5vw 4px;background:var(--card);border:1px solid #2a2a2a55;border-radius:16px}.filter-panel.open{display:block}.filter-panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}.filter-panel-head b{display:block;font-size:14px}.filter-panel-head span{display:block;color:var(--muted);font-size:11px;margin-top:3px}.filter-panel-head button{border:0;background:transparent;color:var(--muted);font-size:12px;padding:8px;cursor:pointer}.filter-group{padding:8px 0;border-top:1px solid #2a2a2a33}.filter-group:first-of-type{border-top:0}.filter-label{font-size:11px;color:var(--muted);margin-bottom:5px}.filter-panel .chips{padding:0 0 4px}.filter-panel .chips-row{padding-bottom:4px}@media(max-width:599px){.search-row{padding:0 5vw}.filter-toggle{min-width:96px;padding:0 13px}.filter-panel{margin:8px 5vw 14px;padding:12px 10px}.filter-panel .chips{padding-left:0;padding-right:0}}
 
-@media(max-width:899px){#overlay .desktop-sticky-actions{display:none} #overlay .ov-actions{display:flex}}
+@media(max-width:899px){#overlay .desktop-sticky-actions{display:none}}
 @media(min-width:900px){
-  #overlay .ov-actions{display:none}
   #overlay{background:rgba(0,0,0,.78);backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:32px 5vw;gap:28px}
   #overlay.open{display:flex}
   #overlay .close{position:absolute;top:24px;right:24px;left:auto;margin:0;width:42px;height:42px;z-index:20}
@@ -260,25 +259,18 @@ footer .addr{color:var(--muted);font-size:13px;margin-bottom:20px}
   .search-row{margin-bottom:0}
   .filter-panel{margin-top:8px;margin-bottom:12px}
   main{padding-bottom:3vh}
-  .grid{gap:18px}
+  .grid{gap:18px;align-items:start}
+  .card{height:max-content;align-self:start;min-width:0}
+  .card .gallery{flex:none}
+  .card .info{flex:none}
 }
 
-/* Animated perimeter light for the main hero */
+/* Animated perimeter light — follows the actual rectangular frame */
 .shop-hero-box{position:relative;isolation:isolate;overflow:hidden}
-.shop-hero-box::before{content:"";position:absolute;inset:0;border-radius:inherit;border:1px solid rgba(212,255,63,.18);pointer-events:none;z-index:3;box-shadow:inset 0 0 18px rgba(212,255,63,.05)}
-.hero-light{position:absolute;z-index:3;pointer-events:none;left:0;top:0;width:32%;height:2px;border-radius:99px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.95),var(--accent),transparent);box-shadow:0 0 8px var(--accent),0 0 18px rgba(212,255,63,.45);animation:heroLight 5s linear infinite}
-.hero-light-glow{position:absolute;z-index:2;pointer-events:none;left:0;top:0;width:32%;height:18px;border-radius:99px;background:linear-gradient(90deg,transparent,rgba(212,255,63,.28),transparent);filter:blur(10px);opacity:.75;animation:heroLight 5s linear infinite}
-.shop-hero-box>*{position:relative;z-index:4}
-@keyframes heroLight{0%{left:0;top:0;width:32%;height:2px}24%{left:68%;top:0;width:32%;height:2px}25%{left:calc(100% - 2px);top:0;width:2px;height:32%}49%{left:calc(100% - 2px);top:68%;width:2px;height:32%}50%{left:68%;top:calc(100% - 2px);width:32%;height:2px}74%{left:0;top:calc(100% - 2px);width:32%;height:2px}75%{left:0;top:68%;width:2px;height:32%}100%{left:0;top:0;width:2px;height:32%}}
-@media(prefers-reduced-motion:reduce){.shop-hero-box::before,.shop-hero-box::after{animation:none}}
-
-/* BRENDSHOP upgrades: existing colors are preserved */
-.shop-hero{max-width:1240px;margin:0 auto;padding:10px 5vw 26px}.shop-hero-box{background:var(--card);border:1px solid #2a2a2a55;border-radius:18px;padding:22px}.shop-hero-kicker{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px}.shop-hero h3{font-size:clamp(25px,5vw,46px);line-height:1.02;margin-bottom:10px}.shop-hero p{font-size:14px;line-height:1.55;color:var(--muted);max-width:650px}.hero-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:16px}.hero-action{border:1px solid var(--line);background:transparent;color:var(--fg);border-radius:10px;padding:10px 8px;font-weight:700;font-size:12px;min-width:0;white-space:nowrap}.hero-action.active{background:var(--accent);color:#0b0b0b;border-color:var(--accent)}.feature-strip{padding:0 5vw 22px;max-width:1240px;margin:auto}.feature-strip-title{font-size:12px;color:var(--muted);margin-bottom:9px}.feature-row{display:flex;gap:9px;overflow:auto;scrollbar-width:none}.feature-row::-webkit-scrollbar{display:none}.feature-card{flex:0 0 145px;min-height:76px;border:1px solid #2a2a2a55;border-radius:14px;background:var(--card);padding:12px;cursor:pointer}.feature-card b{display:block;font-size:13px;margin-bottom:4px}.feature-card span{font-size:11px;color:var(--muted)}.how-order{max-width:1240px;margin:0 auto;padding:5vh 5vw}.how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.how-step{background:var(--card);border-radius:14px;padding:14px}.how-step strong{font-size:12px;color:var(--accent)}.how-step b{display:block;font-size:14px;margin:6px 0}.how-step span{font-size:12px;line-height:1.45;color:var(--muted)}.recommend{padding:18px 0 4px}.recommend-title{font-size:12px;color:var(--muted);margin-bottom:9px}.recommend-row{display:flex;gap:9px;overflow:auto}.recommend-item{flex:0 0 92px;cursor:pointer}.recommend-item img{width:92px;height:112px;object-fit:cover;border-radius:10px;background:var(--card)}.recommend-item div{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:5px}.size-box{margin-top:15px}.size-title{font-size:12px;color:var(--muted);margin-bottom:8px}.size-row{display:flex;gap:7px;flex-wrap:wrap}.size-btn{min-width:42px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:transparent;color:var(--fg);font-size:12px;font-weight:700}.size-btn.on{background:var(--accent);color:#0b0b0b;border-color:var(--accent)}.fav-drawer{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:70;display:none}.fav-drawer.open{display:block}.fav-sheet{position:absolute;right:0;top:0;height:100%;width:min(430px,92vw);background:var(--bg);padding:24px 18px;overflow:auto}.fav-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid #2a2a2a55;cursor:pointer}.fav-item img{width:58px;height:72px;object-fit:cover;border-radius:8px}.fav-item .m{flex:1;min-width:0}.fav-item b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fav-item span{display:block;font-size:12px;color:var(--accent);margin-top:4px}.cart-progress{margin:0 0 14px;padding:11px 12px;border:1px solid #2a2a2a55;border-radius:12px;background:var(--card)}.cart-progress-text{font-size:12px;margin-bottom:7px}.cart-progress-bar{height:5px;background:#2a2a2a;border-radius:5px;overflow:hidden}.cart-progress-bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .25s}@media(max-width:700px){.how-grid{grid-template-columns:1fr 1fr}.hero-action{padding:10px 4px;font-size:11px}}@media(max-width:430px){.how-grid{grid-template-columns:1fr}.shop-hero{padding-top:2px}}
-@media(min-width:1250px){
-  .topbar,header,.search,.chips,main,.about,.reviews,footer,.shop-hero,.feature-strip,.how-order,.search-row,.filter-panel{max-width:1440px}
-  .grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:22px}
-  .card .name{font-size:15px}
-}
+.shop-hero-box::before{content:"";position:absolute;top:-1px;left:0;width:90px;height:3px;border-radius:99px;background:linear-gradient(90deg,transparent,var(--accent),#fff,var(--accent),transparent);box-shadow:0 0 8px var(--accent),0 0 18px color-mix(in srgb,var(--accent) 55%,transparent);offset-path:inset(0 round 16px);offset-rotate:0deg;offset-anchor:50% 50%;animation:heroBorderRun 5s linear infinite;pointer-events:none;z-index:10}
+.shop-hero-box::after{content:"";position:absolute;inset:2px;border-radius:14px;background:radial-gradient(circle at 50% 50%,color-mix(in srgb,var(--accent) 7%,transparent),transparent 62%);box-shadow:inset 0 0 22px color-mix(in srgb,var(--accent) 5%,transparent);pointer-events:none;z-index:0}
+.shop-hero-box>*{position:relative;z-index:1}
+@keyframes heroBorderRun{0%{offset-distance:0%}100%{offset-distance:100%}}
 </style>
 </head>
 <body>
@@ -303,7 +295,7 @@ footer .addr{color:var(--muted);font-size:13px;margin-bottom:20px}
   <h2>Каталог</h2>
 </header>
 
-<div class="shop-hero"><div class="shop-hero-box"><span class="hero-light" aria-hidden="true"></span><span class="hero-light-glow" aria-hidden="true"></span><div class="shop-hero-kicker">BRENDSHOP · актуальное</div><h3>Новые поступления<br>и лучшие товары</h3><p>Смотри новинки, хиты и товары со скидкой. Выбирай размер, добавляй в корзину и оформляй заказ удобным способом.</p><div class="hero-actions"><button class="hero-action active" data-quick="all">Все товары</button><button class="hero-action" data-quick="new">Новинки</button><button class="hero-action" data-quick="hit">Хиты</button><button class="hero-action" data-quick="sale">Скидки</button></div></div></div><div class="feature-strip"><div class="feature-strip-title">Быстрый выбор</div><div class="feature-row"><div class="feature-card" data-quick="new"><b>NEW</b><span>Свежие поступления</span></div><div class="feature-card" data-quick="hit"><b>ХИТЫ</b><span>Популярные товары</span></div><div class="feature-card" data-quick="sale"><b>SALE</b><span>Цена ниже обычной</span></div><div class="feature-card" data-fav="1"><b>♥ Избранное</b><span>Сохранённые товары</span></div></div></div><div class="discount-banner" id="discountBanner">
+<div class="shop-hero"><div class="shop-hero-box"><div class="shop-hero-kicker">BRENDSHOP · актуальное</div><h3>Новые поступления<br>и лучшие товары</h3><p>Смотри новинки, хиты и товары со скидкой. Выбирай размер, добавляй в корзину и оформляй заказ удобным способом.</p><div class="hero-actions"><button class="hero-action active" data-quick="all">Все товары</button><button class="hero-action" data-quick="new">Новинки</button><button class="hero-action" data-quick="hit">Хиты</button><button class="hero-action" data-quick="sale">Скидки</button></div></div></div><div class="feature-strip"><div class="feature-strip-title">Быстрый выбор</div><div class="feature-row"><div class="feature-card" data-quick="new"><b>NEW</b><span>Свежие поступления</span></div><div class="feature-card" data-quick="hit"><b>ХИТЫ</b><span>Популярные товары</span></div><div class="feature-card" data-quick="sale"><b>SALE</b><span>Цена ниже обычной</span></div><div class="feature-card" data-fav="1"><b>♥ Избранное</b><span>Сохранённые товары</span></div></div></div><div class="discount-banner" id="discountBanner">
   <span>Скидка <b>20%</b> при заказе от 3 товаров</span>
   <div class="close-x" id="closeBanner">✕</div>
 </div>
@@ -750,28 +742,25 @@ function openOverlay(p){
   const chars=[['Бренд',p.brand],['Тип',p.type],['Состояние',p.condition],['Сезон',p.season],['Размер',Array.isArray(p.sizes)?p.sizes.join(', '):p.sizes],['Материал',p.material],['Цвет',p.color]];
   cb.innerHTML=chars.map(x=>`<div class="char-row"><span class="k">${esc(x[0])}</span><span class="v">${esc(String(x[1]||'Не указано'))}</span></div>`).join('');
   cw.classList.remove('open');
-  const sizes=Array.isArray(p.sizes)?p.sizes:[],sb=document.getElementById('ovSizes'),sr=document.getElementById('ovSizeRow');sb.style.display=sizes.length?'block':'none';let selectedSize=sizes[0]||'';sr.innerHTML=sizes.map(x=>`<button class="size-btn${x===selectedSize?' on':''}" type="button">${esc(x)}</button>`).join('');sr.querySelectorAll('.size-btn').forEach(b=>b.onclick=()=>{selectedSize=b.textContent;sr.querySelectorAll('.size-btn').forEach(x=>x.classList.remove('on'));b.classList.add('on')});
-  const add=document.getElementById('ovAdd');
+  const sizes=Array.isArray(p.sizes)?p.sizes:[],sb=document.getElementById('ovSizes'),sr=document.getElementById('ovSizeRow');sb.style.display=sizes.length?'block':'none';let selectedSize=sizes[0]||'';sr.innerHTML=sizes.map(x=>`<button class="size-btn${x===selectedSize?' on':''}" type="button">${esc(x)}</button>`).join('');sr.querySelectorAll('.size-btn').forEach(b=>b.onclick=()=>{selectedSize=b.textContent;sr.querySelectorAll('.size-btn').forEach(x=>x.classList.remove('on'));b.classList.add('on')});const add=document.getElementById('ovAdd');add.disabled=p.stock===0;add.textContent=p.stock===0?'Продано':'В корзину';add.onclick=()=>{if(p.stock>0){addToCart(p.id);showToast('Добавлено в корзину'+(selectedSize?' · размер '+selectedSize:''))}};
   const ovFav=document.getElementById('ovFav'),ovStickyAdd=document.getElementById('ovStickyAdd');
-  const renderQtyButton=(el,q)=>{
-    if(!el)return;
-    el.disabled=p.stock===0;
-    if(p.stock===0){el.textContent='Продано';return;}
-    if(q>0){
-      el.innerHTML=`<span style="display:inline-flex;align-items:center;justify-content:center;gap:18px;width:100%"><button type="button" data-qty="minus" aria-label="Уменьшить количество">−</button><span data-qty-value>${q}</span><button type="button" data-qty="plus" aria-label="Увеличить количество">+</button></span>`;
-      el.querySelector('[data-qty="minus"]').onclick=e=>{e.stopPropagation();changeQty(p.id,-1);syncOverlayActions()};
-      el.querySelector('[data-qty="plus"]').onclick=e=>{e.stopPropagation();changeQty(p.id,1);syncOverlayActions()};
-    }else{el.textContent='В корзину';}
-  };
   const syncOverlayActions=()=>{
-    const q=cartQty(p.id),on=favs.has(p.id);
+    const on=favs.has(p.id),q=cartQty(p.id);
     ovFav.classList.toggle('on',on);ovFav.textContent=on?'♥':'♡';ovFav.setAttribute('aria-label',on?'Убрать из избранного':'Добавить в избранное');
-    renderQtyButton(add,q);
-    renderQtyButton(ovStickyAdd,q);
+    ovStickyAdd.disabled=p.stock===0;
+    if(p.stock===0){
+      ovStickyAdd.textContent='Продано';
+    }else if(q>0){
+      ovStickyAdd.innerHTML=`<span style="display:inline-flex;align-items:center;justify-content:center;gap:18px;width:100%"><button type="button" data-qty="minus" aria-label="Уменьшить количество" style="border:0;background:transparent;color:inherit;font-size:22px;font-weight:800;line-height:1;padding:0 8px;cursor:pointer">−</button><span style="min-width:32px;text-align:center;font-size:15px;font-weight:800">${q}</span><button type="button" data-qty="plus" aria-label="Увеличить количество" style="border:0;background:transparent;color:inherit;font-size:22px;font-weight:800;line-height:1;padding:0 8px;cursor:pointer">+</button></span>`;
+      const minus=ovStickyAdd.querySelector('[data-qty=minus]'),plus=ovStickyAdd.querySelector('[data-qty=plus]');
+      minus.onclick=e=>{e.stopPropagation();changeQty(p.id,-1);syncOverlayActions()};
+      plus.onclick=e=>{e.stopPropagation();changeQty(p.id,1);syncOverlayActions()};
+    }else{
+      ovStickyAdd.textContent='В корзину';
+    }
   };
-  add.onclick=e=>{e.stopPropagation();if(p.stock>0&&cartQty(p.id)===0){addToCart(p.id);syncOverlayActions();showToast('Добавлено в корзину'+(selectedSize?' · размер '+selectedSize:''))}};
-  ovFav.onclick=e=>{e.stopPropagation();toggleFav(p.id,ovFav);syncOverlayActions()};
-  ovStickyAdd.onclick=e=>{e.stopPropagation();if(p.stock>0&&cartQty(p.id)===0){addToCart(p.id);syncOverlayActions();showToast('Добавлено в корзину'+(selectedSize?' · размер '+selectedSize:''))}};
+  ovFav.onclick=e=>{e.stopPropagation();toggleFav(p.id,ovFav);syncOverlayActions();};
+  ovStickyAdd.onclick=e=>{e.stopPropagation();if(p.stock>0 && cartQty(p.id)===0){addToCart(p.id);syncOverlayActions();showToast('Добавлено в корзину'+(selectedSize?' · размер '+selectedSize:''))}};
   syncOverlayActions();
   const rec=products.filter(x=>x.id!==p.id&&((p.brand&&key(x.brand)===key(p.brand))||(p.type&&key(x.type)===key(p.type)))).slice(0,6),rb=document.getElementById('ovRecommend'),rr=document.getElementById('recommendRow');rb.style.display=rec.length?'block':'none';rr.innerHTML=rec.map(x=>`<div class="recommend-item" onclick="openOverlay(products.find(p=>p.id===${x.id}))"><img src="${esc(x.imgs[0]||PH)}"><div>${esc(x.name)}</div></div>`).join('');document.getElementById('overlay').classList.add('open');pushModal('overlay');if(navigator.vibrate)navigator.vibrate(8);recent=[p.id,...recent.filter(id=>id!==p.id)].slice(0,6);localStorage.setItem('bs_recent',JSON.stringify(recent));renderRecent()}
 function closeOverlay(){

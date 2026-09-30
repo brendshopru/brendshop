@@ -272,7 +272,7 @@ function openForm(i){
   $('formTitle').textContent=i==null?'Новый товар':'Изменить товар';
   $('fName').value=p.name||'';$('fBrand').value=p.brand||'';$('fType').value=p.type||'';
   $('fPrice').value=p.price||'';$('fOld').value=p.oldPrice||'';$('fSizes').value=Array.isArray(p.sizes)?p.sizes.join(', '):'';$('fFeatured').checked=!!p.featured;
-  $('fStock').value=p.stock==null?1:p.stock;$('fMaterial').value=p.material||'';$('fColor').value=p.color||'';$('fSeason').value=p.season||'';$('fCondition').value=p.condition||'';$('fDesc').value=p.desc||'';
+  $('fStock').value=p.stock==null?1:p.stock;$('fMaterial').value=p.material||'';$('fColor').value=p.color||'';$('fSeason').value=p.season||'';$('fCondition').value=p.condition||'';$('fDesc').value=p.desc||p.description||p.descriptionText||'';
   const known=['','Новинка','Скидка','Хит продаж','Топ','Эксклюзив','Ограниченная серия','Последний размер'];
   if(p.badge&&!known.includes(p.badge)){$('fBadge').value='__custom';$('fBadgeCustom').value=p.badge}
   else{$('fBadge').value=p.badge||'';$('fBadgeCustom').value=''}
@@ -337,7 +337,7 @@ async function saveProduct(){
     const missing=[['Бренд',brand],['Тип',type],['Размеры',sizes.join(', ')],['Материал',material],['Цвет',color],['Сезон',season],['Состояние',condition]].filter(x=>!x[1]).map(x=>x[0]);
     if(missing.length){toast('Заполни характеристики: '+missing.join(', '),1);btn.disabled=false;btn.textContent='Сохранить товар';return}
     const prod={id:editing==null?Date.now():products[editing].id,name,brand,type,
-      price,oldPrice:old,sizes,material,color,season,condition,featured:$('fFeatured').checked,stock:Math.max(0,parseInt($('fStock').value,10)||0),badge:badgeValue(),desc:$('fDesc').value.trim(),imgs};
+      price,oldPrice:old,sizes,material,color,season,condition,featured:$('fFeatured').checked,stock:Math.max(0,parseInt($('fStock').value,10)||0),badge:badgeValue(),desc:$('fDesc').value.trim(),description:$('fDesc').value.trim(),imgs};
     const next=products.slice();
     if(editing==null) next.unshift(prod); else next[editing]=prod;
     pSha=await saveJSON('products.json',next,pSha,editing==null?'add product':'edit product');

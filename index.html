@@ -492,7 +492,7 @@ function normalize(p){
     oldPrice:p.oldPrice?Number(p.oldPrice):null,badge:p.badge||null,sizes:Array.isArray(p.sizes)?p.sizes:[],featured:!!p.featured,
     condition:p.condition||'',season:p.season||'',material:p.material||'',color:p.color||'',
     stock:(p.stock===undefined||p.stock===null||p.stock==='')?99:Number(p.stock),
-    desc:p.desc||'',imgs:(p.imgs&&p.imgs.length)?p.imgs:[PH]};
+    desc:(p.desc||p.description||p.descriptionText||p.text||''),imgs:(p.imgs&&p.imgs.length)?p.imgs:[PH]};
 }
 products=products.map(normalize);
 

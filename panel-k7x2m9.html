@@ -51,6 +51,9 @@ h1{font-size:22px;font-weight:800}
 #toast.on{opacity:1}#toast.err{border-color:var(--red)}
 .chk{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:14px}
 .count{color:var(--muted);font-size:12px;margin:8px 0 12px}
+
+/* Admin upgrades — existing color variables are unchanged */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.stat{background:var(--card);border-radius:12px;padding:12px}.stat b{display:block;font-size:18px}.stat span{font-size:11px;color:var(--muted)}.toolbar{display:flex;gap:8px;align-items:center;margin-bottom:10px}.toolbar select{width:auto;flex:0 0 145px}.row .thumb{position:relative}.row .featured{font-size:10px;color:var(--accent);margin-top:2px}.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.switch{display:flex;align-items:center;gap:9px;font-size:13px;margin-top:10px}.switch input{width:auto}.danger{color:var(--red)!important}@media(max-width:520px){.stats{grid-template-columns:1fr 1fr}.toolbar{flex-wrap:wrap}.toolbar select{width:100%;flex:1}}
 </style>
 </head>
 <body>
@@ -78,7 +81,8 @@ h1{font-size:22px;font-weight:800}
   </div>
 
   <div id="listBox">
-    <input id="q" placeholder="Поиск по названию или бренду" oninput="renderList()">
+    <div class="stats"><div class="stat"><b id="statAll">0</b><span>товаров</span></div><div class="stat"><b id="statStock">0</b><span>в наличии</span></div><div class="stat"><b id="statSum">0 ₽</b><span>стоимость каталога</span></div></div>
+    <div class="toolbar"><input id="q" placeholder="Поиск по названию или бренду" oninput="renderList()"> <select id="sort" onchange="renderList()"><option value="order">Порядок сайта</option><option value="new">Сначала новые</option><option value="priceUp">Цена ↑</option><option value="priceDown">Цена ↓</option><option value="stock">Остаток ↑</option></select></div>
     <div class="count" id="count"></div>
     <div id="list"></div>
     <button class="btn" onclick="openForm(null)">+ Добавить товар</button>
@@ -93,6 +97,10 @@ h1{font-size:22px;font-weight:800}
       <div><label>Тип (выберите или впишите новый)</label><input id="fType" list="types" placeholder="Поло"></div>
     </div>
     <datalist id="brands"></datalist><datalist id="types"></datalist>
+    <div class="g2">
+      <div><label>Размеры</label><input id="fSizes" placeholder="M, L, XL или 42, 43, 44"></div>
+      <div><label>Витрина</label><label class="switch"><input type="checkbox" id="fFeatured"> Показывать как рекомендованный товар</label></div>
+    </div>
     <div class="g2">
       <div><label>Цена, ₽</label><input id="fPrice" type="number" inputmode="numeric" placeholder="5175"></div>
       <div><label>Старая цена, ₽ (для скидки)</label><input id="fOld" type="number" inputmode="numeric" placeholder="6500"></div>
@@ -115,6 +123,7 @@ h1{font-size:22px;font-weight:800}
     <div class="hint">Фото автоматически уменьшаются до 1200 px, чтобы сайт открывался быстро. Можно добавить сколько угодно фото.</div>
     <button class="btn" id="saveBtn" onclick="saveProduct()">Сохранить и опубликовать</button>
     <button class="btn sec" onclick="closeForm()">Отмена</button>
+    <button class="btn sec" id="duplicateBtn" onclick="duplicateProduct()">Создать копию</button>
   </div>
 
   <div id="setBox">
@@ -127,6 +136,7 @@ h1{font-size:22px;font-weight:800}
     <div class="chk"><input type="checkbox" id="sSound"><label style="margin:0;font-size:14px;color:var(--fg)" for="sSound">Звук на сайте включён по умолчанию</label></div>
     <label>Текст «О магазине»</label>
     <textarea id="sAbout" rows="4" placeholder="BRENDSHOP — это оригинальная одежда..."></textarea>
+    <label>Текст блока «Как заказать»</label><textarea id="sHow" rows="4" placeholder="Выберите товар → добавьте в корзину → напишите нам → получите заказ"></textarea>
     <label>Строка с рейтингом/отзывами</label>
     <input id="sReviews" placeholder="39 отзывов на Авито · 108 подписчиков">
     <button class="btn" id="saveSetBtn" onclick="saveSettings()">Сохранить настройки</button>
@@ -217,18 +227,18 @@ const fmt=n=>Number(n).toLocaleString('ru-RU')+' ₽';
 function renderList(){
   const q=$('q').value.toLowerCase().trim();
   const list=products.map((p,i)=>({p,i})).filter(({p})=>(p.name+' '+(p.brand||'')+' '+(p.type||'')).toLowerCase().includes(q));
-  $('count').textContent=`Товаров: ${products.length}`+(q?` · найдено: ${list.length}`:'');
+  const sort=$('sort')?.value||'order';list.sort((a,b)=>sort==='new'?Number(b.p.id)-Number(a.p.id):sort==='priceUp'?a.p.price-b.p.price:sort==='priceDown'?b.p.price-a.p.price:sort==='stock'?(a.p.stock??0)-(b.p.stock??0):a.i-b.i);$('count').textContent=`Товаров: ${products.length}`+(q?` · найдено: ${list.length}`:'');$('statAll').textContent=products.length;$('statStock').textContent=products.filter(p=>(p.stock??0)>0).length;$('statSum').textContent=fmt(products.reduce((n,p)=>n+(Number(p.price)||0)*(Number(p.stock)||0),0));
   $('list').innerHTML=list.map(({p,i})=>{
     const st=p.stock===0?'<span class="tag sold">Продано</span>':(p.stock!=null&&p.stock<=2?`<span class="tag low">Осталось ${p.stock}</span>`:'');
     return `<div class="row">
       <img loading="lazy" src="${esc((p.imgs&&p.imgs[0])||'')}" alt="">
       <div class="meta"><div class="name">${esc(p.name)}${st}</div>
-        <div class="sub2">${esc(p.brand||'—')} · ${esc(p.type||'—')}</div>
+        <div class="sub2">${esc(p.brand||'—')} · ${esc(p.type||'—')}</div>${p.featured?'<div class="featured">★ В рекомендациях</div>': ''}
         <div class="pr">${p.oldPrice?`<s>${fmt(p.oldPrice)}</s>`:''}${fmt(p.price)}</div></div>
       <div class="acts">
         <button class="btn sm" onclick="openForm(${i})">Изменить</button>
         <button class="btn sec sm" onclick="toggleSold(${i})">${p.stock===0?'В наличии':'Продано'}</button>
-        ${i>0?`<button class="btn sec sm" onclick="moveProduct(${i},-1)">▲ Выше</button>`:''}
+        <button class="btn sec sm" onclick="duplicateProduct(${i})">Копия</button>${i>0?`<button class="btn sec sm" onclick="moveProduct(${i},-1)">▲ Выше</button>`:''}
         <button class="btn sec sm" style="color:var(--red)" onclick="delProduct(${i})">Удалить</button>
       </div></div>`}).join('')||'<div class="sub">Ничего не найдено</div>';
 }
@@ -237,7 +247,7 @@ function openForm(i){
   editing=i;const p=i==null?{}:products[i];
   $('formTitle').textContent=i==null?'Новый товар':'Изменить товар';
   $('fName').value=p.name||'';$('fBrand').value=p.brand||'';$('fType').value=p.type||'';
-  $('fPrice').value=p.price||'';$('fOld').value=p.oldPrice||'';
+  $('fPrice').value=p.price||'';$('fOld').value=p.oldPrice||'';$('fSizes').value=Array.isArray(p.sizes)?p.sizes.join(', '):'';$('fFeatured').checked=!!p.featured;
   $('fStock').value=p.stock==null?1:p.stock;$('fDesc').value=p.desc||'';
   const known=['','Новинка','Скидка','Хит продаж','Топ','Эксклюзив','Ограниченная серия','Последний размер'];
   if(p.badge&&!known.includes(p.badge)){$('fBadge').value='__custom';$('fBadgeCustom').value=p.badge}
@@ -300,7 +310,7 @@ async function saveProduct(){
     }
     btn.textContent='Сохраняю…';
     const prod={id:editing==null?Date.now():products[editing].id,name,brand:$('fBrand').value.trim(),type:$('fType').value.trim(),
-      price,oldPrice:old,stock:Math.max(0,parseInt($('fStock').value,10)||0),badge:badgeValue(),desc:$('fDesc').value.trim(),imgs};
+      price,oldPrice:old,sizes:$('fSizes').value.split(',').map(x=>x.trim()).filter(Boolean),featured:$('fFeatured').checked,stock:Math.max(0,parseInt($('fStock').value,10)||0),badge:badgeValue(),desc:$('fDesc').value.trim(),imgs};
     const next=products.slice();
     if(editing==null) next.unshift(prod); else next[editing]=prod;
     pSha=await saveJSON('products.json',next,pSha,editing==null?'add product':'edit product');
@@ -322,6 +332,8 @@ async function moveProduct(i,dir){
   const next=products.slice(); const j=i+dir; if(j<0||j>=next.length)return;
   [next[i],next[j]]=[next[j],next[i]]; await commitList(next,'reorder');
 }
+async function duplicateProduct(i=editing){if(i==null||!products[i])return;const p=JSON.parse(JSON.stringify(products[i]));p.id=Date.now();p.name=p.name+' — копия';const next=products.slice();next.splice(i+1,0,p);await commitList(next,'duplicate product')}
+
 async function delProduct(i){
   if(!confirm('Удалить «'+products[i].name+'»?'))return;
   const next=products.slice();next.splice(i,1);await commitList(next,'delete product');
@@ -331,10 +343,10 @@ function fillSettings(){
   $('sBanner').checked=settings.discountEnabled!==false;
   $('sText').value=settings.discountText||'Скидка 20% при заказе от 3 товаров';
   $('sColor').value=/^#[0-9a-f]{6}$/i.test(settings.accent||'')?settings.accent:'#d4ff3f';
-  $('sSound').checked=settings.sound!==false;$('sAbout').value=settings.about||'';$('sReviews').value=settings.reviewsLine||'';
+  $('sSound').checked=settings.sound!==false;$('sAbout').value=settings.about||'';$('sHow').value=settings.howOrder||'';$('sReviews').value=settings.reviewsLine||'';
 }
 async function saveSettings(){
-  const s={discountEnabled:$('sBanner').checked,discountText:$('sText').value.trim(),accent:$('sColor').value,sound:$('sSound').checked,about:$('sAbout').value.trim(),reviewsLine:$('sReviews').value.trim()};
+  const s={discountEnabled:$('sBanner').checked,discountText:$('sText').value.trim(),accent:$('sColor').value,sound:$('sSound').checked,about:$('sAbout').value.trim(),howOrder:$('sHow').value.trim(),reviewsLine:$('sReviews').value.trim()};
   const b=$('saveSetBtn');b.disabled=true;
   try{sSha=await saveJSON('settings.json',s,sSha,'update settings');settings=s;toast('Настройки сохранены')}
   catch(e){toast('Ошибка: '+e.message,1)}

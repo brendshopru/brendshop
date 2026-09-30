@@ -30,6 +30,20 @@
   #overlay .gallery-dots i{width:7px;height:7px;border-radius:50%;background:#777;opacity:.8}
   #overlay .gallery-dots i.on{background:var(--accent);opacity:1}
 }
+
+/* UX: fixed cart/contact, scroll-top, favorite/cart controls, recommendation scrolling */
+.sticky-tools{position:fixed;right:20px;bottom:20px;z-index:60;display:flex;gap:8px;align-items:center}
+.sticky-tools .sticky-cta{position:static!important;opacity:1!important;transform:none!important}
+.sticky-cart{height:48px;min-width:48px;padding:0 14px;border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--fg);font-size:16px;font-weight:800;box-shadow:0 4px 20px rgba(0,0,0,.4);cursor:pointer}
+.sticky-cart span{font-size:12px;margin-left:3px;color:var(--accent)}
+.scroll-top{position:fixed;right:20px;bottom:82px;width:42px;height:42px;border:1px solid var(--line);border-radius:50%;background:var(--card);color:var(--fg);font-size:20px;font-weight:700;z-index:59;display:none;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.35)}
+.scroll-top.show{display:block}
+.cart-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.cart-close{width:36px;height:36px;border:1px solid var(--line);border-radius:50%;background:var(--card);color:var(--fg);font-size:24px;line-height:1;cursor:pointer}
+.recommend-row{scroll-behavior:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;touch-action:pan-x;overscroll-behavior-x:contain}
+.recommend-row::-webkit-scrollbar{display:none}
+@media(min-width:701px){.recommend-row.auto-scroll{overflow:hidden}.recommend-row.auto-scroll .recommend-item{pointer-events:auto}}
+@media(max-width:700px){.sticky-tools{right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px))}.sticky-tools .sticky-cta{font-size:13px;padding:12px 17px}.sticky-cart{height:44px;min-width:44px;padding:0 11px}.scroll-top{right:12px;bottom:70px;width:40px;height:40px}}
 </style>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>BRENDSHOP</title>
@@ -366,7 +380,7 @@ footer .addr{color:var(--muted);font-size:13px;margin-bottom:20px}
   <a href="https://vk.com/im?sel=420778533" target="_blank">VK</a>
   <a href="tel:+79201085073" onclick="callOrCopy(event)">Позвонить</a>
 </div>
-<div class="sticky-cta" id="stickyCta">Написать →</div>
+<div class="sticky-tools"><button class="sticky-cart" id="stickyCart" type="button" aria-label="Корзина">🛒 <span id="stickyCartCount">0</span></button><div class="sticky-cta" id="stickyCta">Написать →</div></div><button class="scroll-top" id="scrollTopBtn" type="button" aria-label="Наверх">↑</button>
 
 <div class="quick-contact" id="shareMenu" style="bottom:auto;top:50%;right:50%;transform:translate(50%,-50%);z-index:46">
   <a id="shareWa" target="_blank">WhatsApp</a>
@@ -432,10 +446,10 @@ footer .addr{color:var(--muted);font-size:13px;margin-bottom:20px}
   </div>
 </div>
 
-<div class="fav-drawer" id="favDrawer"><div class="fav-sheet"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h2 style="font-size:18px">Избранное</h2><button class="ov-btn" id="closeFav">Закрыть</button></div><div id="favItems"></div></div></div>
+<div class="fav-drawer" id="favDrawer"><div class="fav-sheet"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h2 style="font-size:18px">Избранное</h2><div style="display:flex;gap:8px"><button class="ov-btn" id="favGoCart" type="button">🛒 Корзина</button><button class="ov-btn" id="closeFav" type="button">Закрыть</button></div></div><div id="favItems"></div></div></div>
 <div id="cartDrawer">
   <div class="sheet">
-    <h2 style="font-size:18px;font-weight:800;margin-bottom:14px">Корзина</h2>
+    <div class="cart-head"><h2 style="font-size:18px;font-weight:800;margin:0">Корзина</h2><button class="cart-close" id="cartCloseX" type="button" aria-label="Закрыть">×</button></div>
     <div id="cartProgress" class="cart-progress" style="display:none"><div class="cart-progress-text" id="cartProgressText"></div><div class="cart-progress-bar"><i id="cartProgressBar"></i></div></div><div id="cartItems"></div>
     <div class="cart-discount" id="cartDiscount" style="display:none"><span id="cartDiscountLabel">Скидка</span><span id="cartDiscountValue">−0 ₽</span></div><div class="cart-total"><span>Итого</span><span id="cartTotal">0 ₽</span></div>
     <div style="font-size:12px;color:var(--muted)">Оформить заказ:</div>
@@ -482,7 +496,7 @@ function cartQty(id){return cart[id]||0}
 function updateCartBadge(){
   const count=Object.values(cart).reduce((a,b)=>a+b,0);
   const el=document.getElementById('cartCount');
-  el.textContent=count; el.style.display=count>0?'flex':'none';
+  el.textContent=count; el.style.display=count>0?'flex':'none'; const sc=document.getElementById('stickyCartCount'); if(sc) sc.textContent=count;
 }
 function addToCart(id){
   cart[id]=(cart[id]||0)+1;
@@ -497,7 +511,7 @@ function changeQty(id,delta){
   localStorage.setItem('bs_cart',JSON.stringify(cart));
   updateCartBadge(); refreshGrid(); renderCart();
 }
-function renderFavs(){const box=document.getElementById('favItems'),arr=products.filter(p=>favs.has(p.id));box.innerHTML=arr.length?arr.map(p=>`<div class="fav-item" onclick="openOverlay(products.find(x=>x.id===${p.id}))"><img src="${esc(p.imgs[0]||PH)}"><div class="m"><b>${esc(p.name)}</b><span>${fmt(p.price)}</span></div></div>`).join(''):'<div style="color:var(--muted);font-size:13px">Здесь будут сохранённые товары.</div>'}function openFav(){renderFavs();document.getElementById('favDrawer').classList.add('open');pushModal('fav')}function closeFav(){document.getElementById('favDrawer').classList.remove('open');popModalIfMine('fav')}document.getElementById('favBtn').onclick=openFav;document.getElementById('closeFav').onclick=closeFav;document.querySelector('[data-fav]').onclick=openFav;
+function renderFavs(){const box=document.getElementById('favItems'),arr=products.filter(p=>favs.has(p.id));box.innerHTML=arr.length?arr.map(p=>`<div class="fav-item" onclick="openOverlay(products.find(x=>x.id===${p.id}))"><img src="${esc(p.imgs[0]||PH)}"><div class="m"><b>${esc(p.name)}</b><span>${fmt(p.price)}</span></div></div>`).join(''):'<div style="color:var(--muted);font-size:13px">Здесь будут сохранённые товары.</div>'}function openFav(){renderFavs();document.getElementById('favDrawer').classList.add('open');pushModal('fav')}function closeFav(){document.getElementById('favDrawer').classList.remove('open');popModalIfMine('fav')}document.getElementById('favBtn').onclick=openFav;document.getElementById('closeFav').onclick=closeFav;document.querySelector('[data-fav]').onclick=openFav;document.getElementById('favGoCart').onclick=()=>{closeFav();setTimeout(openCart,80)};
 function renderCart(){
   const wrap=document.getElementById('cartItems');
   const ids=Object.keys(cart),totalQty=ids.reduce((n,id)=>n+(cart[id]||0),0),prog=document.getElementById('cartProgress');
@@ -720,7 +734,7 @@ function goToCartFromOverlay(){
     openCart();
   }
 }
-function openOverlay(p){currentProduct=p;const gal=document.getElementById('ovGallery');const imgs=Array.isArray(p.imgs)&&p.imgs.length?p.imgs:[PH];gal.innerHTML=imgs.map(s=>`<img src="${esc(s)}">`).join('');const dots=document.getElementById('ovDots');dots.innerHTML=imgs.map((_,i)=>`<i class="${i===0?'on':''}"></i>`).join('');let ovIndex=0;const setOvIndex=(i)=>{if(!imgs.length)return;ovIndex=(i+imgs.length)%imgs.length;gal.scrollTo({left:ovIndex*gal.clientWidth,behavior:'smooth'});dots.querySelectorAll('i').forEach((d,n)=>d.classList.toggle('on',n===ovIndex));};document.getElementById('ovPrev').onclick=()=>setOvIndex(ovIndex-1);document.getElementById('ovNext').onclick=()=>setOvIndex(ovIndex+1);gal.onscroll=()=>{if(!gal.clientWidth)return;const i=Math.round(gal.scrollLeft/gal.clientWidth);if(i!==ovIndex){ovIndex=Math.max(0,Math.min(imgs.length-1,i));dots.querySelectorAll('i').forEach((d,n)=>d.classList.toggle('on',n===ovIndex));}};document.getElementById('ovPrev').style.display=imgs.length>1?'flex':'none';document.getElementById('ovNext').style.display=imgs.length>1?'flex':'none';dots.style.display=imgs.length>1?'flex':'none';document.querySelectorAll('#ovGallery img').forEach(img=>img.ondblclick=()=>img.classList.toggle('zoomed'));document.getElementById('ovName').textContent=p.name;document.getElementById('ovPrice').textContent=fmt(p.price);document.getElementById('ovPriceRow').innerHTML=p.oldPrice?`<span class="price-old">${fmt(p.oldPrice)}</span><span class="discount-pct">-${Math.round((1-p.price/p.oldPrice)*100)}%</span>`:'';document.getElementById('ovDesc').textContent=p.desc||'';const cb=document.getElementById('ovCharacteristicsBody'),cw=document.getElementById('ovCharacteristics');const chars=[['Бренд',p.brand],['Тип',p.type],['Состояние',p.condition],['Сезон',p.season],['Размер',Array.isArray(p.sizes)?p.sizes.join(', '):p.sizes],['Материал',p.material],['Цвет',p.color]];cb.innerHTML=chars.map(x=>`<div class="char-row"><span class="k">${esc(x[0])}</span><span class="v">${esc(String(x[1]||'').trim()||'Не указано')}</span></div>`).join('');cw.classList.remove('open');const sizes=Array.isArray(p.sizes)?p.sizes:[],sb=document.getElementById('ovSizes'),sr=document.getElementById('ovSizeRow');sb.style.display=sizes.length?'block':'none';let selectedSize=sizes[0]||'';sr.innerHTML=sizes.map(x=>`<button class="size-btn${x===selectedSize?' on':''}" type="button">${esc(x)}</button>`).join('');sr.querySelectorAll('.size-btn').forEach(b=>b.onclick=()=>{selectedSize=b.textContent;sr.querySelectorAll('.size-btn').forEach(x=>x.classList.remove('on'));b.classList.add('on')});const add=document.getElementById('ovAdd');add.onclick=()=>{if(p.stock>0){addToCart(p.id);syncOverlayCart();showToast('Добавлено в корзину'+(selectedSize?' · размер '+selectedSize:''))}};document.getElementById('ovMinus').onclick=()=>{changeQty(p.id,-1);syncOverlayCart()};document.getElementById('ovPlus').onclick=()=>{changeQty(p.id,1);syncOverlayCart()};syncOverlayCart();const rec=products.filter(x=>x.id!==p.id&&((p.brand&&key(x.brand)===key(p.brand))||(p.type&&key(x.type)===key(p.type)))).slice(0,6),rb=document.getElementById('ovRecommend'),rr=document.getElementById('recommendRow');rb.style.display=rec.length?'block':'none';rr.innerHTML=rec.map(x=>`<div class="recommend-item" onclick="openOverlay(products.find(p=>p.id===${x.id}))"><img src="${esc(x.imgs[0]||PH)}"><div>${esc(x.name)}</div></div>`).join('');document.getElementById('overlay').classList.add('open');pushModal('overlay');if(navigator.vibrate)navigator.vibrate(8);recent=[p.id,...recent.filter(id=>id!==p.id)].slice(0,6);localStorage.setItem('bs_recent',JSON.stringify(recent));renderRecent()}
+function openOverlay(p){currentProduct=p;const gal=document.getElementById('ovGallery');const imgs=Array.isArray(p.imgs)&&p.imgs.length?p.imgs:[PH];gal.innerHTML=imgs.map(s=>`<img src="${esc(s)}">`).join('');const dots=document.getElementById('ovDots');dots.innerHTML=imgs.map((_,i)=>`<i class="${i===0?'on':''}"></i>`).join('');let ovIndex=0;const setOvIndex=(i)=>{if(!imgs.length)return;ovIndex=(i+imgs.length)%imgs.length;gal.scrollTo({left:ovIndex*gal.clientWidth,behavior:'smooth'});dots.querySelectorAll('i').forEach((d,n)=>d.classList.toggle('on',n===ovIndex));};document.getElementById('ovPrev').onclick=()=>setOvIndex(ovIndex-1);document.getElementById('ovNext').onclick=()=>setOvIndex(ovIndex+1);gal.onscroll=()=>{if(!gal.clientWidth)return;const i=Math.round(gal.scrollLeft/gal.clientWidth);if(i!==ovIndex){ovIndex=Math.max(0,Math.min(imgs.length-1,i));dots.querySelectorAll('i').forEach((d,n)=>d.classList.toggle('on',n===ovIndex));}};document.getElementById('ovPrev').style.display=imgs.length>1?'flex':'none';document.getElementById('ovNext').style.display=imgs.length>1?'flex':'none';dots.style.display=imgs.length>1?'flex':'none';document.querySelectorAll('#ovGallery img').forEach(img=>img.ondblclick=()=>img.classList.toggle('zoomed'));document.getElementById('ovName').textContent=p.name;document.getElementById('ovPrice').textContent=fmt(p.price);document.getElementById('ovPriceRow').innerHTML=p.oldPrice?`<span class="price-old">${fmt(p.oldPrice)}</span><span class="discount-pct">-${Math.round((1-p.price/p.oldPrice)*100)}%</span>`:'';document.getElementById('ovDesc').textContent=p.desc||'';const cb=document.getElementById('ovCharacteristicsBody'),cw=document.getElementById('ovCharacteristics');const chars=[['Бренд',p.brand],['Тип',p.type],['Состояние',p.condition],['Сезон',p.season],['Размер',Array.isArray(p.sizes)?p.sizes.join(', '):p.sizes],['Материал',p.material],['Цвет',p.color]];cb.innerHTML=chars.map(x=>`<div class="char-row"><span class="k">${esc(x[0])}</span><span class="v">${esc(String(x[1]||'').trim()||'Не указано')}</span></div>`).join('');cw.classList.remove('open');const sizes=Array.isArray(p.sizes)?p.sizes:[],sb=document.getElementById('ovSizes'),sr=document.getElementById('ovSizeRow');sb.style.display=sizes.length?'block':'none';let selectedSize=sizes[0]||'';sr.innerHTML=sizes.map(x=>`<button class="size-btn${x===selectedSize?' on':''}" type="button">${esc(x)}</button>`).join('');sr.querySelectorAll('.size-btn').forEach(b=>b.onclick=()=>{selectedSize=b.textContent;sr.querySelectorAll('.size-btn').forEach(x=>x.classList.remove('on'));b.classList.add('on')});const add=document.getElementById('ovAdd');add.onclick=()=>{if(p.stock>0){addToCart(p.id);syncOverlayCart();showToast('Добавлено в корзину'+(selectedSize?' · размер '+selectedSize:''))}};document.getElementById('ovMinus').onclick=()=>{changeQty(p.id,-1);syncOverlayCart()};document.getElementById('ovPlus').onclick=()=>{changeQty(p.id,1);syncOverlayCart()};syncOverlayCart();const rec=products.filter(x=>x.id!==p.id&&((p.brand&&key(x.brand)===key(p.brand))||(p.type&&key(x.type)===key(p.type)))).slice(0,6),rb=document.getElementById('ovRecommend'),rr=document.getElementById('recommendRow');rb.style.display=rec.length?'block':'none';rr.innerHTML=rec.map(x=>`<div class="recommend-item" onclick="openOverlay(products.find(p=>p.id===${x.id}))"><img src="${esc(x.imgs[0]||PH)}"><div>${esc(x.name)}</div></div>`).join('');rr.classList.toggle('auto-scroll',window.matchMedia('(min-width:701px)').matches); if(window.matchMedia('(min-width:701px)').matches && rec.length>3){let raf=0;let paused=false;const tick=()=>{if(!document.getElementById('overlay').classList.contains('open')||paused){cancelAnimationFrame(raf);return;}rr.scrollLeft+=0.35;if(rr.scrollLeft>=rr.scrollWidth-rr.clientWidth-1)rr.scrollLeft=0;raf=requestAnimationFrame(tick)};rr.onmouseenter=()=>paused=true;rr.onmouseleave=()=>{paused=false;cancelAnimationFrame(raf);raf=requestAnimationFrame(tick)};rr.ontouchstart=()=>paused=true;rr.onwheel=()=>paused=true;requestAnimationFrame(tick);}document.getElementById('overlay').classList.add('open');pushModal('overlay');if(navigator.vibrate)navigator.vibrate(8);recent=[p.id,...recent.filter(id=>id!==p.id)].slice(0,6);localStorage.setItem('bs_recent',JSON.stringify(recent));renderRecent()}
 function closeOverlay(){
   document.getElementById('overlay').classList.remove('open');
   popModalIfMine('overlay');
@@ -732,6 +746,9 @@ function closeOverlay(){
   if(goCart) goCart.addEventListener('click',goToCartFromOverlay);
   const shareBtn=document.getElementById('shareBtn');
   if(shareBtn) shareBtn.addEventListener('click', shareProduct);
+  const cartX=document.getElementById('cartCloseX'); if(cartX) cartX.addEventListener('click',closeCart);
+  const stickyCart=document.getElementById('stickyCart'); if(stickyCart) stickyCart.addEventListener('click',openCart);
+  const scrollTop=document.getElementById('scrollTopBtn'); if(scrollTop) scrollTop.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
 })();
 function showToast(msg){
   let toast=document.getElementById('callToast');
@@ -898,7 +915,7 @@ window.addEventListener('scroll',()=>{
   const h=document.documentElement;
   const pct=h.scrollTop/(h.scrollHeight-h.clientHeight)*100;
   document.getElementById('progress').style.width=pct+'%';
-  document.getElementById('stickyCta').classList.toggle('show', h.scrollTop>300);
+  document.getElementById('stickyCta').classList.add('show'); const st=document.getElementById('scrollTopBtn'); if(st) st.classList.toggle('show',h.scrollTop>500);
 });
 
 

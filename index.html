@@ -199,15 +199,17 @@ footer .addr{color:var(--muted);font-size:13px;margin-bottom:20px}
   header{padding:1vh 5vw 2vh}
   header h2{font-size:clamp(28px,8vw,60px)}
 }
+.search-row{display:flex;gap:10px;align-items:stretch;max-width:1240px;margin:0 auto;padding:0 5vw}.search-row .search{flex:1;min-width:0}.filter-toggle{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:12px;padding:0 18px;font-size:13px;font-weight:700;cursor:pointer;min-width:118px}.filter-toggle:active,.filter-toggle.open{background:var(--accent);color:#0b0b0b;border-color:var(--accent)}.filter-toggle span{margin-left:4px}.filter-panel{display:none;max-width:1240px;margin:10px auto 18px;padding:14px 5vw 4px;background:var(--card);border:1px solid #2a2a2a55;border-radius:16px}.filter-panel.open{display:block}.filter-panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}.filter-panel-head b{display:block;font-size:14px}.filter-panel-head span{display:block;color:var(--muted);font-size:11px;margin-top:3px}.filter-panel-head button{border:0;background:transparent;color:var(--muted);font-size:12px;padding:8px;cursor:pointer}.filter-group{padding:8px 0;border-top:1px solid #2a2a2a33}.filter-group:first-of-type{border-top:0}.filter-label{font-size:11px;color:var(--muted);margin-bottom:5px}.filter-panel .chips{padding:0 0 4px}.filter-panel .chips-row{padding-bottom:4px}@media(max-width:599px){.search-row{padding:0 5vw}.filter-toggle{min-width:96px;padding:0 13px}.filter-panel{margin:8px 5vw 14px;padding:12px 10px}.filter-panel .chips{padding-left:0;padding-right:0}}
+
 @media(min-width:900px){
   body{cursor:none}
   #cursor{position:fixed;width:14px;height:14px;border-radius:50%;background:var(--accent);pointer-events:none;z-index:100;transform:translate(-50%,-50%);transition:width .2s,height .2s;mix-blend-mode:difference}
   #cursor.hover{width:44px;height:44px}
-  .topbar,header,.search,.chips,main,.about,.reviews,footer{max-width:1240px;margin-left:auto;margin-right:auto}
+  .topbar,header,.search,.chips,main,.about,.reviews,footer{max-width:1440px;margin-left:auto;margin-right:auto}
   header h2{font-size:clamp(48px,6vw,84px)}
   header .tag{font-size:15px}
   .search input{font-size:15px;padding:16px 20px}
-  .grid{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:20px}
+  .grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
   .card .name{font-size:15px}
   .card .price{font-size:19px}
   .about p{font-size:15px;max-width:760px}
@@ -217,6 +219,11 @@ footer .addr{color:var(--muted);font-size:13px;margin-bottom:20px}
 
 /* BRENDSHOP upgrades: existing colors are preserved */
 .shop-hero{max-width:1240px;margin:0 auto;padding:10px 5vw 26px}.shop-hero-box{background:var(--card);border:1px solid #2a2a2a55;border-radius:18px;padding:22px}.shop-hero-kicker{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px}.shop-hero h3{font-size:clamp(25px,5vw,46px);line-height:1.02;margin-bottom:10px}.shop-hero p{font-size:14px;line-height:1.55;color:var(--muted);max-width:650px}.hero-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.hero-action{border:1px solid var(--line);background:transparent;color:var(--fg);border-radius:10px;padding:10px 13px;font-weight:700;font-size:12px}.hero-action.active{background:var(--accent);color:#0b0b0b;border-color:var(--accent)}.feature-strip{padding:0 5vw 22px;max-width:1240px;margin:auto}.feature-strip-title{font-size:12px;color:var(--muted);margin-bottom:9px}.feature-row{display:flex;gap:9px;overflow:auto;scrollbar-width:none}.feature-row::-webkit-scrollbar{display:none}.feature-card{flex:0 0 145px;min-height:76px;border:1px solid #2a2a2a55;border-radius:14px;background:var(--card);padding:12px;cursor:pointer}.feature-card b{display:block;font-size:13px;margin-bottom:4px}.feature-card span{font-size:11px;color:var(--muted)}.how-order{max-width:1240px;margin:0 auto;padding:5vh 5vw}.how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.how-step{background:var(--card);border-radius:14px;padding:14px}.how-step strong{font-size:12px;color:var(--accent)}.how-step b{display:block;font-size:14px;margin:6px 0}.how-step span{font-size:12px;line-height:1.45;color:var(--muted)}.recommend{padding:18px 0 4px}.recommend-title{font-size:12px;color:var(--muted);margin-bottom:9px}.recommend-row{display:flex;gap:9px;overflow:auto}.recommend-item{flex:0 0 92px;cursor:pointer}.recommend-item img{width:92px;height:112px;object-fit:cover;border-radius:10px;background:var(--card)}.recommend-item div{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:5px}.size-box{margin-top:15px}.size-title{font-size:12px;color:var(--muted);margin-bottom:8px}.size-row{display:flex;gap:7px;flex-wrap:wrap}.size-btn{min-width:42px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:transparent;color:var(--fg);font-size:12px;font-weight:700}.size-btn.on{background:var(--accent);color:#0b0b0b;border-color:var(--accent)}.fav-drawer{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:70;display:none}.fav-drawer.open{display:block}.fav-sheet{position:absolute;right:0;top:0;height:100%;width:min(430px,92vw);background:var(--bg);padding:24px 18px;overflow:auto}.fav-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid #2a2a2a55;cursor:pointer}.fav-item img{width:58px;height:72px;object-fit:cover;border-radius:8px}.fav-item .m{flex:1;min-width:0}.fav-item b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fav-item span{display:block;font-size:12px;color:var(--accent);margin-top:4px}.cart-progress{margin:0 0 14px;padding:11px 12px;border:1px solid #2a2a2a55;border-radius:12px;background:var(--card)}.cart-progress-text{font-size:12px;margin-bottom:7px}.cart-progress-bar{height:5px;background:#2a2a2a;border-radius:5px;overflow:hidden}.cart-progress-bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .25s}@media(max-width:700px){.how-grid{grid-template-columns:1fr 1fr}}@media(max-width:430px){.how-grid{grid-template-columns:1fr}.shop-hero{padding-top:2px}}
+@media(min-width:1250px){
+  .topbar,header,.search,.chips,main,.about,.reviews,footer,.shop-hero,.feature-strip,.how-order,.search-row,.filter-panel{max-width:1440px}
+  .grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:22px}
+  .card .name{font-size:15px}
+}
 </style>
 </head>
 <body>
@@ -246,54 +253,47 @@ footer .addr{color:var(--muted);font-size:13px;margin-bottom:20px}
   <div class="close-x" id="closeBanner">✕</div>
 </div>
 
-<div class="search"><input id="search" placeholder="Поиск по названию..."></div>
-<div class="chips chips-row" id="chips">
-  <div class="chip active" data-brand="all">Все</div>
-  <div class="chip" data-brand="Tommy Hilfiger">Tommy Hilfiger</div>
-  <div class="chip" data-brand="Ralph Lauren">Ralph Lauren</div>
-  <div class="chip" data-brand="Lacoste">Lacoste</div>
-  <div class="chip" data-brand="Autograph">Autograph</div>
-  <div class="chip" data-brand="Calvin Klein">Calvin Klein</div>
-  <div class="chip" data-brand="Timberland">Timberland</div>
-  <div class="chip" data-brand="La Martina">La Martina</div>
-  <div class="chip" data-brand="DKNY">DKNY</div>
-  <div class="chip" data-brand="New Balance">New Balance</div>
-  <div class="chip" data-brand="Cerruti 1881">Cerruti 1881</div>
-  <div class="chip" data-brand="Bikkembergs">Bikkembergs</div>
-  <div class="chip" data-brand="Tommy Jeans">Tommy Jeans</div>
+<div class="search-row">
+  <div class="search"><input id="search" placeholder="Поиск по названию..."></div>
+  <button class="filter-toggle" id="filterToggle" type="button" aria-expanded="false">☰ Фильтр <span id="filterCount"></span></button>
 </div>
-<div class="chips" id="priceChips">
-  <div class="chip active" data-max="999999">Любая цена</div>
-  <div class="chip" data-max="5000">до 5 000 ₽</div>
-  <div class="chip" data-max="7500">до 7 500 ₽</div>
-</div>
-<div class="chips" id="typeChips">
-  <div class="chip active" data-type="all">Все типы</div>
-  <div class="chip" data-type="Поло">Поло</div>
-  <div class="chip" data-type="Футболка">Футболка</div>
-  <div class="chip" data-type="Джемпер">Джемпер</div>
-  <div class="chip" data-type="Свитшот">Свитшот</div>
-  <div class="chip" data-type="Бомбер">Бомбер</div>
-  <div class="chip" data-type="Куртка">Куртки</div>
-  <div class="chip" data-type="Пуховик">Пуховик</div>
-  <div class="chip" data-type="Жилет">Жилет</div>
-  <div class="chip" data-type="Шорты">Шорты</div>
-  <div class="chip" data-type="Кроссовки">Кроссовки</div>
-  <div class="chip" data-type="Кеды">Кеды</div>
-  <div class="chip" data-type="Сумка">Сумки</div>
-</div>
-  <div class="chip" data-type="Поло">Поло</div>
-  <div class="chip" data-type="Футболка">Футболка</div>
-  <div class="chip" data-type="Джемпер">Джемпер</div>
-  <div class="chip" data-type="Свитшот">Свитшот</div>
-  <div class="chip" data-type="Бомбер">Бомбер</div>
-  <div class="chip" data-type="Куртка">Куртки</div>
-  <div class="chip" data-type="Пуховик">Пуховик</div>
-  <div class="chip" data-type="Жилет">Жилет</div>
-  <div class="chip" data-type="Шорты">Шорты</div>
-  <div class="chip" data-type="Кроссовки">Кроссовки</div>
-  <div class="chip" data-type="Кеды">Кеды</div>
-  <div class="chip" data-type="Сумка">Сумки</div>
+<div class="filter-panel" id="filterPanel">
+  <div class="filter-panel-head"><div><b>Фильтры</b><span>Бренд, цена и тип товара</span></div><button id="filterReset" type="button">Сбросить</button></div>
+  <div class="filter-group"><div class="filter-label">Бренд</div><div class="chips chips-row" id="chips">
+    <div class="chip active" data-brand="all">Все</div>
+    <div class="chip" data-brand="Tommy Hilfiger">Tommy Hilfiger</div>
+    <div class="chip" data-brand="Ralph Lauren">Ralph Lauren</div>
+    <div class="chip" data-brand="Lacoste">Lacoste</div>
+    <div class="chip" data-brand="Autograph">Autograph</div>
+    <div class="chip" data-brand="Calvin Klein">Calvin Klein</div>
+    <div class="chip" data-brand="Timberland">Timberland</div>
+    <div class="chip" data-brand="La Martina">La Martina</div>
+    <div class="chip" data-brand="DKNY">DKNY</div>
+    <div class="chip" data-brand="New Balance">New Balance</div>
+    <div class="chip" data-brand="Cerruti 1881">Cerruti 1881</div>
+    <div class="chip" data-brand="Bikkembergs">Bikkembergs</div>
+    <div class="chip" data-brand="Tommy Jeans">Tommy Jeans</div>
+  </div></div>
+  <div class="filter-group"><div class="filter-label">Цена</div><div class="chips" id="priceChips">
+    <div class="chip active" data-max="999999">Любая цена</div>
+    <div class="chip" data-max="5000">до 5 000 ₽</div>
+    <div class="chip" data-max="7500">до 7 500 ₽</div>
+  </div></div>
+  <div class="filter-group"><div class="filter-label">Тип</div><div class="chips" id="typeChips">
+    <div class="chip active" data-type="all">Все типы</div>
+    <div class="chip" data-type="Поло">Поло</div>
+    <div class="chip" data-type="Футболка">Футболка</div>
+    <div class="chip" data-type="Джемпер">Джемпер</div>
+    <div class="chip" data-type="Свитшот">Свитшот</div>
+    <div class="chip" data-type="Бомбер">Бомбер</div>
+    <div class="chip" data-type="Куртка">Куртки</div>
+    <div class="chip" data-type="Пуховик">Пуховик</div>
+    <div class="chip" data-type="Жилет">Жилет</div>
+    <div class="chip" data-type="Шорты">Шорты</div>
+    <div class="chip" data-type="Кроссовки">Кроссовки</div>
+    <div class="chip" data-type="Кеды">Кеды</div>
+    <div class="chip" data-type="Сумка">Сумки</div>
+  </div></div>
 </div>
 
 <div class="recent" id="recentBlock" style="display:none">
@@ -703,11 +703,16 @@ function refreshGrid(){
 }
 document.querySelectorAll('[data-quick]').forEach(el=>el.addEventListener('click',()=>{if(el.dataset.fav){openFav();return}quickMode=el.dataset.quick;document.querySelectorAll('.hero-action').forEach(x=>x.classList.toggle('active',x.dataset.quick===quickMode));filterAndRender();document.getElementById('search').scrollIntoView({behavior:'smooth',block:'center'})}));
 document.getElementById('search').oninput=filterAndRender;
+const filterToggle=document.getElementById('filterToggle'),filterPanel=document.getElementById('filterPanel');
+function updateFilterCount(){const b=document.querySelector('#chips .chip.active')?.dataset.brand||'all',p=document.querySelector('#priceChips .chip.active')?.dataset.max||'999999',t=document.querySelector('#typeChips .chip.active')?.dataset.type||'all';const n=(b!=='all'?1:0)+(p!=='999999'?1:0)+(t!=='all'?1:0);document.getElementById('filterCount').textContent=n?`(${n})`:'';filterToggle.classList.toggle('open',filterPanel.classList.contains('open'));filterToggle.setAttribute('aria-expanded',filterPanel.classList.contains('open')?'true':'false')}
+filterToggle.onclick=()=>{filterPanel.classList.toggle('open');updateFilterCount()};
+document.getElementById('filterReset').onclick=()=>{document.querySelector('#chips .chip[data-brand="all"]').click();document.querySelector('#priceChips .chip[data-max="999999"]').click();document.querySelector('#typeChips .chip[data-type="all"]').click();updateFilterCount()};
+updateFilterCount();
 ['chips','priceChips','typeChips'].forEach(id=>{
   document.getElementById(id).addEventListener('click',e=>{
     const ch=e.target.closest('.chip'); if(!ch)return;
     document.querySelectorAll('#'+id+' .chip').forEach(x=>x.classList.remove('active'));
-    ch.classList.add('active'); filterAndRender();
+    ch.classList.add('active'); filterAndRender(); updateFilterCount();
   });
 });
 function buildChips(id,attr,allLabel,field){

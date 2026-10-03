@@ -315,7 +315,7 @@ footer .addr{color:var(--muted);font-size:13px;margin-bottom:20px}
     <div style="font-weight:800;font-size:14px;letter-spacing:-.01em">BREND<span style="color:var(--accent)">SHOP</span></div>
   </div>
   <div style="display:flex;gap:10px">
-    <button class="theme-toggle install-app-btn" id="installAppBtn" type="button" title="Добавить BRENDSHOP на экран">⌂ <span>На экран</span></button>
+    <button class="theme-toggle install-app-btn" id="installAppBtn" type="button" title="Установить BRENDSHOP">⌂ <span>Установить</span></button>
     <div class="theme-toggle" id="soundToggle">🔊</div>
     <div class="theme-toggle" id="themeToggle">🌙</div>
   </div>
@@ -1026,9 +1026,9 @@ if(window.matchMedia('(min-width:900px)').matches){
       return;
     }
     if(isIOS()){
-      alert('На iPhone: нажмите «Поделиться» в Safari → «Ещё» → «На экран Домой» → «Добавить».');
+      alert('На iPhone: Safari → «Поделиться» → «На экран «Домой»» → «Добавить».');
     }else{
-      alert('Откройте меню браузера и выберите «Установить приложение» или «Добавить на главный экран».');
+      alert('Откройте меню браузера и выберите «Установить BRENDSHOP».');
     }
   };
   if(isIOS())btn.style.display='flex';

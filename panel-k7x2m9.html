@@ -101,7 +101,7 @@ h1{font-size:22px;font-weight:800}
       <div><label>Размеры</label><input id="fSizes" placeholder="M, L, XL или 42, 43, 44"></div>
       <div><label>Витрина</label><label class="switch"><input type="checkbox" id="fFeatured"> Показывать как рекомендованный товар</label></div>
     </div>
-    <div class="char-required"><div class="char-required-title">Характеристики товара</div><div class="hint" style="margin-top:4px">Заполни эти поля — они будут показаны покупателю в карточке товара.</div></div>
+    <div class="char-required"><div class="char-required-title">Дополнительные характеристики <span style="color:var(--muted);font-weight:500">(необязательно)</span></div><div class="hint" style="margin-top:4px">Можно оставить пустыми — товар всё равно сохранится.</div></div>
     <div class="g2">
       <div><label>Материал</label><input id="fMaterial" placeholder="Хлопок"></div>
       <div><label>Цвет</label><input id="fColor" placeholder="Коричневый"></div>
@@ -122,7 +122,7 @@ h1{font-size:22px;font-weight:800}
       <input id="fBadgeCustom" placeholder="Свой текст бейджа" style="display:none;margin-top:8px">
       </div>
     </div>
-    <div class="char-required desc-required"><div class="char-required-title">Описание товара</div><div class="hint" style="margin-top:4px">Заполняй по готовому шаблону — на сайте каждая строка будет отдельным пунктом.</div>
+    <div class="char-required desc-required"><div class="char-required-title">Описание товара <span style="color:var(--muted);font-weight:500">(необязательно)</span></div><div class="hint" style="margin-top:4px">Заполняй по готовому шаблону — на сайте каждая строка будет отдельным пунктом.</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn sec sm" type="button" onclick="setDescTemplate('shoe')">Шаблон для обуви</button><button class="btn sec sm" type="button" onclick="setDescTemplate('clothes')">Шаблон для вещей</button></div>
     </div>
     <textarea id="fDesc" rows="12" placeholder="Выбери шаблон выше и заполни значения после двоеточия."></textarea>
@@ -275,7 +275,6 @@ function onBadgeSel(){$('fBadgeCustom').style.display=$('fBadge').value==='__cus
 function descTemplate(type){
   if(type==='shoe') return `Описание:
 Цвет:
-Качество:
 Страна производитель:
 Размер:
 Наружный материал:
@@ -289,7 +288,6 @@ function descTemplate(type){
 Ещё больше моделей, размеров и цветов смотрите на нашем сайте.`;
   return `Описание:
 Цвет:
-Качество:
 Страна производитель:
 Размер:
 Состав:
@@ -353,12 +351,12 @@ async function saveProduct(){
     }
     btn.textContent='Сохраняю…';
     const brand=$('fBrand').value.trim(),type=$('fType').value.trim(),sizes=$('fSizes').value.split(',').map(x=>x.trim()).filter(Boolean),material=$('fMaterial').value.trim(),color=$('fColor').value.trim(),season=$('fSeason').value.trim(),condition=$('fCondition').value.trim();
-    const missing=[['Бренд',brand],['Тип',type],['Размеры',sizes.join(', ')],['Материал',material],['Цвет',color],['Сезон',season],['Состояние',condition]].filter(x=>!x[1]).map(x=>x[0]);
+    const missing=[['Бренд',brand],['Тип',type]].filter(x=>!x[1]).map(x=>x[0]);
     if(missing.length){toast('Заполни характеристики: '+missing.join(', '),1);btn.disabled=false;btn.textContent='Сохранить товар';return}
     const prod={id:editing==null?Date.now():products[editing].id,name,brand,type,
       price,oldPrice:old,sizes,material,color,season,condition,featured:$('fFeatured').checked,stock:Math.max(0,parseInt($('fStock').value,10)||0),badge:badgeValue(),desc:$('fDesc').value.trim(),description:$('fDesc').value.trim(),imgs};
     const next=products.slice();
-    if(editing==null) next.unshift(prod); else next[editing]=prod;
+    if(editing==null) next.push(prod); else next[editing]=prod;
     pSha=await saveJSON('products.json',next,pSha,editing==null?'add product':'edit product');
     products=next;
     toast('Сохранено. На сайте появится через 1–2 минуты');

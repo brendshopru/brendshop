@@ -158,6 +158,7 @@ h1{font-size:22px;font-weight:800}
     <input id="sLogoFile" type="file" accept="image/png,image/jpeg,image/webp">
     <div id="sLogoPreview" style="margin-top:8px;width:96px;height:96px;border-radius:18px;overflow:hidden;background:#0b0b0b;border:1px solid var(--line);display:flex;align-items:center;justify-content:center"><img src="icons/icon-192.png?v=2" alt="Логотип" style="width:100%;height:100%;object-fit:cover"></div>
     <div class="hint">Выберите иконку приложения здесь. После сохранения она автоматически станет иконкой BRENDSHOP при установке на телефон и обновит иконку админки.</div>
+    <div id="logoSaveStatus" class="admin-note" style="display:none;margin-top:8px"></div>
     <label>Строка с рейтингом/отзывами</label>
     <input id="sReviews" placeholder="39 отзывов на Авито · 108 подписчиков">
     <button class="btn" id="saveSetBtn" onclick="saveSettings()">Сохранить настройки</button>
@@ -283,7 +284,6 @@ function onBadgeSel(){$('fBadgeCustom').style.display=$('fBadge').value==='__cus
 function descTemplate(type){
   if(type==='shoe') return `Описание:
 Цвет:
-Качество:
 Страна производитель:
 Размер:
 Наружный материал:
@@ -297,7 +297,6 @@ function descTemplate(type){
 Ещё больше моделей, размеров и цветов смотрите на нашем сайте.`;
   return `Описание:
 Цвет:
-Качество:
 Страна производитель:
 Размер:
 Состав:
@@ -361,12 +360,10 @@ async function saveProduct(){
     }
     btn.textContent='Сохраняю…';
     const brand=$('fBrand').value.trim(),type=$('fType').value.trim(),sizes=$('fSizes').value.split(',').map(x=>x.trim()).filter(Boolean),material=$('fMaterial').value.trim(),color=$('fColor').value.trim(),season=$('fSeason').value.trim(),condition=$('fCondition').value.trim();
-    const missing=[['Бренд',brand],['Тип',type],['Размеры',sizes.join(', ')],['Материал',material],['Цвет',color],['Сезон',season],['Состояние',condition]].filter(x=>!x[1]).map(x=>x[0]);
-    if(missing.length){toast('Заполни характеристики: '+missing.join(', '),1);btn.disabled=false;btn.textContent='Сохранить товар';return}
     const prod={id:editing==null?Date.now():products[editing].id,name,brand,type,
       price,oldPrice:old,sizes,material,color,season,condition,featured:$('fFeatured').checked,stock:Math.max(0,parseInt($('fStock').value,10)||0),badge:badgeValue(),desc:$('fDesc').value.trim(),description:$('fDesc').value.trim(),imgs};
     const next=products.slice();
-    if(editing==null) next.unshift(prod); else next[editing]=prod;
+    if(editing==null) next.push(prod); else next[editing]=prod;
     pSha=await saveJSON('products.json',next,pSha,editing==null?'add product':'edit product');
     products=next;
     toast('Сохранено. На сайте появится через 1–2 минуты');
@@ -398,7 +395,7 @@ function fillSettings(){
   $('sText').value=settings.discountText||'Скидка 20% при заказе от 3 товаров';
   $('sDiscountPercent').value=settings.discountPercent==null?20:settings.discountPercent; $('sDiscountMinQty').value=settings.discountMinQty==null?3:settings.discountMinQty;
   $('sColor').value=/^#[0-9a-f]{6}$/i.test(settings.accent||'')?settings.accent:'#d4ff3f';
-  $('sSound').checked=settings.sound!==false;$('sAbout').value=settings.about||'';$('sHow').value=settings.howOrder||'';$('sReviews').value=settings.reviewsLine||'';$('sAppName').value=settings.appName||'BRENDSHOP';$('sLogoPreview').querySelector('img').src='icons/icon-192.png?v='+Date.now();
+  $('sSound').checked=settings.sound!==false;$('sAbout').value=settings.about||'';$('sHow').value=settings.howOrder||'';$('sReviews').value=settings.reviewsLine||'';$('sAppName').value=settings.appName||'BRENDSHOP';$('sLogoPreview').querySelector('img').src='icons/icon-192.png?v='+(settings.appLogoVersion||Date.now());
 }
 async function getMeta(path){
   const r=await gh('/contents/'+path+'?t='+Date.now());
@@ -408,39 +405,101 @@ async function getMeta(path){
 }
 function fileToIconB64(file,size){
   return new Promise((resolve,reject)=>{
-    const fr=new FileReader();fr.onload=()=>{const im=new Image();im.onload=()=>{
-      const cv=document.createElement('canvas');cv.width=size;cv.height=size;const c=cv.getContext('2d');
-      c.fillStyle='#0b0b0b';c.fillRect(0,0,size,size);
-      const pad=Math.round(size*.10),scale=Math.min((size-pad*2)/im.width,(size-pad*2)/im.height);
-      const w=Math.round(im.width*scale),h=Math.round(im.height*scale);c.drawImage(im,Math.round((size-w)/2),Math.round((size-h)/2),w,h);
-      resolve(cv.toDataURL('image/png').split(',')[1]);
-    };im.onerror=()=>reject(new Error('Не удалось прочитать логотип'));im.src=fr.result};fr.onerror=()=>reject(new Error('Не удалось прочитать файл'));fr.readAsDataURL(file);
+    const fr=new FileReader();
+    fr.onload=()=>{
+      const im=new Image();
+      im.onload=()=>{
+        const cv=document.createElement('canvas');cv.width=size;cv.height=size;
+        const c=cv.getContext('2d');
+        c.fillStyle='#0b0b0b';c.fillRect(0,0,size,size);
+        const pad=Math.round(size*.10),scale=Math.min((size-pad*2)/im.width,(size-pad*2)/im.height);
+        const w=Math.round(im.width*scale),h=Math.round(im.height*scale);
+        c.drawImage(im,Math.round((size-w)/2),Math.round((size-h)/2),w,h);
+        resolve(cv.toDataURL('image/png').split(',')[1]);
+      };
+      im.onerror=()=>reject(new Error('Не удалось прочитать логотип'));
+      im.src=fr.result;
+    };
+    fr.onerror=()=>reject(new Error('Не удалось прочитать файл'));
+    fr.readAsDataURL(file);
   });
+}
+function logoStatus(msg,err=false){
+  const el=$('logoSaveStatus');
+  if(!el)return;
+  el.style.display='block';el.textContent=msg;el.style.color=err?'var(--red)':'var(--fg)';
+}
+async function updateIndexVersion(v){
+  const r=await gh('/contents/index.html?t='+Date.now());
+  if(!r.ok)throw new Error('Не удалось обновить index.html: GitHub '+r.status);
+  const d=await r.json();
+  let html=dec(d.content);
+  const re=/(<link\s+rel=["']manifest["']\s+href=["']manifest\.webmanifest)(?:\?[^"']*)?(["'])/i;
+  if(!re.test(html))throw new Error('В index.html не найден manifest.webmanifest');
+  html=html.replace(re,'$1?v='+v+'$2');
+  const iconRe=/(<link\s+rel=["']apple-touch-icon["']\s+href=["']icons\/icon-180\.png)(?:\?[^"']*)?(["'])/i;
+  if(iconRe.test(html))html=html.replace(iconRe,'$1?v='+v+'$2');
+  await putFile('index.html',enc(html),d.sha,'refresh BRENDSHOP PWA version');
 }
 async function uploadAppLogo(file){
   const b512=await fileToIconB64(file,512),b192=await fileToIconB64(file,192),b180=await fileToIconB64(file,180);
-  for(const [path,b64] of [['icons/icon-512.png',b512],['icons/icon-192.png',b192],['icons/icon-180.png',b180],['icons/admin-icon-512.png',b512],['icons/admin-icon-192.png',b192],['icons/admin-icon-180.png',b180]]){
-    const meta=await getMeta(path);await putFile(path,b64,meta.sha,'update BRENDSHOP app icon');
+  const files=[['icons/icon-512.png',b512],['icons/icon-192.png',b192],['icons/icon-180.png',b180],['icons/admin-icon-512.png',b512],['icons/admin-icon-192.png',b192],['icons/admin-icon-180.png',b180]];
+  for(const [path,b64] of files){
+    logoStatus('Сохраняю '+path+'…');
+    const meta=await getMeta(path);
+    await putFile(path,b64,meta.sha,'update BRENDSHOP app icon');
   }
+  const v=Date.now();
   const m=await gh('/contents/manifest.webmanifest?t='+Date.now());
-  if(m.ok){const d=await m.json();const man=JSON.parse(dec(d.content));const v=Date.now();man.name=$('sAppName').value.trim()||'BRENDSHOP';man.short_name=man.name;man.id='./';man.scope='./';man.start_url='./';man.display='standalone';man.display_override=['window-controls-overlay','standalone'];man.icons=[{src:'icons/icon-192.png?v='+v,sizes:'192x192',type:'image/png',purpose:'any maskable'},{src:'icons/icon-512.png?v='+v,sizes:'512x512',type:'image/png',purpose:'any maskable'}];await putFile('manifest.webmanifest',enc(JSON.stringify(man,null,2)),d.sha,'update BRENDSHOP manifest');}
+  if(!m.ok)throw new Error('Не найден manifest.webmanifest в репозитории');
+  const d=await m.json();
+  const man=JSON.parse(dec(d.content));
+  man.name=$('sAppName').value.trim()||'BRENDSHOP';
+  man.short_name=man.name;
+  man.id='./';man.scope='./';man.start_url='./';man.display='standalone';man.display_override=['standalone'];man.prefer_related_applications=false;
+  man.icons=[
+    {src:'icons/icon-192.png',sizes:'192x192',type:'image/png',purpose:'any maskable'},
+    {src:'icons/icon-512.png',sizes:'512x512',type:'image/png',purpose:'any maskable'}
+  ];
+  logoStatus('Сохраняю manifest…');
+  await putFile('manifest.webmanifest',enc(JSON.stringify(man,null,2)),d.sha,'update BRENDSHOP manifest');
   const am=await gh('/contents/admin-manifest.webmanifest?t='+Date.now());
-  if(am.ok){const d=await am.json();const man=JSON.parse(dec(d.content));const v=Date.now();man.name=(($('sAppName').value.trim()||'BRENDSHOP')+' Admin').trim();man.short_name='BS Admin';man.id='./panel-k7x2m9.html';man.scope='./';man.start_url='./panel-k7x2m9.html';man.icons=[{src:'icons/admin-icon-192.png?v='+v,sizes:'192x192',type:'image/png',purpose:'any maskable'},{src:'icons/admin-icon-512.png?v='+v,sizes:'512x512',type:'image/png',purpose:'any maskable'}];await putFile('admin-manifest.webmanifest',enc(JSON.stringify(man,null,2)),d.sha,'update BRENDSHOP admin manifest');}
+  if(am.ok){
+    const ad=await am.json();const aman=JSON.parse(dec(ad.content));
+    aman.name=(($('sAppName').value.trim()||'BRENDSHOP')+' Admin').trim();aman.short_name='BS Admin';aman.id='./panel-k7x2m9.html';aman.scope='./';aman.start_url='./panel-k7x2m9.html';aman.display='standalone';aman.icons=[{src:'icons/admin-icon-192.png',sizes:'192x192',type:'image/png',purpose:'any maskable'},{src:'icons/admin-icon-512.png',sizes:'512x512',type:'image/png',purpose:'any maskable'}];
+    await putFile('admin-manifest.webmanifest',enc(JSON.stringify(aman,null,2)),ad.sha,'update BRENDSHOP admin manifest');
+  }
+  logoStatus('Обновляю версию установки…');
+  await updateIndexVersion(v);
+  return v;
 }
-$('sLogoFile').onchange=async()=>{const f=$('sLogoFile').files[0];if(!f)return;try{$('sLogoPreview').querySelector('img').src=URL.createObjectURL(f)}catch(e){}};
+$('sLogoFile').onchange=()=>{
+  const f=$('sLogoFile').files[0];
+  if(!f)return;
+  try{$('sLogoPreview').querySelector('img').src=URL.createObjectURL(f)}catch(e){}
+  logoStatus('✓ Иконка выбрана. Нажми «Сохранить настройки».');
+};
 async function saveSettings(){
-  const s={discountEnabled:$('sBanner').checked,discountText:$('sText').value.trim(),discountPercent:Math.max(0,Math.min(100,+$('sDiscountPercent').value||20)),discountMinQty:Math.max(1,parseInt($('sDiscountMinQty').value,10)||3),accent:$('sColor').value,sound:$('sSound').checked,about:$('sAbout').value.trim(),howOrder:$('sHow').value.trim(),reviewsLine:$('sReviews').value.trim(),appName:$('sAppName').value.trim()||'BRENDSHOP'};
-  const b=$('saveSetBtn');b.disabled=true;
+  const s={discountEnabled:$('sBanner').checked,discountText:$('sText').value.trim(),discountPercent:Math.max(0,Math.min(100,+$('sDiscountPercent').value||20)),discountMinQty:Math.max(1,parseInt($('sDiscountMinQty').value,10)||3),accent:$('sColor').value,sound:$('sSound').checked,about:$('sAbout').value.trim(),howOrder:$('sHow').value.trim(),reviewsLine:$('sReviews').value.trim(),appName:$('sAppName').value.trim()||'BRENDSHOP',appLogoVersion:settings.appLogoVersion||0};
+  const b=$('saveSetBtn');b.disabled=true;b.textContent='Сохраняю…';
   try{
     const logo=$('sLogoFile').files[0];
-    if(logo)await uploadAppLogo(logo);
-    else{
+    if(logo){
+      logoStatus('Начинаю сохранение логотипа…');
+      s.appLogoVersion=await uploadAppLogo(logo);
+    }else{
       const m=await gh('/contents/manifest.webmanifest?t='+Date.now());
       if(m.ok){const d=await m.json();const man=JSON.parse(dec(d.content));man.name=s.appName;man.short_name=s.appName;await putFile('manifest.webmanifest',enc(JSON.stringify(man,null,2)),d.sha,'update app name');}
     }
-    sSha=await saveJSON('settings.json',s,sSha,'update settings');settings=s;fillSettings();toast(logo?'Настройки и логотип сохранены':'Настройки сохранены');
-  }catch(e){toast('Ошибка: '+e.message,1)}
-  b.disabled=false;
+    sSha=await saveJSON('settings.json',s,sSha,'update settings');
+    settings=s;fillSettings();$('sLogoFile').value='';
+    logoStatus(logo?'✓ Логотип и настройки СОХРАНЕНЫ в GitHub.':'✓ Настройки СОХРАНЕНЫ в GitHub.');
+    toast(logo?'✓ Логотип и настройки сохранены':'✓ Настройки сохранены');
+  }catch(e){
+    logoStatus('✕ Не сохранено: '+e.message,true);
+    toast('Ошибка сохранения: '+e.message,1);
+  }
+  b.disabled=false;b.textContent='Сохранить настройки';
 }
 
 const st=localStorage.getItem('bs_admin_token'),sr=localStorage.getItem('bs_admin_repo');

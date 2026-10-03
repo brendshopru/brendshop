@@ -1020,8 +1020,49 @@ if(window.matchMedia('(min-width:900px)').matches){
   let deferredPrompt=null;
   const standalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
   if(standalone){btn.style.display='none';return;}
-  function isIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent);}
-  function isAndroid(){return /android/i.test(navigator.userAgent);}
+  const ua=navigator.userAgent||'';
+  const isIOS=/iphone|ipad|ipod/i.test(ua);
+  const isAndroid=/android/i.test(ua);
+  const isInApp=/;\s*wv\)|\bwv\b|FBAN|FBAV|Instagram|TikTok|Line\/|GSA\//i.test(ua);
+  function showInstallHelp(){
+    const old=document.getElementById('installHelp');
+    if(old)old.remove();
+    const box=document.createElement('div');
+    box.id='installHelp';
+    box.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.72);display:flex;align-items:flex-end;justify-content:center;padding:16px;';
+    const card=document.createElement('div');
+    card.style.cssText='width:min(520px,100%);background:var(--card,#141414);color:var(--fg,#f5f5f0);border:1px solid var(--line,#2a2a2a);border-radius:22px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.5);';
+    let title='Установить BRENDSHOP';
+    let text='';
+    let action='';
+    if(isInApp && isAndroid){
+      title='Открой BRENDSHOP в браузере';
+      text='Сейчас сайт открыт во встроенном браузере. В нём установка приложения недоступна. Нажми кнопку ниже — BRENDSHOP откроется в обычном браузере, где можно установить его с нашим логотипом.';
+      action='<button id="openExternalBrowser" style="width:100%;padding:14px 16px;border:0;border-radius:14px;background:var(--accent,#d4ff3f);color:#111;font-weight:800;font-size:16px">Открыть в браузере</button>';
+    }else if(isIOS){
+      title='Добавить BRENDSHOP';
+      text='В iPhone установка зависит от браузера. В Safari используй «Поделиться» → «На экран Домой». На iOS 16.4+ это также доступно в поддерживаемых браузерах.';
+      action='';
+    }else if(isAndroid){
+      title='Установить BRENDSHOP';
+      text='Если браузер поддерживает установку PWA, появится системное окно установки. Если его нет, открой меню браузера и выбери «Установить приложение» или «Добавить на главный экран». Брендовый значок берётся из manifest BRENDSHOP.';
+      action='';
+    }else{
+      title='Установить BRENDSHOP';
+      text='Открой меню браузера и выбери команду установки приложения. Доступность зависит от браузера и устройства.';
+      action='';
+    }
+    card.innerHTML='<div style="font-size:22px;font-weight:800;margin-bottom:10px">'+title+'</div><div style="font-size:15px;line-height:1.5;color:var(--muted,#8a8a85);margin-bottom:16px">'+text+'</div>'+action+'<button id="closeInstallHelp" style="width:100%;padding:13px 16px;margin-top:10px;border:1px solid var(--line,#2a2a2a);border-radius:14px;background:transparent;color:inherit;font-weight:700;font-size:15px">Закрыть</button>';
+    box.appendChild(card);document.body.appendChild(box);
+    document.getElementById('closeInstallHelp').onclick=()=>box.remove();
+    const open=document.getElementById('openExternalBrowser');
+    if(open)open.onclick=()=>{
+      const u=new URL(location.href); u.hash='';
+      const intent='intent://'+u.host+u.pathname+u.search+'#Intent;scheme=https;end';
+      location.href=intent;
+      setTimeout(()=>{ try{ window.open(u.href,'_blank'); }catch(e){} },900);
+    };
+  }
   window.addEventListener('beforeinstallprompt',e=>{
     e.preventDefault();
     deferredPrompt=e;
@@ -1033,24 +1074,18 @@ if(window.matchMedia('(min-width:900px)').matches){
   });
   btn.onclick=async()=>{
     if(deferredPrompt){
-      deferredPrompt.prompt();
-      try{await deferredPrompt.userChoice}catch(e){}
+      try{await deferredPrompt.prompt();await deferredPrompt.userChoice}catch(e){}
       deferredPrompt=null;
       return;
     }
-    if(isIOS()){
-      alert('На iPhone: Safari → «Поделиться» → «На экран Домой» → «Добавить».');
-    }else if(isAndroid()){
-      alert('Chrome пока не получил установку BRENDSHOP. Обновите страницу после публикации файлов и попробуйте снова. Если кнопка «Установить» не появляется, проверьте manifest.webmanifest и иконки 192×192 и 512×512.');
-    }else{
-      alert('Откройте меню браузера и выберите «Установить BRENDSHOP».');
-    }
+    showInstallHelp();
   };
-  // На iPhone кнопка нужна всегда; на Android/ПК показываем её до появления install prompt.
-  if(isIOS())btn.style.display='flex';
+  // Кнопка остаётся доступной: если браузер не дал beforeinstallprompt,
+  // вместо бесполезного сообщения показываем правильный способ для текущего браузера.
+  btn.style.display='flex';
 })();
 if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(()=>{}));
+  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=3',{scope:'./'}).catch(()=>{}));
 }
 </script>
 

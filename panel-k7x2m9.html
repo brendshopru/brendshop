@@ -45,6 +45,17 @@ h1{font-size:22px;font-weight:800}
 .ph .x{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:var(--red);color:#fff;border:none;font-size:12px}
 .ph .n{position:absolute;bottom:3px;left:3px;background:rgba(0,0,0,.65);font-size:10px;padding:1px 5px;border-radius:4px}
 .ph .mv{position:absolute;bottom:3px;right:3px;background:rgba(0,0,0,.65);color:#fff;border:none;font-size:11px;padding:1px 6px;border-radius:4px}
+
+#photoViewer{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:100;align-items:center;justify-content:center;padding:20px}
+#photoViewer.open{display:flex}
+#photoViewer img{max-width:92vw;max-height:88vh;object-fit:contain;border-radius:12px}
+#photoViewer .pv-close,#photoViewer .pv-prev,#photoViewer .pv-next{position:absolute;border:1px solid var(--line);background:rgba(20,20,20,.9);color:var(--fg);border-radius:50%;width:42px;height:42px;z-index:2}
+#photoViewer .pv-close{top:18px;right:18px;font-size:24px}
+#photoViewer .pv-prev{left:18px;top:50%;font-size:28px}
+#photoViewer .pv-next{right:18px;top:50%;font-size:28px}
+#photoViewer .pv-count{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);background:rgba(20,20,20,.9);padding:6px 10px;border-radius:8px;font-size:12px;color:var(--muted)}
+.ph img{cursor:zoom-in}
+
 #login,#app,#formBox,#setBox{display:none}
 #login.show,#app.show,#formBox.show,#setBox.show{display:block}
 #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--line);padding:12px 18px;border-radius:12px;font-size:13px;z-index:50;opacity:0;transition:opacity .25s;pointer-events:none;max-width:90vw}
@@ -101,7 +112,7 @@ h1{font-size:22px;font-weight:800}
       <div><label>Размеры</label><input id="fSizes" placeholder="M, L, XL или 42, 43, 44"></div>
       <div><label>Витрина</label><label class="switch"><input type="checkbox" id="fFeatured"> Показывать как рекомендованный товар</label></div>
     </div>
-    <div class="char-required"><div class="char-required-title">Характеристики товара</div><div class="hint" style="margin-top:4px">Заполни эти поля — они будут показаны покупателю в карточке товара.</div></div>
+    <div class="char-required"><div class="char-required-title">Характеристики товара</div><div class="hint" style="margin-top:4px">Поля необязательные. Если оставить пустыми, товар всё равно сохранится.</div></div>
     <div class="g2">
       <div><label>Материал</label><input id="fMaterial" placeholder="Хлопок"></div>
       <div><label>Цвет</label><input id="fColor" placeholder="Коричневый"></div>
@@ -156,6 +167,14 @@ h1{font-size:22px;font-weight:800}
     <div class="hint">Изменения появляются на сайте через 1–2 минуты после сохранения.</div>
   </div>
 </div>
+</div>
+
+<div id="photoViewer" onclick="photoViewerBg(event)">
+  <button class="pv-close" type="button" onclick="closePhotoViewer()">×</button>
+  <button class="pv-prev" id="pvPrev" type="button" onclick="photoViewerMove(-1)">‹</button>
+  <img id="pvImg" src="" alt="">
+  <button class="pv-next" id="pvNext" type="button" onclick="photoViewerMove(1)">›</button>
+  <div class="pv-count" id="pvCount"></div>
 </div>
 <div id="toast"></div>
 
@@ -309,10 +328,21 @@ function discHint(){
 $('fPrice').oninput=$('fOld').oninput=discHint;
 function renderPhotos(){
   $('photoCount').textContent=formImgs.length?`Фото добавлено: ${formImgs.length}`:'Фото ещё не добавлены';
-  $('photos').innerHTML=formImgs.map((im,i)=>`<div class="ph"><img src="${esc(im.preview||im.url)}"><button class="x" onclick="rmPhoto(${i})">✕</button><span class="n">${i+1}</span>${i>0?`<button class="mv" onclick="mvPhoto(${i})">◀</button>`:''}</div>`).join('');
+  $('photos').innerHTML=formImgs.map((im,i)=>`<div class="ph"><img src="${esc(im.preview||im.url)}" onclick="openPhotoViewer(${i})" title="Открыть фото"><button class="x" onclick="rmPhoto(${i});event.stopPropagation()">✕</button><span class="n">${i+1}</span>${i>0?`<button class="mv" onclick="mvPhoto(${i});event.stopPropagation()">◀</button>`:''}</div>`).join('');
 }
 function rmPhoto(i){formImgs.splice(i,1);renderPhotos()}
 function mvPhoto(i){const t=formImgs[i];formImgs[i]=formImgs[i-1];formImgs[i-1]=t;renderPhotos()}
+let pvIndex=0;
+function openPhotoViewer(i){if(!formImgs.length)return;pvIndex=Math.max(0,Math.min(i,formImgs.length-1));updatePhotoViewer();$('photoViewer').classList.add('open');document.body.style.overflow='hidden'}
+function updatePhotoViewer(){const im=formImgs[pvIndex];$('pvImg').src=im.preview||im.url||'';$('pvCount').textContent=`${pvIndex+1} / ${formImgs.length}`;$('pvPrev').style.display=formImgs.length>1?'block':'none';$('pvNext').style.display=formImgs.length>1?'block':'none'}
+function photoViewerMove(dir){if(!formImgs.length)return;pvIndex=(pvIndex+dir+formImgs.length)%formImgs.length;updatePhotoViewer()}
+function closePhotoViewer(){$('photoViewer').classList.remove('open');document.body.style.overflow=''}
+function photoViewerBg(e){if(e.target===$('photoViewer'))closePhotoViewer()}
+document.addEventListener('keydown',e=>{if(!$('photoViewer').classList.contains('open'))return;if(e.key==='Escape')closePhotoViewer();if(e.key==='ArrowLeft')photoViewerMove(-1);if(e.key==='ArrowRight')photoViewerMove(1)});
+let pvTouchX=0;
+$('pvImg').addEventListener('touchstart',e=>{pvTouchX=e.changedTouches[0].clientX},{passive:true});
+$('pvImg').addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-pvTouchX;if(Math.abs(dx)>40)photoViewerMove(dx<0?1:-1)},{passive:true});
+
 $('fPhotos').onchange=async e=>{
   for(const f of e.target.files){
     try{const c=await compress(f);formImgs.push({b64:c.b64,preview:c.preview,name:f.name})}
@@ -352,8 +382,6 @@ async function saveProduct(){
     }
     btn.textContent='Сохраняю…';
     const brand=$('fBrand').value.trim(),type=$('fType').value.trim(),sizes=$('fSizes').value.split(',').map(x=>x.trim()).filter(Boolean),material=$('fMaterial').value.trim(),color=$('fColor').value.trim(),season=$('fSeason').value.trim(),condition=$('fCondition').value.trim();
-    const missing=[['Бренд',brand],['Тип',type],['Размеры',sizes.join(', ')],['Материал',material],['Цвет',color],['Сезон',season],['Состояние',condition]].filter(x=>!x[1]).map(x=>x[0]);
-    if(missing.length){toast('Заполни характеристики: '+missing.join(', '),1);btn.disabled=false;btn.textContent='Сохранить товар';return}
     const prod={id:editing==null?Date.now():products[editing].id,name,brand,type,
       price,oldPrice:old,sizes,material,color,season,condition,featured:$('fFeatured').checked,stock:Math.max(0,parseInt($('fStock').value,10)||0),badge:badgeValue(),desc:$('fDesc').value.trim(),description:$('fDesc').value.trim(),imgs};
     const next=products.slice();

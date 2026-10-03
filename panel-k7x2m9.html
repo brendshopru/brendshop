@@ -456,19 +456,19 @@ async function uploadAppLogo(file){
   const man=JSON.parse(dec(d.content));
   man.name=$('sAppName').value.trim()||'BRENDSHOP';
   man.short_name=man.name;
-  man.id='/';man.scope='/';man.start_url='/';man.display='standalone';man.display_override=['standalone'];man.prefer_related_applications=false;
+  man.id='./';man.scope='./';man.start_url='./';man.display='standalone';man.display_override=['standalone'];man.prefer_related_applications=false;
   man.icons=[
-    {src:'/icons/icon-192.png',sizes:'192x192',type:'image/png',purpose:'any'},
-    {src:'/icons/icon-512.png',sizes:'512x512',type:'image/png',purpose:'any'},
-    {src:'/icons/icon-192.png',sizes:'192x192',type:'image/png',purpose:'maskable'},
-    {src:'/icons/icon-512.png',sizes:'512x512',type:'image/png',purpose:'maskable'}
+    {src:'icons/icon-192.png',sizes:'192x192',type:'image/png',purpose:'any'},
+    {src:'icons/icon-512.png',sizes:'512x512',type:'image/png',purpose:'any'},
+    {src:'icons/icon-192.png',sizes:'192x192',type:'image/png',purpose:'maskable'},
+    {src:'icons/icon-512.png',sizes:'512x512',type:'image/png',purpose:'maskable'}
   ];
   logoStatus('Сохраняю manifest…');
   await putFile('manifest.webmanifest',enc(JSON.stringify(man,null,2)),d.sha,'update BRENDSHOP manifest');
   const am=await gh('/contents/admin-manifest.webmanifest?t='+Date.now());
   if(am.ok){
     const ad=await am.json();const aman=JSON.parse(dec(ad.content));
-    aman.name=(($('sAppName').value.trim()||'BRENDSHOP')+' Admin').trim();aman.short_name='BS Admin';aman.id='/panel-k7x2m9.html';aman.scope='/';aman.start_url='/panel-k7x2m9.html';aman.display='standalone';aman.icons=[{src:'/icons/admin-icon-192.png',sizes:'192x192',type:'image/png',purpose:'any'},{src:'/icons/admin-icon-512.png',sizes:'512x512',type:'image/png',purpose:'any'},{src:'/icons/admin-icon-192.png',sizes:'192x192',type:'image/png',purpose:'maskable'},{src:'/icons/admin-icon-512.png',sizes:'512x512',type:'image/png',purpose:'maskable'}];
+    aman.name=(($('sAppName').value.trim()||'BRENDSHOP')+' Admin').trim();aman.short_name='BS Admin';aman.id='./panel-k7x2m9.html';aman.scope='./';aman.start_url='./panel-k7x2m9.html';aman.display='standalone';aman.icons=[{src:'icons/admin-icon-192.png',sizes:'192x192',type:'image/png',purpose:'any'},{src:'icons/admin-icon-512.png',sizes:'512x512',type:'image/png',purpose:'any'},{src:'icons/admin-icon-192.png',sizes:'192x192',type:'image/png',purpose:'maskable'},{src:'icons/admin-icon-512.png',sizes:'512x512',type:'image/png',purpose:'maskable'}];
     await putFile('admin-manifest.webmanifest',enc(JSON.stringify(aman,null,2)),ad.sha,'update BRENDSHOP admin manifest');
   }
   logoStatus('Обновляю версию установки…');

@@ -54,10 +54,6 @@ h1{font-size:22px;font-weight:800}
 
 /* Admin upgrades — existing color variables are unchanged */
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.stat{background:var(--card);border-radius:12px;padding:12px}.stat b{display:block;font-size:18px}.stat span{font-size:11px;color:var(--muted)}.toolbar{display:flex;gap:8px;align-items:center;margin-bottom:10px}.toolbar select{width:auto;flex:0 0 145px}.row .thumb{position:relative}.row .featured{font-size:10px;color:var(--accent);margin-top:2px}.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.switch{display:flex;align-items:center;gap:9px;font-size:13px;margin-top:10px}.switch input{width:auto}.danger{color:var(--red)!important}.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.char-required{border-left:3px solid var(--accent);padding-left:10px;margin-top:14px}.char-required-title{font-size:13px;font-weight:800;margin-bottom:2px}.desc-required{margin-top:16px}.admin-note{background:var(--card);border:1px solid #2a2a2a55;border-radius:12px;padding:11px 12px;font-size:12px;color:var(--muted);line-height:1.45}@media(max-width:520px){.settings-grid{grid-template-columns:1fr}}@media(max-width:520px){.stats{grid-template-columns:1fr 1fr}.toolbar{flex-wrap:wrap}.toolbar select{width:100%;flex:1}}
-
-.photo-zoom{position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:9999;display:none;align-items:center;justify-content:center;padding:54px 58px 70px;touch-action:pan-y}
-.photo-zoom.show{display:flex}.photo-zoom img{max-width:94vw;max-height:82vh;object-fit:contain;border-radius:14px;box-shadow:0 20px 80px #000;cursor:default;user-select:none;-webkit-user-drag:none}.photo-zoom .pz-close,.photo-zoom .pz-prev,.photo-zoom .pz-next{position:absolute;width:44px;height:44px;border-radius:50%;border:1px solid #ffffff33;background:#111;color:#fff;font-size:25px;cursor:pointer;z-index:2}.photo-zoom .pz-close{right:18px;top:14px}.photo-zoom .pz-prev{left:12px;top:50%;transform:translateY(-50%)}.photo-zoom .pz-next{right:12px;top:50%;transform:translateY(-50%)}.photo-zoom .pz-name{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);color:#fff;background:#0009;padding:8px 12px;border-radius:10px;font-size:13px;white-space:nowrap}.ph img{cursor:zoom-in}
-@media(max-width:520px){.photo-zoom{padding:52px 42px 64px}.photo-zoom img{max-width:90vw;max-height:78vh}.photo-zoom .pz-prev{left:7px}.photo-zoom .pz-next{right:7px}.photo-zoom .pz-close{right:10px}.photo-zoom .pz-name{font-size:12px;bottom:12px}}
 </style>
 </head>
 <body>
@@ -105,7 +101,7 @@ h1{font-size:22px;font-weight:800}
       <div><label>Размеры</label><input id="fSizes" placeholder="M, L, XL или 42, 43, 44"></div>
       <div><label>Витрина</label><label class="switch"><input type="checkbox" id="fFeatured"> Показывать как рекомендованный товар</label></div>
     </div>
-    <div class="char-required"><div class="char-required-title">Дополнительные характеристики <span style="color:var(--muted);font-weight:500">(необязательно)</span></div><div class="hint" style="margin-top:4px">Можно оставить пустыми — товар всё равно сохранится.</div></div>
+    <div class="char-required"><div class="char-required-title">Характеристики товара</div><div class="hint" style="margin-top:4px">Заполни эти поля — они будут показаны покупателю в карточке товара.</div></div>
     <div class="g2">
       <div><label>Материал</label><input id="fMaterial" placeholder="Хлопок"></div>
       <div><label>Цвет</label><input id="fColor" placeholder="Коричневый"></div>
@@ -126,7 +122,7 @@ h1{font-size:22px;font-weight:800}
       <input id="fBadgeCustom" placeholder="Свой текст бейджа" style="display:none;margin-top:8px">
       </div>
     </div>
-    <div class="char-required desc-required"><div class="char-required-title">Описание товара <span style="color:var(--muted);font-weight:500">(необязательно)</span></div><div class="hint" style="margin-top:4px">Заполняй по готовому шаблону — на сайте каждая строка будет отдельным пунктом.</div>
+    <div class="char-required desc-required"><div class="char-required-title">Описание товара</div><div class="hint" style="margin-top:4px">Заполняй по готовому шаблону — на сайте каждая строка будет отдельным пунктом.</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn sec sm" type="button" onclick="setDescTemplate('shoe')">Шаблон для обуви</button><button class="btn sec sm" type="button" onclick="setDescTemplate('clothes')">Шаблон для вещей</button></div>
     </div>
     <textarea id="fDesc" rows="12" placeholder="Выбери шаблон выше и заполни значения после двоеточия."></textarea>
@@ -278,9 +274,12 @@ function closeForm(){$('formBox').classList.remove('show');$('listBox').style.di
 function onBadgeSel(){$('fBadgeCustom').style.display=$('fBadge').value==='__custom'?'block':'none'}
 function descTemplate(type){
   if(type==='shoe') return `Описание:В продаже кроссовки Lacoste оригинал
+Цвет:
 Страна производитель:Вьетнам vn
-Наружний материал:текстиль
+Размер:
+Наружний материал:натуральная кожа
 Внутренний материал:текстиль
+Материал стельки:текстиль
 Материал подошвы:резина
 Сезон:демисезон
 Комплект:коробка,навесная бирка
@@ -289,6 +288,7 @@ function descTemplate(type){
 Ещё больше моделей, размеров и цветов смотрите на нашем сайте.`;
   return `Описание:
 Цвет:
+Качество:
 Страна производитель:
 Размер:
 Состав:
@@ -307,36 +307,9 @@ function discHint(){
   $('discHint').textContent=(old&&pr&&old>pr)?`Скидка на сайте: −${Math.round((1-pr/old)*100)}%`:(old?'Старая цена должна быть больше новой':'Пусто — скидки нет');
 }
 $('fPrice').oninput=$('fOld').oninput=discHint;
-let zoomIndex=0,zoomHistory=false,zoomTouchX=0;
-function openPhotoZoom(index){
-  if(!formImgs.length)return;
-  zoomIndex=Math.max(0,Math.min(index,formImgs.length-1));
-  renderPhotoZoom();
-  $('photoZoom').classList.add('show');
-  if(!zoomHistory){history.pushState({bsPhotoZoom:true},'');zoomHistory=true}
-}
-function renderPhotoZoom(){
-  const im=formImgs[zoomIndex];
-  $('photoZoomImg').src=im.preview||im.url||'';
-  $('photoZoomName').textContent=`Фото ${zoomIndex+1} из ${formImgs.length}`;
-  $('photoZoomPrev').style.display=formImgs.length>1?'block':'none';
-  $('photoZoomNext').style.display=formImgs.length>1?'block':'none';
-}
-function closePhotoZoom(fromPop){
-  if(!$('photoZoom').classList.contains('show'))return;
-  $('photoZoom').classList.remove('show');$('photoZoomImg').src='';
-  if(zoomHistory&&!fromPop){zoomHistory=false;history.back()}
-  else zoomHistory=false;
-}
-function photoPrev(e){if(e)e.stopPropagation();if(formImgs.length<2)return;zoomIndex=(zoomIndex-1+formImgs.length)%formImgs.length;renderPhotoZoom()}
-function photoNext(e){if(e)e.stopPropagation();if(formImgs.length<2)return;zoomIndex=(zoomIndex+1)%formImgs.length;renderPhotoZoom()}
-window.addEventListener('popstate',()=>{if(zoomHistory)closePhotoZoom(true)});
-document.addEventListener('keydown',e=>{if(!$('photoZoom').classList.contains('show'))return;if(e.key==='Escape')closePhotoZoom();if(e.key==='ArrowLeft')photoPrev();if(e.key==='ArrowRight')photoNext()});
-$('photoZoom').addEventListener('touchstart',e=>{zoomTouchX=e.changedTouches[0].clientX},{passive:true});
-$('photoZoom').addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-zoomTouchX;if(Math.abs(dx)>45){if(dx<0)photoNext();else photoPrev()}},{passive:true});
 function renderPhotos(){
   $('photoCount').textContent=formImgs.length?`Фото добавлено: ${formImgs.length}`:'Фото ещё не добавлены';
-  $('photos').innerHTML=formImgs.map((im,i)=>`<div class="ph"><img src="${esc(im.preview||im.url)}" onclick="openPhotoZoom(${i})" title="Увеличить фото"><button class="x" onclick="rmPhoto(${i})">✕</button><span class="n">${i+1}</span>${i>0?`<button class="mv" onclick="mvPhoto(${i})">◀</button>`:''}</div>`).join('');
+  $('photos').innerHTML=formImgs.map((im,i)=>`<div class="ph"><img src="${esc(im.preview||im.url)}"><button class="x" onclick="rmPhoto(${i})">✕</button><span class="n">${i+1}</span>${i>0?`<button class="mv" onclick="mvPhoto(${i})">◀</button>`:''}</div>`).join('');
 }
 function rmPhoto(i){formImgs.splice(i,1);renderPhotos()}
 function mvPhoto(i){const t=formImgs[i];formImgs[i]=formImgs[i-1];formImgs[i-1]=t;renderPhotos()}
@@ -379,12 +352,12 @@ async function saveProduct(){
     }
     btn.textContent='Сохраняю…';
     const brand=$('fBrand').value.trim(),type=$('fType').value.trim(),sizes=$('fSizes').value.split(',').map(x=>x.trim()).filter(Boolean),material=$('fMaterial').value.trim(),color=$('fColor').value.trim(),season=$('fSeason').value.trim(),condition=$('fCondition').value.trim();
-    const missing=[['Бренд',brand],['Тип',type]].filter(x=>!x[1]).map(x=>x[0]);
+    const missing=[['Бренд',brand],['Тип',type],['Размеры',sizes.join(', ')],['Материал',material],['Цвет',color],['Сезон',season],['Состояние',condition]].filter(x=>!x[1]).map(x=>x[0]);
     if(missing.length){toast('Заполни характеристики: '+missing.join(', '),1);btn.disabled=false;btn.textContent='Сохранить товар';return}
     const prod={id:editing==null?Date.now():products[editing].id,name,brand,type,
       price,oldPrice:old,sizes,material,color,season,condition,featured:$('fFeatured').checked,stock:Math.max(0,parseInt($('fStock').value,10)||0),badge:badgeValue(),desc:$('fDesc').value.trim(),description:$('fDesc').value.trim(),imgs};
     const next=products.slice();
-    if(editing==null) next.push(prod); else next[editing]=prod;
+    if(editing==null) next.unshift(prod); else next[editing]=prod;
     pSha=await saveJSON('products.json',next,pSha,editing==null?'add product':'edit product');
     products=next;
     toast('Сохранено. На сайте появится через 1–2 минуты');
@@ -429,6 +402,5 @@ async function saveSettings(){
 const st=localStorage.getItem('bs_admin_token'),sr=localStorage.getItem('bs_admin_repo');
 if(st&&sr){$('ghToken').value=st;$('ghRepo').value=sr;login()}
 </script>
-<div class="photo-zoom" id="photoZoom" onclick="if(event.target===this)closePhotoZoom()"><button class="pz-close" type="button" onclick="closePhotoZoom()">×</button><button class="pz-prev" id="photoZoomPrev" type="button" onclick="photoPrev(event)">‹</button><img id="photoZoomImg" src="" alt=""><button class="pz-next" id="photoZoomNext" type="button" onclick="photoNext(event)">›</button><div class="pz-name" id="photoZoomName"></div></div>
 </body>
 </html>

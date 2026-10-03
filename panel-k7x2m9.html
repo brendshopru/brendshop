@@ -55,9 +55,9 @@ h1{font-size:22px;font-weight:800}
 /* Admin upgrades — existing color variables are unchanged */
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.stat{background:var(--card);border-radius:12px;padding:12px}.stat b{display:block;font-size:18px}.stat span{font-size:11px;color:var(--muted)}.toolbar{display:flex;gap:8px;align-items:center;margin-bottom:10px}.toolbar select{width:auto;flex:0 0 145px}.row .thumb{position:relative}.row .featured{font-size:10px;color:var(--accent);margin-top:2px}.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.switch{display:flex;align-items:center;gap:9px;font-size:13px;margin-top:10px}.switch input{width:auto}.danger{color:var(--red)!important}.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.char-required{border-left:3px solid var(--accent);padding-left:10px;margin-top:14px}.char-required-title{font-size:13px;font-weight:800;margin-bottom:2px}.desc-required{margin-top:16px}.admin-note{background:var(--card);border:1px solid #2a2a2a55;border-radius:12px;padding:11px 12px;font-size:12px;color:var(--muted);line-height:1.45}@media(max-width:520px){.settings-grid{grid-template-columns:1fr}}@media(max-width:520px){.stats{grid-template-columns:1fr 1fr}.toolbar{flex-wrap:wrap}.toolbar select{width:100%;flex:1}}
 
-.photo-zoom{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9999;display:none;align-items:center;justify-content:center;padding:24px;cursor:zoom-out}
-.photo-zoom.show{display:flex}.photo-zoom img{max-width:94vw;max-height:90vh;object-fit:contain;border-radius:14px;box-shadow:0 20px 80px #000;cursor:default}.photo-zoom .pz-close{position:absolute;right:18px;top:14px;width:44px;height:44px;border-radius:50%;border:1px solid #ffffff33;background:#111;color:#fff;font-size:25px;cursor:pointer}.photo-zoom .pz-name{position:absolute;left:20px;bottom:16px;color:#fff;background:#0009;padding:8px 12px;border-radius:10px;font-size:13px}
-.ph img{cursor:zoom-in}
+.photo-zoom{position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:9999;display:none;align-items:center;justify-content:center;padding:54px 58px 70px;touch-action:pan-y}
+.photo-zoom.show{display:flex}.photo-zoom img{max-width:94vw;max-height:82vh;object-fit:contain;border-radius:14px;box-shadow:0 20px 80px #000;cursor:default;user-select:none;-webkit-user-drag:none}.photo-zoom .pz-close,.photo-zoom .pz-prev,.photo-zoom .pz-next{position:absolute;width:44px;height:44px;border-radius:50%;border:1px solid #ffffff33;background:#111;color:#fff;font-size:25px;cursor:pointer;z-index:2}.photo-zoom .pz-close{right:18px;top:14px}.photo-zoom .pz-prev{left:12px;top:50%;transform:translateY(-50%)}.photo-zoom .pz-next{right:12px;top:50%;transform:translateY(-50%)}.photo-zoom .pz-name{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);color:#fff;background:#0009;padding:8px 12px;border-radius:10px;font-size:13px;white-space:nowrap}.ph img{cursor:zoom-in}
+@media(max-width:520px){.photo-zoom{padding:52px 42px 64px}.photo-zoom img{max-width:90vw;max-height:78vh}.photo-zoom .pz-prev{left:7px}.photo-zoom .pz-next{right:7px}.photo-zoom .pz-close{right:10px}.photo-zoom .pz-name{font-size:12px;bottom:12px}}
 </style>
 </head>
 <body>
@@ -307,12 +307,36 @@ function discHint(){
   $('discHint').textContent=(old&&pr&&old>pr)?`Скидка на сайте: −${Math.round((1-pr/old)*100)}%`:(old?'Старая цена должна быть больше новой':'Пусто — скидки нет');
 }
 $('fPrice').oninput=$('fOld').oninput=discHint;
-function openPhotoZoom(src,n){$('photoZoomImg').src=src;$('photoZoomName').textContent=`Фото ${n} — нажми вне изображения или ×, чтобы закрыть`;$('photoZoom').classList.add('show')}
-function closePhotoZoom(e){if(e){e.stopPropagation();if(e.target!==$('photoZoom')&&e.target!==$('photoZoomImg')&&e.target!==$('photoZoom').querySelector('.pz-close'))return}$('photoZoom').classList.remove('show');$('photoZoomImg').src=''}
-document.addEventListener('keydown',e=>{if(e.key==='Escape')$('photoZoom').classList.remove('show')});
+let zoomIndex=0,zoomHistory=false,zoomTouchX=0;
+function openPhotoZoom(index){
+  if(!formImgs.length)return;
+  zoomIndex=Math.max(0,Math.min(index,formImgs.length-1));
+  renderPhotoZoom();
+  $('photoZoom').classList.add('show');
+  if(!zoomHistory){history.pushState({bsPhotoZoom:true},'');zoomHistory=true}
+}
+function renderPhotoZoom(){
+  const im=formImgs[zoomIndex];
+  $('photoZoomImg').src=im.preview||im.url||'';
+  $('photoZoomName').textContent=`Фото ${zoomIndex+1} из ${formImgs.length}`;
+  $('photoZoomPrev').style.display=formImgs.length>1?'block':'none';
+  $('photoZoomNext').style.display=formImgs.length>1?'block':'none';
+}
+function closePhotoZoom(fromPop){
+  if(!$('photoZoom').classList.contains('show'))return;
+  $('photoZoom').classList.remove('show');$('photoZoomImg').src='';
+  if(zoomHistory&&!fromPop){zoomHistory=false;history.back()}
+  else zoomHistory=false;
+}
+function photoPrev(e){if(e)e.stopPropagation();if(formImgs.length<2)return;zoomIndex=(zoomIndex-1+formImgs.length)%formImgs.length;renderPhotoZoom()}
+function photoNext(e){if(e)e.stopPropagation();if(formImgs.length<2)return;zoomIndex=(zoomIndex+1)%formImgs.length;renderPhotoZoom()}
+window.addEventListener('popstate',()=>{if(zoomHistory)closePhotoZoom(true)});
+document.addEventListener('keydown',e=>{if(!$('photoZoom').classList.contains('show'))return;if(e.key==='Escape')closePhotoZoom();if(e.key==='ArrowLeft')photoPrev();if(e.key==='ArrowRight')photoNext()});
+$('photoZoom').addEventListener('touchstart',e=>{zoomTouchX=e.changedTouches[0].clientX},{passive:true});
+$('photoZoom').addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-zoomTouchX;if(Math.abs(dx)>45){if(dx<0)photoNext();else photoPrev()}},{passive:true});
 function renderPhotos(){
   $('photoCount').textContent=formImgs.length?`Фото добавлено: ${formImgs.length}`:'Фото ещё не добавлены';
-  $('photos').innerHTML=formImgs.map((im,i)=>`<div class="ph"><img src="${esc(im.preview||im.url)}" onclick="openPhotoZoom('${esc(im.preview||im.url)}', ${i+1})" title="Увеличить фото"><button class="x" onclick="rmPhoto(${i})">✕</button><span class="n">${i+1}</span>${i>0?`<button class="mv" onclick="mvPhoto(${i})">◀</button>`:''}</div>`).join('');
+  $('photos').innerHTML=formImgs.map((im,i)=>`<div class="ph"><img src="${esc(im.preview||im.url)}" onclick="openPhotoZoom(${i})" title="Увеличить фото"><button class="x" onclick="rmPhoto(${i})">✕</button><span class="n">${i+1}</span>${i>0?`<button class="mv" onclick="mvPhoto(${i})">◀</button>`:''}</div>`).join('');
 }
 function rmPhoto(i){formImgs.splice(i,1);renderPhotos()}
 function mvPhoto(i){const t=formImgs[i];formImgs[i]=formImgs[i-1];formImgs[i-1]=t;renderPhotos()}
@@ -405,6 +429,6 @@ async function saveSettings(){
 const st=localStorage.getItem('bs_admin_token'),sr=localStorage.getItem('bs_admin_repo');
 if(st&&sr){$('ghToken').value=st;$('ghRepo').value=sr;login()}
 </script>
-<div class="photo-zoom" id="photoZoom" onclick="closePhotoZoom(event)"><button class="pz-close" type="button" onclick="closePhotoZoom(event)">×</button><img id="photoZoomImg" src="" alt=""><div class="pz-name" id="photoZoomName"></div></div>
+<div class="photo-zoom" id="photoZoom" onclick="if(event.target===this)closePhotoZoom()"><button class="pz-close" type="button" onclick="closePhotoZoom()">×</button><button class="pz-prev" id="photoZoomPrev" type="button" onclick="photoPrev(event)">‹</button><img id="photoZoomImg" src="" alt=""><button class="pz-next" id="photoZoomNext" type="button" onclick="photoNext(event)">›</button><div class="pz-name" id="photoZoomName"></div></div>
 </body>
 </html>

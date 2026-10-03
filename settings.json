@@ -1,0 +1,12 @@
+{
+  "discountEnabled": true,
+  "discountText": "Скидка 20% при заказе от 3 товаров",
+  "discountPercent": 20,
+  "discountMinQty": 3,
+  "accent": "#d4ff3f",
+  "sound": true,
+  "about": "",
+  "howOrder": "",
+  "reviewsLine": "",
+  "appName": "BRENDSHOP"
+}

@@ -4,9 +4,11 @@
 <meta charset="UTF-8">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#0b0b0b">
-<link rel="manifest" href="manifest.webmanifest?v=2">
+<link rel="manifest" href="manifest.webmanifest?v=20261003">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="icon" href="icons/icon-192.png?v=2" sizes="192x192" type="image/png">
-<link rel="apple-touch-icon" href="icons/icon-180.png?v=2">
+<link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="BRENDSHOP">
@@ -1018,23 +1020,37 @@ if(window.matchMedia('(min-width:900px)').matches){
   const standalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
   if(standalone){btn.style.display='none';return;}
   function isIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent);}
-  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;btn.style.display='flex';});
+  function isAndroid(){return /android/i.test(navigator.userAgent);}
+  window.addEventListener('beforeinstallprompt',e=>{
+    e.preventDefault();
+    deferredPrompt=e;
+    btn.style.display='flex';
+  });
+  window.addEventListener('appinstalled',()=>{
+    deferredPrompt=null;
+    btn.style.display='none';
+  });
   btn.onclick=async()=>{
     if(deferredPrompt){
       deferredPrompt.prompt();
-      await deferredPrompt.userChoice;
+      try{await deferredPrompt.userChoice}catch(e){}
       deferredPrompt=null;
       return;
     }
     if(isIOS()){
-      alert('На iPhone: Safari → «Поделиться» → «На экран «Домой»» → «Добавить».');
+      alert('На iPhone: Safari → «Поделиться» → «На экран Домой» → «Добавить».');
+    }else if(isAndroid()){
+      alert('Если Chrome пишет «Это приложение нельзя установить», сначала обновите страницу и откройте её снова. Затем: ⋮ → «Установить приложение» или «Добавить на главный экран».');
     }else{
       alert('Откройте меню браузера и выберите «Установить BRENDSHOP».');
     }
   };
+  // На iPhone кнопка нужна всегда; на Android/ПК показываем её до появления install prompt.
   if(isIOS())btn.style.display='flex';
 })();
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(()=>{}));
+}
 </script>
 
 </body>

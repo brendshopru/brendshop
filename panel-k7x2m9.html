@@ -353,7 +353,7 @@ let photoViewerHistory=false;
 function openListPhotoViewer(i){
   const p=products[i];
   if(!p||!Array.isArray(p.imgs)||!p.imgs.length)return;
-  formImgs=p.imgs.filter(u=>typeof u==='string'&&u).map(u=>({url:u}));
+  formImgs=p.imgs.filter(u=>typeof u==='string'&&u).map(u=>({url:new URL(u,location.href).href}));
   openPhotoViewer(0);
 }
 function openPhotoViewer(i){
@@ -621,7 +621,7 @@ if(st&&sr){$('ghToken').value=st;$('ghRepo').value=sr;login()}
   };
   if(isIOS())btn.style.display='inline-block';
 })();
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('admin-sw.js').catch(()=>{}));}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('admin-sw.js?v=20261004-2').catch(()=>{}));}
 </script>
 </body>
 </html>

@@ -47,6 +47,18 @@ h1{font-size:22px;font-weight:800}
 .ph .x{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:var(--red);color:#fff;border:none;font-size:12px}
 .ph .n{position:absolute;bottom:3px;left:3px;background:rgba(0,0,0,.65);font-size:10px;padding:1px 5px;border-radius:4px}
 .ph .mv{position:absolute;bottom:3px;right:3px;background:rgba(0,0,0,.65);color:#fff;border:none;font-size:11px;padding:1px 6px;border-radius:4px}
+
+/* Product photo viewer */
+#photoViewer{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:1000;align-items:center;justify-content:center;padding:24px;touch-action:none}
+#photoViewer.open{display:flex}
+#photoViewerImg{max-width:min(88vw,1100px);max-height:86vh;width:auto;height:auto;object-fit:contain;border-radius:12px;user-select:none;-webkit-user-drag:none}
+#photoViewer .pvBtn{position:absolute;border:0;background:rgba(255,255,255,.12);color:#fff;width:46px;height:46px;border-radius:50%;font-size:28px;line-height:46px;text-align:center;cursor:pointer}
+#photoViewerClose{right:18px;top:18px}
+#photoViewerPrev{left:18px;top:50%;transform:translateY(-50%)}
+#photoViewerNext{right:18px;top:50%;transform:translateY(-50%)}
+#photoViewerCount{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);color:#fff;background:rgba(0,0,0,.55);padding:6px 10px;border-radius:999px;font-size:12px}
+.ph img,.row img{cursor:pointer}
+@media(max-width:520px){#photoViewer{padding:12px}#photoViewerImg{max-width:94vw;max-height:82vh}#photoViewer .pvBtn{width:42px;height:42px;font-size:24px;line-height:42px}#photoViewerPrev{left:8px}#photoViewerNext{right:8px}}
 #login,#app,#formBox,#setBox{display:none}
 #login.show,#app.show,#formBox.show,#setBox.show{display:block}
 #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--line);padding:12px 18px;border-radius:12px;font-size:13px;z-index:50;opacity:0;transition:opacity .25s;pointer-events:none;max-width:90vw}
@@ -165,6 +177,13 @@ h1{font-size:22px;font-weight:800}
     <div class="hint">Изменения появляются на сайте через 1–2 минуты после сохранения.</div>
   </div>
 </div>
+</div>
+<div id="photoViewer" aria-hidden="true">
+  <button type="button" class="pvBtn" id="photoViewerClose" aria-label="Закрыть">×</button>
+  <button type="button" class="pvBtn" id="photoViewerPrev" aria-label="Предыдущее фото">‹</button>
+  <img id="photoViewerImg" alt="Фото товара">
+  <button type="button" class="pvBtn" id="photoViewerNext" aria-label="Следующее фото">›</button>
+  <div id="photoViewerCount"></div>
 </div>
 <div id="toast"></div>
 
@@ -317,8 +336,47 @@ function discHint(){
 $('fPrice').oninput=$('fOld').oninput=discHint;
 function renderPhotos(){
   $('photoCount').textContent=formImgs.length?`Фото добавлено: ${formImgs.length}`:'Фото ещё не добавлены';
-  $('photos').innerHTML=formImgs.map((im,i)=>`<div class="ph"><img src="${esc(im.preview||im.url)}"><button class="x" onclick="rmPhoto(${i})">✕</button><span class="n">${i+1}</span>${i>0?`<button class="mv" onclick="mvPhoto(${i})">◀</button>`:''}</div>`).join('');
+  $('photos').innerHTML=formImgs.map((im,i)=>`<div class="ph"><img src="${esc(im.preview||im.url)}" alt="Фото ${i+1}" onclick="openPhotoViewer(${i})"><button type="button" class="x" onclick="rmPhoto(${i})">✕</button><span class="n">${i+1}</span>${i>0?`<button type="button" class="mv" onclick="mvPhoto(${i})">◀</button>`:''}</div>`).join('');
 }
+let photoViewerIndex=0;
+function openPhotoViewer(i){
+  if(!formImgs.length)return;
+  photoViewerIndex=Math.max(0,Math.min(i,formImgs.length-1));
+  updatePhotoViewer();
+  $('photoViewer').classList.add('open');
+  $('photoViewer').setAttribute('aria-hidden','false');
+  document.body.style.overflow='hidden';
+}
+function updatePhotoViewer(){
+  const im=formImgs[photoViewerIndex];
+  if(!im)return;
+  $('photoViewerImg').src=im.preview||im.url||'';
+  $('photoViewerCount').textContent=`${photoViewerIndex+1} / ${formImgs.length}`;
+}
+function closePhotoViewer(){
+  $('photoViewer').classList.remove('open');
+  $('photoViewer').setAttribute('aria-hidden','true');
+  $('photoViewerImg').removeAttribute('src');
+  document.body.style.overflow='';
+}
+function photoViewerNav(dir){
+  if(!formImgs.length)return;
+  photoViewerIndex=(photoViewerIndex+dir+formImgs.length)%formImgs.length;
+  updatePhotoViewer();
+}
+$('photoViewerClose').onclick=closePhotoViewer;
+$('photoViewerPrev').onclick=()=>photoViewerNav(-1);
+$('photoViewerNext').onclick=()=>photoViewerNav(1);
+$('photoViewer').onclick=e=>{if(e.target===$('photoViewer'))closePhotoViewer()};
+document.addEventListener('keydown',e=>{
+  if(!$('photoViewer').classList.contains('open'))return;
+  if(e.key==='Escape')closePhotoViewer();
+  else if(e.key==='ArrowLeft')photoViewerNav(-1);
+  else if(e.key==='ArrowRight')photoViewerNav(1);
+});
+let pvTouchX=0;
+$('photoViewer').addEventListener('touchstart',e=>{pvTouchX=e.changedTouches[0].clientX},{passive:true});
+$('photoViewer').addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-pvTouchX;if(Math.abs(dx)>50)photoViewerNav(dx<0?1:-1)},{passive:true});
 function rmPhoto(i){formImgs.splice(i,1);renderPhotos()}
 function mvPhoto(i){const t=formImgs[i];formImgs[i]=formImgs[i-1];formImgs[i-1]=t;renderPhotos()}
 $('fPhotos').onchange=async e=>{

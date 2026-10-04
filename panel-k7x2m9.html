@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex,nofollow">
+<meta name="color-scheme" content="dark">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BRENDSHOP — Админка</title>
+<style>
+:root{--bg:#0b0b0b;--card:#141414;--fg:#f5f5f0;--muted:#8a8a85;--accent:#d4ff3f;--line:#2a2a2a;--red:#ff5c5c;box-sizing:border-box}
+*{box-sizing:inherit;margin:0;padding:0}
+html,body{min-height:100%;background:var(--bg);color:var(--fg);font-family:-apple-system,'Helvetica Neue',Arial,sans-serif}
+input,textarea,select{width:100%;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;color:var(--fg);font-size:14px;font-family:inherit}
+input:focus,textarea:focus,select:focus{outline:1px solid var(--accent)}
+input[type=checkbox]{width:auto}
+input[type=color]{padding:2px;height:44px}
+label{font-size:12px;color:var(--muted);display:block;margin:14px 0 6px}
+button{font:inherit;cursor:pointer}
+.btn{background:var(--accent);color:#0b0b0b;border:none;border-radius:10px;padding:13px;font-weight:700;font-size:14px;width:100%;margin-top:14px}
+.btn.sec{background:transparent;color:var(--fg);border:1px solid var(--line)}
+.btn.sm{width:auto;padding:8px 12px;font-size:12px;margin:0}
+.btn:disabled{opacity:.5}
+.wrap{max-width:760px;margin:0 auto;padding:calc(20px + env(safe-area-inset-top,0px)) 16px 80px}
+h1{font-size:22px;font-weight:800}
+.sub{color:var(--muted);font-size:13px;margin:4px 0 18px}
+.hint{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.tabs{display:flex;gap:8px;margin:14px 0}
+.tab{flex:1;padding:11px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--muted);font-weight:700;font-size:13px}
+.tab.on{background:var(--accent);color:#0b0b0b;border-color:var(--accent)}
+.row{display:flex;gap:12px;align-items:center;background:var(--card);border-radius:14px;padding:10px;margin-bottom:10px}
+.row img{width:54px;height:68px;object-fit:cover;border-radius:8px;background:#1c1c1c;flex-shrink:0}
+.row .meta{flex:1;min-width:0}
+.row .name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .sub2{font-size:12px;color:var(--muted);margin-top:2px}
+.row .pr{font-size:13px;color:var(--accent);font-weight:700;margin-top:3px}
+.row .pr s{color:var(--muted);font-weight:400;margin-right:6px}
+.acts{display:flex;flex-direction:column;gap:6px}
+.tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 6px;border-radius:5px;margin-left:6px;vertical-align:middle}
+.tag.sold{background:#963030;color:#fff}.tag.low{background:#b47800;color:#fff}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.photos{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.ph{position:relative;width:72px;height:90px}
+.ph img{width:100%;height:100%;object-fit:cover;border-radius:8px}
+.ph .x{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:var(--red);color:#fff;border:none;font-size:12px}
+.ph .n{position:absolute;bottom:3px;left:3px;background:rgba(0,0,0,.65);font-size:10px;padding:1px 5px;border-radius:4px}
+.ph .mv{position:absolute;bottom:3px;right:3px;background:rgba(0,0,0,.65);color:#fff;border:none;font-size:11px;padding:1px 6px;border-radius:4px}
+#login,#app,#formBox,#setBox{display:none}
+#login.show,#app.show,#formBox.show,#setBox.show{display:block}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--line);padding:12px 18px;border-radius:12px;font-size:13px;z-index:50;opacity:0;transition:opacity .25s;pointer-events:none;max-width:90vw}
+#toast.on{opacity:1}#toast.err{border-color:var(--red)}
+.chk{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:14px}
+.count{color:var(--muted);font-size:12px;margin:8px 0 12px}
+
+/* Admin upgrades — existing color variables are unchanged */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.stat{background:var(--card);border-radius:12px;padding:12px}.stat b{display:block;font-size:18px}.stat span{font-size:11px;color:var(--muted)}.toolbar{display:flex;gap:8px;align-items:center;margin-bottom:10px}.toolbar select{width:auto;flex:0 0 145px}.row .thumb{position:relative}.row .featured{font-size:10px;color:var(--accent);margin-top:2px}.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.switch{display:flex;align-items:center;gap:9px;font-size:13px;margin-top:10px}.switch input{width:auto}.danger{color:var(--red)!important}.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.char-required{border-left:3px solid var(--accent);padding-left:10px;margin-top:14px}.char-required-title{font-size:13px;font-weight:800;margin-bottom:2px}.desc-required{margin-top:16px}.admin-note{background:var(--card);border:1px solid #2a2a2a55;border-radius:12px;padding:11px 12px;font-size:12px;color:var(--muted);line-height:1.45}@media(max-width:520px){.settings-grid{grid-template-columns:1fr}}@media(max-width:520px){.stats{grid-template-columns:1fr 1fr}.toolbar{flex-wrap:wrap}.toolbar select{width:100%;flex:1}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div id="login" class="show">
+  <h1>Админка BRENDSHOP</h1>
+  <div class="sub">Вход через GitHub: товары и настройки сохраняются прямо в репозиторий сайта</div>
+  <label>GitHub Personal Access Token</label>
+  <input id="ghToken" type="password" placeholder="github_pat_... или ghp_..." autocomplete="off">
+  <label>Репозиторий (пользователь/название)</label>
+  <input id="ghRepo" placeholder="например andrei/brendshop">
+  <button class="btn" onclick="login()">Войти</button>
+  <div class="hint">Токен создаётся один раз: GitHub → Settings → Developer settings → Personal access tokens. Права: доступ к этому репозиторию, Contents: Read and write. Токен хранится только в этом браузере.</div>
+</div>
+
+<div id="app">
+  <div class="top">
+    <div><h1>BRENDSHOP</h1><div class="sub" id="repoLabel"></div></div>
+    <button class="btn sec sm" onclick="logout()">Выйти</button>
+  </div>
+  <div class="tabs">
+    <button class="tab on" id="tabP" onclick="tab('p')">Товары</button>
+    <button class="tab" id="tabS" onclick="tab('s')">Настройки сайта</button>
+  </div>
+
+  <div id="listBox">
+    <div class="stats"><div class="stat"><b id="statAll">0</b><span>товаров</span></div><div class="stat"><b id="statStock">0</b><span>в наличии</span></div><div class="stat"><b id="statSum">0 ₽</b><span>стоимость каталога</span></div></div>
+    <div class="toolbar"><input id="q" placeholder="Поиск по названию, бренду или типу" oninput="renderList()"> <select id="statusFilter" onchange="renderList()"><option value="all">Все товары</option><option value="stock">В наличии</option><option value="sold">Проданные</option><option value="sale">Со скидкой</option><option value="featured">Рекомендованные</option></select><select id="sort" onchange="renderList()"><option value="order">Порядок сайта</option><option value="new">Сначала новые</option><option value="priceUp">Цена ↑</option><option value="priceDown">Цена ↓</option><option value="stock">Остаток ↑</option></select></div>
+    <div class="count" id="count"></div>
+    <div id="list"></div>
+    <button class="btn" onclick="openForm(null)">+ Добавить товар</button>
+  </div>
+
+  <div id="formBox">
+    <h1 id="formTitle">Новый товар</h1>
+    <label>Название</label>
+    <input id="fName" placeholder="Поло Tommy Hilfiger оригинал">
+    <div class="g2">
+      <div><label>Бренд (выберите из списка или впишите новый)</label><input id="fBrand" list="brands" placeholder="Tommy Hilfiger"></div>
+      <div><label>Тип (выберите или впишите новый)</label><input id="fType" list="types" placeholder="Поло"></div>
+    </div>
+    <datalist id="brands"></datalist><datalist id="types"></datalist>
+    <div class="g2">
+      <div><label>Размеры</label><input id="fSizes" placeholder="M, L, XL или 42, 43, 44"></div>
+      <div><label>Витрина</label><label class="switch"><input type="checkbox" id="fFeatured"> Показывать как рекомендованный товар</label></div>
+    </div>
+    <div class="char-required"><div class="char-required-title">Характеристики товара</div><div class="hint" style="margin-top:4px">Заполни эти поля — они будут показаны покупателю в карточке товара.</div></div>
+    <div class="g2">
+      <div><label>Материал</label><input id="fMaterial" placeholder="Хлопок"></div>
+      <div><label>Цвет</label><input id="fColor" placeholder="Коричневый"></div>
+    </div>
+    <div class="g2">
+      <div><label>Сезон</label><input id="fSeason" placeholder="Любой"></div>
+      <div><label>Состояние</label><input id="fCondition" placeholder="Новое с биркой"></div>
+    </div>
+    <div class="g2">
+      <div><label>Цена, ₽</label><input id="fPrice" type="number" inputmode="numeric" placeholder="5175"></div>
+      <div><label>Старая цена, ₽ (для скидки)</label><input id="fOld" type="number" inputmode="numeric" placeholder="6500"></div>
+    </div>
+    <div class="hint" id="discHint"></div>
+    <div class="g2">
+      <div><label>Наличие, шт. (0 = продано)</label><input id="fStock" type="number" inputmode="numeric" value="1"></div>
+      <div><label>Бейдж на фото</label>
+        <select id="fBadge" onchange="onBadgeSel()"><option value="">Без бейджа</option><option>Новинка</option><option>Скидка</option><option>Хит продаж</option><option>Топ</option><option>Эксклюзив</option><option>Ограниченная серия</option><option>Последний размер</option><option value="__custom">Свой текст…</option></select>
+      <input id="fBadgeCustom" placeholder="Свой текст бейджа" style="display:none;margin-top:8px">
+      </div>
+    </div>
+    <div class="char-required desc-required"><div class="char-required-title">Описание товара</div><div class="hint" style="margin-top:4px">Заполняй по готовому шаблону — на сайте каждая строка будет отдельным пунктом.</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn sec sm" type="button" onclick="setDescTemplate('shoe')">Шаблон для обуви</button><button class="btn sec sm" type="button" onclick="setDescTemplate('clothes')">Шаблон для вещей</button></div>
+    </div>
+    <textarea id="fDesc" rows="12" placeholder="Выбери шаблон выше и заполни значения после двоеточия."></textarea>
+    <label>Фото — можно выбрать сразу много или добавлять по одному. Первое фото спереди, второе сзади, остальные в любом порядке</label>
+    <input id="fPhotos" type="file" accept="image/*" multiple>
+    <button class="btn sec sm" type="button" onclick="$('fPhotos').click()" style="margin-top:8px">+ Добавить ещё фото</button>
+    <div class="hint" id="photoCount"></div>
+    <div class="photos" id="photos"></div>
+    <div class="hint">Фото автоматически уменьшаются до 1200 px, чтобы сайт открывался быстро. Можно добавить сколько угодно фото.</div>
+    <button class="btn" id="saveBtn" onclick="saveProduct()">Сохранить и опубликовать</button>
+    <button class="btn sec" onclick="closeForm()">Отмена</button>
+    <button class="btn sec" id="duplicateBtn" onclick="duplicateProduct()">Создать копию</button>
+  </div>
+
+  <div id="setBox">
+    <h1>Настройки сайта</h1>
+    <div class="chk"><input type="checkbox" id="sBanner"><label style="margin:0;font-size:14px;color:var(--fg)" for="sBanner">Показывать баннер скидки</label></div>
+    <label>Текст баннера</label>
+    <input id="sText" placeholder="Скидка 20% при заказе от 3 товаров">
+    <div class="settings-grid"><div><label>Скидка, %</label><input id="sDiscountPercent" type="number" min="0" max="100" value="20"></div><div><label>От скольких товаров</label><input id="sDiscountMinQty" type="number" min="1" value="3"></div></div>
+    <div class="admin-note">Эти два значения управляют реальной скидкой в корзине. Например, 20% от 3 товаров — после достижения количества корзина автоматически пересчитает итог.</div>
+    <label>Акцентный цвет сайта</label>
+    <input id="sColor" type="color" value="#d4ff3f">
+    <div class="chk"><input type="checkbox" id="sSound"><label style="margin:0;font-size:14px;color:var(--fg)" for="sSound">Звук на сайте включён по умолчанию</label></div>
+    <label>Текст «О магазине»</label>
+    <textarea id="sAbout" rows="4" placeholder="BRENDSHOP — это оригинальная одежда..."></textarea>
+    <label>Текст блока «Как заказать»</label><textarea id="sHow" rows="4" placeholder="Выберите товар → добавьте в корзину → напишите нам → получите заказ"></textarea>
+    <label>Строка с рейтингом/отзывами</label>
+    <input id="sReviews" placeholder="39 отзывов на Авито · 108 подписчиков">
+    <button class="btn" id="saveSetBtn" onclick="saveSettings()">Сохранить настройки</button>
+    <div class="hint">Изменения появляются на сайте через 1–2 минуты после сохранения.</div>
+  </div>
+</div>
+</div>
+<div id="toast"></div>
+
+<script>
+const API='https://api.github.com';
+let token='',repo='',products=[],pSha='',settings={},sSha='',editing=null,formImgs=[];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const enc=s=>btoa(unescape(encodeURIComponent(s)));
+const dec=b=>decodeURIComponent(escape(atob(b.replace(/\n/g,''))));
+
+function toast(msg,err){const t=$('toast');t.textContent=msg;t.className='on'+(err?' err':'');clearTimeout(t._t);t._t=setTimeout(()=>t.className='',err?9000:2500)}
+function hdr(){return {Authorization:'Bearer '+token,Accept:'application/vnd.github+json'}}
+async function gh(path,opt){
+  const r=await fetch(API+'/repos/'+repo+path,Object.assign({headers:hdr()},opt||{}));
+  return r;
+}
+async function getFile(path){
+  const r=await gh('/contents/'+path+'?t='+Date.now());
+  if(r.status===404) return {json:null,sha:''};
+  if(!r.ok) throw new Error('GitHub '+r.status);
+  const d=await r.json();
+  return {json:JSON.parse(dec(d.content)),sha:d.sha};
+}
+async function putFile(path,contentB64,sha,msg){
+  const body={message:msg,content:contentB64};if(sha)body.sha=sha;
+  const r=await gh('/contents/'+path,{method:'PUT',headers:Object.assign({'Content-Type':'application/json'},hdr()),body:JSON.stringify(body)});
+  if(!r.ok){const e=await r.json().catch(()=>({}));const err=new Error(e.message||r.status);err.status=r.status;throw err}
+  return (await r.json()).content.sha;
+}
+async function saveJSON(path,data,shaRef,msg){
+  const b64=enc(JSON.stringify(data,null,2));
+  try{ return await putFile(path,b64,shaRef,msg); }
+  catch(e){
+    if(e.status===409||e.status===422){ // stale sha: refetch and retry once
+      const cur=await getFile(path); return await putFile(path,b64,cur.sha,msg);
+    }
+    throw e;
+  }
+}
+
+async function login(){
+  token=$('ghToken').value.replace(/\s+/g,'');repo=$('ghRepo').value.trim().replace(/^https?:\/\/github\.com\//,'').replace(/\/$/,'').replace(/\.git$/,'');
+  if(!token||!repo){toast('Заполните токен и репозиторий',1);return}
+  if(!/^[\w.-]+\/[\w.-]+$/.test(repo)){toast('Репозиторий пишите так: логин/название, например brendshopru/brendshop',1);return}
+  try{
+    const r=await gh('');
+    if(!r.ok){
+      const why={401:'Токен не подходит: неверный, обрезан при копировании или истёк. Создайте новый и скопируйте целиком (ghp_… ~40 знаков или github_pat_… ~90 знаков). Сейчас длина: '+token.length,
+        403:'Доступ запрещён. Проверьте права токена: Contents → Read and write',
+        404:'Репозиторий не найден или у токена нет доступа к нему. Проверьте название и что в токене выбран именно этот репозиторий'}[r.status]||('Ошибка GitHub '+r.status);
+      toast(why,1);return;
+    }
+    const info=await r.json();
+    if(info.permissions&&info.permissions.push===false){toast('У токена нет права записи. Нужно: Contents → Read and write',1);return}
+    const p=await getFile('products.json');
+    products=Array.isArray(p.json)?p.json:[];pSha=p.sha;
+    const s=await getFile('settings.json');
+    settings=s.json||{};sSha=s.sha;
+  }catch(e){toast(e instanceof TypeError?'Нет соединения с GitHub. Проверьте интернет и попробуйте ещё раз':'Ошибка: '+e.message,1);return}
+  localStorage.setItem('bs_admin_token',token);localStorage.setItem('bs_admin_repo',repo);
+  $('login').classList.remove('show');$('app').classList.add('show');
+  $('repoLabel').textContent=repo;
+  fillSettings();renderList();fillLists();
+}
+function logout(){localStorage.removeItem('bs_admin_token');location.reload()}
+
+function tab(t){
+  $('tabP').classList.toggle('on',t==='p');$('tabS').classList.toggle('on',t==='s');
+  $('listBox').style.display=t==='p'?'block':'none';
+  $('setBox').classList.toggle('show',t==='s');
+  $('formBox').classList.remove('show');
+}
+function fillLists(){
+  const u=k=>[...new Set(products.map(p=>p[k]).filter(Boolean))];
+  const base={brands:['Tommy Hilfiger','Ralph Lauren','Lacoste','Autograph','Calvin Klein','Timberland','La Martina','DKNY','New Balance','Cerruti 1881','Bikkembergs','Tommy Jeans','Armani','Emporio Armani','Armani Exchange','Armani Jeans','Boss','Hugo','Polo Ralph Lauren','Nike','Adidas','Levi\'s','Diesel','Guess','Versace','Dolce & Gabbana','Moncler','The North Face','Stone Island','Fred Perry','Champion'],
+    types:['Поло','Футболка','Рубашка','Пуловер','Джемпер','Свитшот','Худи','Кофта','Лонгслив','Бомбер','Ветровка','Куртка','Пуховик','Парка','Пальто','Жилет','Костюм','Брюки','Джинсы','Шорты','Кроссовки','Кеды','Кепка','Шапка','Ремень','Носки','Сумка','Рюкзак','Аксессуар']};
+  $('brands').innerHTML=[...new Set([...base.brands,...u('brand')])].map(x=>`<option value="${esc(x)}">`).join('');
+  $('types').innerHTML=[...new Set([...base.types,...u('type')])].map(x=>`<option value="${esc(x)}">`).join('');
+}
+const fmt=n=>Number(n).toLocaleString('ru-RU')+' ₽';
+function renderList(){
+  const q=$('q').value.toLowerCase().trim();
+  const status=$('statusFilter')?.value||'all'; const list=products.map((p,i)=>({p,i})).filter(({p})=>{const hay=(p.name+' '+(p.brand||'')+' '+(p.type||'')).toLowerCase(); if(!hay.includes(q))return false; if(status==='stock'&&!(p.stock>0))return false; if(status==='sold'&&p.stock!==0)return false; if(status==='sale'&&!(p.oldPrice&&p.oldPrice>p.price))return false; if(status==='featured'&&!p.featured)return false; return true;});
+  const sort=$('sort')?.value||'order';list.sort((a,b)=>sort==='new'?Number(b.p.id)-Number(a.p.id):sort==='priceUp'?a.p.price-b.p.price:sort==='priceDown'?b.p.price-a.p.price:sort==='stock'?(a.p.stock??0)-(b.p.stock??0):a.i-b.i);$('count').textContent=`Товаров: ${products.length}`+(q?` · найдено: ${list.length}`:'');$('statAll').textContent=products.length;$('statStock').textContent=products.filter(p=>(p.stock??0)>0).length;$('statSum').textContent=fmt(products.reduce((n,p)=>n+(Number(p.price)||0)*(Number(p.stock)||0),0));
+  $('list').innerHTML=list.map(({p,i})=>{
+    const st=p.stock===0?'<span class="tag sold">Продано</span>':(p.stock!=null&&p.stock<=2?`<span class="tag low">Осталось ${p.stock}</span>`:'');
+    return `<div class="row">
+      <img loading="lazy" src="${esc((p.imgs&&p.imgs[0])||'')}" alt="">
+      <div class="meta"><div class="name">${esc(p.name)}${st}</div>
+        <div class="sub2">${esc(p.brand||'—')} · ${esc(p.type||'—')}</div>${p.featured?'<div class="featured">★ В рекомендациях</div>': ''}
+        <div class="pr">${p.oldPrice?`<s>${fmt(p.oldPrice)}</s>`:''}${fmt(p.price)}</div></div>
+      <div class="acts">
+        <button class="btn sm" onclick="openForm(${i})">Изменить</button>
+        <button class="btn sec sm" onclick="toggleSold(${i})">${p.stock===0?'В наличии':'Продано'}</button>
+        <button class="btn sec sm" onclick="duplicateProduct(${i})">Копия</button>${i>0?`<button class="btn sec sm" onclick="moveProduct(${i},-1)">▲ Выше</button>`:''}
+        <button class="btn sec sm" style="color:var(--red)" onclick="delProduct(${i})">Удалить</button>
+      </div></div>`}).join('')||'<div class="sub">Ничего не найдено</div>';
+}
+
+let adminHistoryReady=false;
+function ensureAdminHistory(){
+  if(adminHistoryReady)return;
+  const st=(history.state&&typeof history.state==='object')?history.state:{};
+  if(!st.bsAdminBase){try{history.replaceState({...st,bsAdminBase:true},'')}catch(e){}}
+  adminHistoryReady=true;
+}
+function pushAdminHistory(view){
+  ensureAdminHistory();
+  try{history.pushState({bsAdmin:view},'')}catch(e){}
+}
+function openForm(i){
+  ensureAdminHistory();
+  if(!(history.state&&history.state.bsAdmin==='form'))pushAdminHistory('form');
+  editing=i;const p=i==null?{}:products[i];
+  $('formTitle').textContent=i==null?'Новый товар':'Изменить товар';
+  $('fName').value=p.name||'';$('fBrand').value=p.brand||'';$('fType').value=p.type||'';
+  $('fPrice').value=p.price||'';$('fOld').value=p.oldPrice||'';$('fSizes').value=Array.isArray(p.sizes)?p.sizes.join(', '):'';$('fFeatured').checked=!!p.featured;
+  $('fStock').value=p.stock==null?1:p.stock;$('fMaterial').value=p.material||'';$('fColor').value=p.color||'';$('fSeason').value=p.season||'';$('fCondition').value=p.condition||'';$('fDesc').value=p.desc||p.description||p.descriptionText||(i==null?descTemplate(descTemplateType(p.type)):'' );
+  const known=['','Новинка','Скидка','Хит продаж','Топ','Эксклюзив','Ограниченная серия','Последний размер'];
+  if(p.badge&&!known.includes(p.badge)){$('fBadge').value='__custom';$('fBadgeCustom').value=p.badge}
+  else{$('fBadge').value=p.badge||'';$('fBadgeCustom').value=''}
+  onBadgeSel();
+  formImgs=(p.imgs||[]).filter(u=>!u.startsWith('data:')).map(u=>({url:u}));
+  $('fPhotos').value='';renderPhotos();discHint();
+  $('listBox').style.display='none';$('formBox').classList.add('show');scrollTo(0,0);
+}
+function closeForm(fromPop){
+  $('formBox').classList.remove('show');$('listBox').style.display='block';
+  if(!fromPop&&history.state&&history.state.bsAdmin==='form'){try{history.back()}catch(e){}}
+}
+function onBadgeSel(){$('fBadgeCustom').style.display=$('fBadge').value==='__custom'?'block':'none'}
+function descTemplate(type){
+  if(type==='shoe') return `Описание:
+Цвет:
+Качество:
+Страна производитель:
+Размер:
+Наружный материал:
+Внутренний материал:
+Материал стельки:
+Материал подошвы:
+Сезон:
+Комплект:
+По необходимости можно запросить замеры.
+Так же возможно сделать видео.
+Ещё больше моделей, размеров и цветов смотрите на нашем сайте.`;
+  return `Описание:
+Цвет:
+Качество:
+Страна производитель:
+Размер:
+Состав:
+По необходимости можно запросить замеры.
+Так же возможно сделать видео.
+Ещё больше моделей, размеров и цветов смотрите на нашем сайте.`;
+}
+function setDescTemplate(type){$('fDesc').value=descTemplate(type);$('fDesc').focus()}
+function descTemplateType(type){
+  const t=String(type||'').toLowerCase();
+  return ['кроссовки','кеды','обувь','ботинки','туфли','сапоги','мокасины','слипоны','сандалии','тапочки'].some(x=>t.includes(x))?'shoe':'clothes';
+}
+function badgeValue(){return $('fBadge').value==='__custom'?$('fBadgeCustom').value.trim():$('fBadge').value}
+function discHint(){
+  const pr=+$('fPrice').value,old=+$('fOld').value;
+  $('discHint').textContent=(old&&pr&&old>pr)?`Скидка на сайте: −${Math.round((1-pr/old)*100)}%`:(old?'Старая цена должна быть больше новой':'Пусто — скидки нет');
+}
+$('fPrice').oninput=$('fOld').oninput=discHint;
+function renderPhotos(){
+  $('photoCount').textContent=formImgs.length?`Фото добавлено: ${formImgs.length}`:'Фото ещё не добавлены';
+  $('photos').innerHTML=formImgs.map((im,i)=>`<div class="ph"><img src="${esc(im.preview||im.url)}"><button class="x" onclick="rmPhoto(${i})">✕</button><span class="n">${i+1}</span>${i>0?`<button class="mv" onclick="mvPhoto(${i})">◀</button>`:''}</div>`).join('');
+}
+function rmPhoto(i){formImgs.splice(i,1);renderPhotos()}
+function mvPhoto(i){const t=formImgs[i];formImgs[i]=formImgs[i-1];formImgs[i-1]=t;renderPhotos()}
+$('fPhotos').onchange=async e=>{
+  for(const f of e.target.files){
+    try{const c=await compress(f);formImgs.push({b64:c.b64,preview:c.preview,name:f.name})}
+    catch(err){toast('Не удалось обработать '+f.name,1)}
+  }
+  e.target.value='';renderPhotos();
+};
+function compress(file){
+  return new Promise((res,rej)=>{
+    const url=URL.createObjectURL(file),img=new Image();
+    img.onload=()=>{
+      const M=1200,k=Math.min(1,M/Math.max(img.width,img.height));
+      const cv=document.createElement('canvas');cv.width=Math.round(img.width*k);cv.height=Math.round(img.height*k);
+      cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+      const data=cv.toDataURL('image/jpeg',0.85);URL.revokeObjectURL(url);
+      res({b64:data.split(',')[1],preview:data});
+    };
+    img.onerror=()=>rej(new Error('img'));img.src=url;
+  });
+}
+
+async function saveProduct(){
+  const name=$('fName').value.trim(),price=+$('fPrice').value,old=+$('fOld').value||null;
+  if(!name){toast('Введите название',1);return}
+  if(!price){toast('Введите цену',1);return}
+  if(old&&old<=price){toast('Старая цена должна быть больше новой',1);return}
+  if(!formImgs.length){toast('Добавьте хотя бы одно фото',1);return}
+  const btn=$('saveBtn');btn.disabled=true;
+  try{
+    const imgs=[];let n=0;const total=formImgs.filter(x=>x.b64).length;
+    for(const im of formImgs){
+      if(im.url){imgs.push(im.url);continue}
+      n++;btn.textContent=`Загружаю фото ${n}/${total}…`;
+      const path=`images/${Date.now()}_${Math.random().toString(36).slice(2,7)}.jpg`;
+      await putFile(path,im.b64,'','photo');
+      imgs.push(path);
+    }
+    btn.textContent='Сохраняю…';
+    const brand=$('fBrand').value.trim(),type=$('fType').value.trim(),sizes=$('fSizes').value.split(',').map(x=>x.trim()).filter(Boolean),material=$('fMaterial').value.trim(),color=$('fColor').value.trim(),season=$('fSeason').value.trim(),condition=$('fCondition').value.trim();
+    const missing=[['Бренд',brand],['Тип',type],['Размеры',sizes.join(', ')],['Материал',material],['Цвет',color],['Сезон',season],['Состояние',condition]].filter(x=>!x[1]).map(x=>x[0]);
+    if(missing.length){toast('Заполни характеристики: '+missing.join(', '),1);btn.disabled=false;btn.textContent='Сохранить товар';return}
+    const prod={id:editing==null?Date.now():products[editing].id,name,brand,type,
+      price,oldPrice:old,sizes,material,color,season,condition,featured:$('fFeatured').checked,stock:Math.max(0,parseInt($('fStock').value,10)||0),badge:badgeValue(),desc:$('fDesc').value.trim(),description:$('fDesc').value.trim(),imgs};
+    const next=products.slice();
+    if(editing==null) next.unshift(prod); else next[editing]=prod;
+    pSha=await saveJSON('products.json',next,pSha,editing==null?'add product':'edit product');
+    products=next;
+    toast('Сохранено. На сайте появится через 1–2 минуты');
+    closeForm();renderList();fillLists();
+  }catch(e){toast('Ошибка: '+e.message,1)}
+  btn.disabled=false;btn.textContent='Сохранить и опубликовать';
+}
+async function commitList(next,msg){
+  try{pSha=await saveJSON('products.json',next,pSha,msg);products=next;renderList();fillLists();toast('Сохранено')}
+  catch(e){toast('Ошибка: '+e.message,1)}
+}
+async function toggleSold(i){
+  const next=products.slice();const p=Object.assign({},next[i]);
+  p.stock=p.stock===0?1:0;next[i]=p;await commitList(next,'toggle sold');
+}
+async function moveProduct(i,dir){
+  const next=products.slice(); const j=i+dir; if(j<0||j>=next.length)return;
+  [next[i],next[j]]=[next[j],next[i]]; await commitList(next,'reorder');
+}
+async function duplicateProduct(i=editing){if(i==null||!products[i])return;const p=JSON.parse(JSON.stringify(products[i]));p.id=Date.now();p.name=p.name+' — копия';const next=products.slice();next.splice(i+1,0,p);await commitList(next,'duplicate product')}
+
+async function delProduct(i){
+  if(!confirm('Удалить «'+products[i].name+'»?'))return;
+  const next=products.slice();next.splice(i,1);await commitList(next,'delete product');
+}
+
+function fillSettings(){
+  $('sBanner').checked=settings.discountEnabled!==false;
+  $('sText').value=settings.discountText||'Скидка 20% при заказе от 3 товаров';
+  $('sDiscountPercent').value=settings.discountPercent==null?20:settings.discountPercent; $('sDiscountMinQty').value=settings.discountMinQty==null?3:settings.discountMinQty;
+  $('sColor').value=/^#[0-9a-f]{6}$/i.test(settings.accent||'')?settings.accent:'#d4ff3f';
+  $('sSound').checked=settings.sound!==false;$('sAbout').value=settings.about||'';$('sHow').value=settings.howOrder||'';$('sReviews').value=settings.reviewsLine||'';
+}
+async function saveSettings(){
+  const s={discountEnabled:$('sBanner').checked,discountText:$('sText').value.trim(),discountPercent:Math.max(0,Math.min(100,+$('sDiscountPercent').value||20)),discountMinQty:Math.max(1,parseInt($('sDiscountMinQty').value,10)||3),accent:$('sColor').value,sound:$('sSound').checked,about:$('sAbout').value.trim(),howOrder:$('sHow').value.trim(),reviewsLine:$('sReviews').value.trim()};
+  const b=$('saveSetBtn');b.disabled=true;
+  try{sSha=await saveJSON('settings.json',s,sSha,'update settings');settings=s;toast('Настройки сохранены')}
+  catch(e){toast('Ошибка: '+e.message,1)}
+  b.disabled=false;
+}
+
+const st=localStorage.getItem('bs_admin_token'),sr=localStorage.getItem('bs_admin_repo');
+if(st&&sr){$('ghToken').value=st;$('ghRepo').value=sr;login()}
+
+window.addEventListener('popstate',e=>{
+  const view=e.state&&e.state.bsAdmin;
+  if(view==='form')return;
+  if($('formBox').classList.contains('show'))closeForm(true);
+});
+</script>
+</body>
+</html>

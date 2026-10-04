@@ -126,13 +126,11 @@ h1{font-size:22px;font-weight:800}
 
 <div id="login" class="show">
   <h1>Админка BRENDSHOP</h1>
-  <div class="sub">Вход через GitHub: товары и настройки сохраняются прямо в репозиторий сайта</div>
   <label>GitHub Personal Access Token</label>
   <input id="ghToken" type="password" placeholder="github_pat_... или ghp_..." autocomplete="off">
   <label>Репозиторий (пользователь/название)</label>
   <input id="ghRepo" placeholder="например andrei/brendshop">
   <button class="btn" onclick="login()">Войти</button>
-  <div class="hint">Токен создаётся один раз: GitHub → Settings → Developer settings → Personal access tokens. Права: доступ к этому репозиторию, Contents: Read and write. Токен хранится только в этом браузере.</div>
 </div>
 
 <div id="app">

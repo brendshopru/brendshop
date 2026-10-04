@@ -4,16 +4,6 @@
 <meta charset="UTF-8">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#0b0b0b">
-<link rel="manifest" href="manifest.webmanifest?v=20261004-1">
-<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png?v=20261004-1">
-<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png?v=20261004-1">
-<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png?v=20261004-1">
-<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
-<link rel="icon" href="icons/icon-192.png?v=2" sizes="192x192" type="image/png">
-<link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="BRENDSHOP">
 <style>html,body{background:#0b0b0b;color-scheme:dark}
 @media(min-width:900px){
   #overlay{background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:34px;overflow:auto;transform:translateY(100%)}
@@ -95,7 +85,6 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .topbar{display:flex;justify-content:space-between;align-items:center;padding:5vh 5vw 0;opacity:0}
 .topbar.show{opacity:1;transition:opacity .4s ease}
 .theme-toggle{width:40px;height:40px;border-radius:50%;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer}
-.install-app-btn{width:auto;min-width:40px;padding:0 13px;gap:7px;border-radius:999px;font-size:13px;font-weight:700;white-space:nowrap}.install-app-btn span{display:inline}
 
 header{padding:2vh 5vw 3vh;opacity:0}
 header.show{opacity:1;transition:opacity .4s ease}
@@ -307,8 +296,10 @@ footer .addr{color:var(--muted);font-size:13px;margin-bottom:20px}
 .hero-border-light rect{fill:none;stroke:var(--accent);stroke-width:3;vector-effect:non-scaling-stroke;stroke-linecap:round;stroke-dasharray:90 910;stroke-dashoffset:0;filter:drop-shadow(0 0 5px var(--accent)) drop-shadow(0 0 10px color-mix(in srgb,var(--accent) 45%,transparent));animation:heroFrameRun 5s linear infinite}
 @keyframes heroFrameRun{to{stroke-dashoffset:-1000}}
 </style>
+<style id="pwaInstallStyle">#installBtn{display:none;align-items:center;gap:7px;border:1px solid currentColor;background:transparent;color:inherit;border-radius:10px;padding:8px 12px;font:inherit;cursor:pointer}#installBtn.show{display:inline-flex}</style>
 </head>
-<body>
+<body
+<button id="installBtn" type="button" aria-label="Установить приложение">Установить</button>>
 
 <div id="progress"></div>
 <div id="cursor"></div>
@@ -320,7 +311,6 @@ footer .addr{color:var(--muted);font-size:13px;margin-bottom:20px}
     <div style="font-weight:800;font-size:14px;letter-spacing:-.01em">BREND<span style="color:var(--accent)">SHOP</span></div>
   </div>
   <div style="display:flex;gap:10px">
-    <button class="theme-toggle install-app-btn" id="installAppBtn" type="button" title="Установить BRENDSHOP">⌂ <span>Установить</span></button>
     <div class="theme-toggle" id="soundToggle">🔊</div>
     <div class="theme-toggle" id="themeToggle">🌙</div>
   </div>
@@ -880,7 +870,6 @@ function buildChips(id,attr,allLabel,field){
 }
 function syncChips(){/* chips are static, not rebuilt from products */}
 function applySettings(s){
-  try{ const v=s&&s.appLogoVersion; if(v){ const ml=document.querySelector('link[rel=\"manifest\"]'); if(ml) ml.href='manifest.webmanifest?v='+encodeURIComponent(v); const al=document.querySelector('link[rel=\"apple-touch-icon\"]'); if(al) al.href='icons/icon-180.png?v='+encodeURIComponent(v); } }catch(e){}
   if(!s)return;
   siteSettings=Object.assign({},siteSettings,s);
   if(s.about) document.getElementById('aboutText').textContent=s.about;
@@ -1015,81 +1004,7 @@ if(window.matchMedia('(min-width:900px)').matches){
   });
 }
 </script>
-<script>
-(function(){
-  const btn=document.getElementById('installAppBtn');
-  if(!btn)return;
-  let deferredPrompt=null;
-  const standalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
-  if(standalone){btn.style.display='none';return;}
-  const ua=navigator.userAgent||'';
-  const isIOS=/iphone|ipad|ipod/i.test(ua);
-  const isAndroid=/android/i.test(ua);
-  const isInApp=/;\s*wv\)|\bwv\b|FBAN|FBAV|Instagram|TikTok|Line\/|GSA\//i.test(ua);
-  function showInstallHelp(){
-    const old=document.getElementById('installHelp');
-    if(old)old.remove();
-    const box=document.createElement('div');
-    box.id='installHelp';
-    box.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.72);display:flex;align-items:flex-end;justify-content:center;padding:16px;';
-    const card=document.createElement('div');
-    card.style.cssText='width:min(520px,100%);background:var(--card,#141414);color:var(--fg,#f5f5f0);border:1px solid var(--line,#2a2a2a);border-radius:22px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.5);';
-    let title='Установить BRENDSHOP';
-    let text='';
-    let action='';
-    if(isInApp && isAndroid){
-      title='Открой BRENDSHOP в браузере';
-      text='Сейчас сайт открыт во встроенном браузере. В нём установка приложения недоступна. Нажми кнопку ниже — BRENDSHOP откроется в обычном браузере, где можно установить его с нашим логотипом.';
-      action='<button id="openExternalBrowser" style="width:100%;padding:14px 16px;border:0;border-radius:14px;background:var(--accent,#d4ff3f);color:#111;font-weight:800;font-size:16px">Открыть в браузере</button>';
-    }else if(isIOS){
-      title='Добавить BRENDSHOP';
-      text='В iPhone установка зависит от браузера. В Safari используй «Поделиться» → «На экран Домой». На iOS 16.4+ это также доступно в поддерживаемых браузерах.';
-      action='';
-    }else if(isAndroid){
-      title='Установить BRENDSHOP';
-      text='Если браузер поддерживает установку PWA, появится системное окно установки. Если его нет, открой меню браузера и выбери «Установить приложение» или «Добавить на главный экран». Брендовый значок берётся из manifest BRENDSHOP.';
-      action='';
-    }else{
-      title='Установить BRENDSHOP';
-      text='Открой меню браузера и выбери команду установки приложения. Доступность зависит от браузера и устройства.';
-      action='';
-    }
-    card.innerHTML='<div style="font-size:22px;font-weight:800;margin-bottom:10px">'+title+'</div><div style="font-size:15px;line-height:1.5;color:var(--muted,#8a8a85);margin-bottom:16px">'+text+'</div>'+action+'<button id="closeInstallHelp" style="width:100%;padding:13px 16px;margin-top:10px;border:1px solid var(--line,#2a2a2a);border-radius:14px;background:transparent;color:inherit;font-weight:700;font-size:15px">Закрыть</button>';
-    box.appendChild(card);document.body.appendChild(box);
-    document.getElementById('closeInstallHelp').onclick=()=>box.remove();
-    const open=document.getElementById('openExternalBrowser');
-    if(open)open.onclick=()=>{
-      const u=new URL(location.href); u.hash='';
-      const intent='intent://'+u.host+u.pathname+u.search+'#Intent;scheme=https;end';
-      location.href=intent;
-      setTimeout(()=>{ try{ window.open(u.href,'_blank'); }catch(e){} },900);
-    };
-  }
-  window.addEventListener('beforeinstallprompt',e=>{
-    e.preventDefault();
-    deferredPrompt=e;
-    btn.style.display='flex';
-  });
-  window.addEventListener('appinstalled',()=>{
-    deferredPrompt=null;
-    btn.style.display='none';
-  });
-  btn.onclick=async()=>{
-    if(deferredPrompt){
-      try{await deferredPrompt.prompt();await deferredPrompt.userChoice}catch(e){}
-      deferredPrompt=null;
-      return;
-    }
-    showInstallHelp();
-  };
-  // Кнопка остаётся доступной: если браузер не дал beforeinstallprompt,
-  // вместо бесполезного сообщения показываем правильный способ для текущего браузера.
-  btn.style.display='none';
-})();
-if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=3',{scope:'./'}).catch(()=>{}));
-}
-</script>
 
+<script id="pwaInstallScript">(function(){let deferredPrompt=null;const btn=document.getElementById('installBtn');if(!btn)return;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;btn.classList.add('show')});btn.addEventListener('click',async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();try{await deferredPrompt.userChoice}catch(e){}deferredPrompt=null;btn.classList.remove('show')});window.addEventListener('appinstalled',()=>{deferredPrompt=null;btn.classList.remove('show')})})();</script>
 </body>
 </html>

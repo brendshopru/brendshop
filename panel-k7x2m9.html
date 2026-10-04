@@ -350,11 +350,17 @@ function renderPhotos(){
 }
 let photoViewerIndex=0;
 let photoViewerHistory=false;
+function photoUrl(v){
+  const u=typeof v==='string'?v:(v&&typeof v==='object'?(v.url||v.src||v.preview||''):'');
+  if(!u)return '';
+  if(/^data:|^blob:|^https?:\/\//i.test(u))return u;
+  try{return new URL(u,location.href).href}catch(e){return u}
+}
 function openListPhotoViewer(i){
   const p=products[i];
   if(!p||!Array.isArray(p.imgs)||!p.imgs.length)return;
-  formImgs=p.imgs.filter(u=>typeof u==='string'&&u).map(u=>({url:new URL(u,location.href).href}));
-  openPhotoViewer(0);
+  formImgs=p.imgs.map(photoUrl).filter(Boolean).map(u=>({url:u}));
+  if(formImgs.length)openPhotoViewer(0);
 }
 function openPhotoViewer(i){
   if(!formImgs.length)return;
@@ -433,6 +439,8 @@ async function saveProduct(){
   if(!name){toast('Введите название',1);return}
   if(!price){toast('Введите цену',1);return}
   if(old&&old<=price){toast('Старая цена должна быть больше новой',1);return}
+  // Характеристики (материал, цвет, сезон, состояние) — необязательные.
+  // Товар сохраняется даже при пустых характеристиках.
   if(!formImgs.length){toast('Добавьте хотя бы одно фото',1);return}
   const btn=$('saveBtn');btn.disabled=true;
   try{
@@ -536,29 +544,36 @@ async function uploadAppLogo(file){
     await putFile(path,b64,meta.sha,'update BRENDSHOP app icon');
   }
   const v=Date.now();
-  const m=await gh('/contents/manifest.webmanifest?t='+Date.now());
-  if(!m.ok)throw new Error('Не найден manifest.webmanifest в репозитории');
-  const d=await m.json();
-  const man=JSON.parse(dec(d.content));
-  man.name=$('sAppName').value.trim()||'BRENDSHOP';
-  man.short_name=man.name;
-  man.id='./';man.scope='./';man.start_url='./';man.display='standalone';man.display_override=['standalone'];man.prefer_related_applications=false;
-  man.icons=[
-    {src:'icons/icon-192.png',sizes:'192x192',type:'image/png',purpose:'any'},
-    {src:'icons/icon-512.png',sizes:'512x512',type:'image/png',purpose:'any'},
-    {src:'icons/icon-192.png',sizes:'192x192',type:'image/png',purpose:'maskable'},
-    {src:'icons/icon-512.png',sizes:'512x512',type:'image/png',purpose:'maskable'}
-  ];
-  logoStatus('Сохраняю manifest…');
-  await putFile('manifest.webmanifest',enc(JSON.stringify(man,null,2)),d.sha,'update BRENDSHOP manifest');
-  const am=await gh('/contents/admin-manifest.webmanifest?t='+Date.now());
-  if(am.ok){
-    const ad=await am.json();const aman=JSON.parse(dec(ad.content));
-    aman.name=(($('sAppName').value.trim()||'BRENDSHOP')+' Admin').trim();aman.short_name='BS Admin';aman.id='./panel-k7x2m9.html';aman.scope='./';aman.start_url='./panel-k7x2m9.html';aman.display='standalone';aman.icons=[{src:'icons/admin-icon-192.png',sizes:'192x192',type:'image/png',purpose:'any'},{src:'icons/admin-icon-512.png',sizes:'512x512',type:'image/png',purpose:'any'},{src:'icons/admin-icon-192.png',sizes:'192x192',type:'image/png',purpose:'maskable'},{src:'icons/admin-icon-512.png',sizes:'512x512',type:'image/png',purpose:'maskable'}];
-    await putFile('admin-manifest.webmanifest',enc(JSON.stringify(aman,null,2)),ad.sha,'update BRENDSHOP admin manifest');
-  }
-  logoStatus('Обновляю версию установки…');
-  await updateIndexVersion(v);
+  try{
+    const m=await gh('/contents/manifest.webmanifest?t='+Date.now());
+    if(m.ok){
+      const d=await m.json();
+      const man=JSON.parse(dec(d.content));
+      man.name=$('sAppName').value.trim()||'BRENDSHOP';
+      man.short_name=man.name;
+      man.id='./';man.scope='./';man.start_url='./';man.display='standalone';man.display_override=['standalone'];man.prefer_related_applications=false;
+      man.icons=[
+        {src:'icons/icon-192.png',sizes:'192x192',type:'image/png',purpose:'any'},
+        {src:'icons/icon-512.png',sizes:'512x512',type:'image/png',purpose:'any'},
+        {src:'icons/icon-192.png',sizes:'192x192',type:'image/png',purpose:'maskable'},
+        {src:'icons/icon-512.png',sizes:'512x512',type:'image/png',purpose:'maskable'}
+      ];
+      logoStatus('Сохраняю manifest…');
+      await putFile('manifest.webmanifest',enc(JSON.stringify(man,null,2)),d.sha,'update BRENDSHOP manifest');
+    }
+  }catch(e){logoStatus('Иконки сохранены; обновление manifest пропущено: '+e.message)}
+  try{
+    const am=await gh('/contents/admin-manifest.webmanifest?t='+Date.now());
+    if(am.ok){
+      const ad=await am.json();const aman=JSON.parse(dec(ad.content));
+      aman.name=(($('sAppName').value.trim()||'BRENDSHOP')+' Admin').trim();aman.short_name='BS Admin';aman.id='./panel-k7x2m9.html';aman.scope='./';aman.start_url='./panel-k7x2m9.html';aman.display='standalone';aman.icons=[{src:'icons/admin-icon-192.png',sizes:'192x192',type:'image/png',purpose:'any'},{src:'icons/admin-icon-512.png',sizes:'512x512',type:'image/png',purpose:'any'},{src:'icons/admin-icon-192.png',sizes:'192x192',type:'image/png',purpose:'maskable'},{src:'icons/admin-icon-512.png',sizes:'512x512',type:'image/png',purpose:'maskable'}];
+      await putFile('admin-manifest.webmanifest',enc(JSON.stringify(aman,null,2)),ad.sha,'update BRENDSHOP admin manifest');
+    }
+  }catch(e){logoStatus('Иконки сохранены; обновление админ-манифеста пропущено: '+e.message)}
+  try{
+    logoStatus('Обновляю версию установки…');
+    await updateIndexVersion(v);
+  }catch(e){logoStatus('Иконки сохранены; обновление версии сайта пропущено: '+e.message)}
   return v;
 }
 $('sLogoFile').onchange=()=>{
@@ -592,6 +607,17 @@ async function saveSettings(){
 
 const st=localStorage.getItem('bs_admin_token'),sr=localStorage.getItem('bs_admin_repo');
 if(st&&sr){$('ghToken').value=st;$('ghRepo').value=sr;login()}
+
+// Явно экспортируем обработчики для inline onclick.
+Object.assign(window,{
+  login,logout,tab,renderList,resetFilters,openForm,closeForm,onBadgeSel,
+  setDescTemplate,saveProduct,duplicateProduct,toggleSold,moveProduct,delProduct,
+  rmPhoto,mvPhoto,openPhotoViewer,openListPhotoViewer,photoViewerNav,
+  closePhotoViewer,saveSettings
+});
+window.addEventListener('error',e=>{
+  if(e&&e.error)console.error('BRENDSHOP Admin:',e.error);
+});
 </script>
 <script>
 (function(){
@@ -621,7 +647,7 @@ if(st&&sr){$('ghToken').value=st;$('ghRepo').value=sr;login()}
   };
   if(isIOS())btn.style.display='inline-block';
 })();
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('admin-sw.js?v=20261004-2').catch(()=>{}));}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('admin-sw.js?v=20261004-3').catch(()=>{}));}
 </script>
 </body>
 </html>

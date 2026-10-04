@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BRENDSHOP ADMIN FIX 2026-10-04 -->
 <html lang="ru" data-theme="dark">
 <head>
 <meta charset="UTF-8">
@@ -275,7 +276,7 @@ function renderList(){
   $('list').innerHTML=list.map(({p,i})=>{
     const st=p.stock===0?'<span class="tag sold">Продано</span>':(p.stock!=null&&p.stock<=2?`<span class="tag low">Осталось ${p.stock}</span>`:'');
     return `<div class="row">
-      <img loading="lazy" src="${esc((p.imgs&&p.imgs[0])||'')}" alt="" onclick="event.stopPropagation();openListPhotoViewer(${i})" style="cursor:pointer">
+      <img loading="lazy" src="${esc(photoUrl(p.imgs&&p.imgs[0]))}" alt="" onclick="event.stopPropagation();openListPhotoViewer(${i})" style="cursor:pointer">
       <div class="meta"><div class="name">${esc(p.name)}${st}</div>
         <div class="sub2">${esc(p.brand||'—')} · ${esc(p.type||'—')}</div>${p.featured?'<div class="featured">★ В рекомендациях</div>': ''}
         <div class="pr">${p.oldPrice?`<s>${fmt(p.oldPrice)}</s>`:''}${fmt(p.price)}</div></div>
@@ -359,8 +360,10 @@ function photoUrl(v){
 function openListPhotoViewer(i){
   const p=products[i];
   if(!p||!Array.isArray(p.imgs)||!p.imgs.length)return;
-  formImgs=p.imgs.map(photoUrl).filter(Boolean).map(u=>({url:u}));
-  if(formImgs.length)openPhotoViewer(0);
+  const imgs=p.imgs.map(photoUrl).filter(Boolean);
+  if(!imgs.length)return;
+  formImgs=imgs.map(u=>({url:u}));
+  openPhotoViewer(0);
 }
 function openPhotoViewer(i){
   if(!formImgs.length)return;
@@ -439,8 +442,6 @@ async function saveProduct(){
   if(!name){toast('Введите название',1);return}
   if(!price){toast('Введите цену',1);return}
   if(old&&old<=price){toast('Старая цена должна быть больше новой',1);return}
-  // Характеристики (материал, цвет, сезон, состояние) — необязательные.
-  // Товар сохраняется даже при пустых характеристиках.
   if(!formImgs.length){toast('Добавьте хотя бы одно фото',1);return}
   const btn=$('saveBtn');btn.disabled=true;
   try{
@@ -453,7 +454,7 @@ async function saveProduct(){
       imgs.push(path);
     }
     btn.textContent='Сохраняю…';
-    const brand=$('fBrand').value.trim(),type=$('fType').value.trim(),sizes=$('fSizes').value.split(',').map(x=>x.trim()).filter(Boolean),material=$('fMaterial').value.trim(),color=$('fColor').value.trim(),season=$('fSeason').value.trim(),condition=$('fCondition').value.trim();
+    // Характеристики необязательны: пустые поля не блокируют сохранение товара.\n    const brand=$('fBrand').value.trim(),type=$('fType').value.trim(),sizes=$('fSizes').value.split(',').map(x=>x.trim()).filter(Boolean),material=$('fMaterial').value.trim(),color=$('fColor').value.trim(),season=$('fSeason').value.trim(),condition=$('fCondition').value.trim();
     const prod={id:editing==null?Date.now():products[editing].id,name,brand,type,
       price,oldPrice:old,sizes,material,color,season,condition,featured:$('fFeatured').checked,stock:Math.max(0,parseInt($('fStock').value,10)||0),badge:badgeValue(),desc:$('fDesc').value.trim(),description:$('fDesc').value.trim(),imgs};
     const next=products.slice();
@@ -544,6 +545,7 @@ async function uploadAppLogo(file){
     await putFile(path,b64,meta.sha,'update BRENDSHOP app icon');
   }
   const v=Date.now();
+  // Иконки уже сохранены выше. Manifest/index — вторичные шаги.
   try{
     const m=await gh('/contents/manifest.webmanifest?t='+Date.now());
     if(m.ok){
@@ -558,10 +560,10 @@ async function uploadAppLogo(file){
         {src:'icons/icon-192.png',sizes:'192x192',type:'image/png',purpose:'maskable'},
         {src:'icons/icon-512.png',sizes:'512x512',type:'image/png',purpose:'maskable'}
       ];
-      logoStatus('Сохраняю manifest…');
+      logoStatus('Обновляю manifest…');
       await putFile('manifest.webmanifest',enc(JSON.stringify(man,null,2)),d.sha,'update BRENDSHOP manifest');
     }
-  }catch(e){logoStatus('Иконки сохранены; обновление manifest пропущено: '+e.message)}
+  }catch(e){logoStatus('✓ Логотип сохранён; manifest не обновлён: '+e.message);}
   try{
     const am=await gh('/contents/admin-manifest.webmanifest?t='+Date.now());
     if(am.ok){
@@ -569,11 +571,11 @@ async function uploadAppLogo(file){
       aman.name=(($('sAppName').value.trim()||'BRENDSHOP')+' Admin').trim();aman.short_name='BS Admin';aman.id='./panel-k7x2m9.html';aman.scope='./';aman.start_url='./panel-k7x2m9.html';aman.display='standalone';aman.icons=[{src:'icons/admin-icon-192.png',sizes:'192x192',type:'image/png',purpose:'any'},{src:'icons/admin-icon-512.png',sizes:'512x512',type:'image/png',purpose:'any'},{src:'icons/admin-icon-192.png',sizes:'192x192',type:'image/png',purpose:'maskable'},{src:'icons/admin-icon-512.png',sizes:'512x512',type:'image/png',purpose:'maskable'}];
       await putFile('admin-manifest.webmanifest',enc(JSON.stringify(aman,null,2)),ad.sha,'update BRENDSHOP admin manifest');
     }
-  }catch(e){logoStatus('Иконки сохранены; обновление админ-манифеста пропущено: '+e.message)}
+  }catch(e){/* admin manifest is optional */}
   try{
     logoStatus('Обновляю версию установки…');
     await updateIndexVersion(v);
-  }catch(e){logoStatus('Иконки сохранены; обновление версии сайта пропущено: '+e.message)}
+  }catch(e){logoStatus('✓ Логотип сохранён; обновление index.html пропущено: '+e.message);}
   return v;
 }
 $('sLogoFile').onchange=()=>{
@@ -605,19 +607,15 @@ async function saveSettings(){
   b.disabled=false;b.textContent='Сохранить настройки';
 }
 
+Object.assign(window,{
+  login,logout,tab,renderList,resetFilters,openForm,closeForm,onBadgeSel,setDescTemplate,
+  saveProduct,duplicateProduct,toggleSold,moveProduct,delProduct,rmPhoto,mvPhoto,
+  openPhotoViewer,openListPhotoViewer,photoViewerNav,closePhotoViewer,saveSettings
+});
+window.addEventListener('error',e=>{if(e&&e.error)console.error('BRENDSHOP Admin:',e.error);});
+
 const st=localStorage.getItem('bs_admin_token'),sr=localStorage.getItem('bs_admin_repo');
 if(st&&sr){$('ghToken').value=st;$('ghRepo').value=sr;login()}
-
-// Явно экспортируем обработчики для inline onclick.
-Object.assign(window,{
-  login,logout,tab,renderList,resetFilters,openForm,closeForm,onBadgeSel,
-  setDescTemplate,saveProduct,duplicateProduct,toggleSold,moveProduct,delProduct,
-  rmPhoto,mvPhoto,openPhotoViewer,openListPhotoViewer,photoViewerNav,
-  closePhotoViewer,saveSettings
-});
-window.addEventListener('error',e=>{
-  if(e&&e.error)console.error('BRENDSHOP Admin:',e.error);
-});
 </script>
 <script>
 (function(){
@@ -647,7 +645,7 @@ window.addEventListener('error',e=>{
   };
   if(isIOS())btn.style.display='inline-block';
 })();
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('admin-sw.js?v=20261004-3').catch(()=>{}));}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('admin-sw.js?v=20261004-4').catch(()=>{}));}
 </script>
 </body>
 </html>

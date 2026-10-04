@@ -72,6 +72,53 @@ h1{font-size:22px;font-weight:800}
 
 /* Admin upgrades — existing color variables are unchanged */
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.stat{background:var(--card);border-radius:12px;padding:12px}.stat b{display:block;font-size:18px}.stat span{font-size:11px;color:var(--muted)}.toolbar{display:flex;gap:8px;align-items:center;margin-bottom:10px}.toolbar select{width:auto;flex:0 0 145px}.row .thumb{position:relative}.row .featured{font-size:10px;color:var(--accent);margin-top:2px}.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.switch{display:flex;align-items:center;gap:9px;font-size:13px;margin-top:10px}.switch input{width:auto}.danger{color:var(--red)!important}.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.char-required{border-left:3px solid var(--accent);padding-left:10px;margin-top:14px}.char-required-title{font-size:13px;font-weight:800;margin-bottom:2px}.desc-required{margin-top:16px}.admin-note{background:var(--card);border:1px solid #2a2a2a55;border-radius:12px;padding:11px 12px;font-size:12px;color:var(--muted);line-height:1.45}@media(max-width:520px){.settings-grid{grid-template-columns:1fr}}@media(max-width:520px){.stats{grid-template-columns:1fr 1fr}.toolbar{flex-wrap:wrap}.toolbar select{width:100%;flex:1}}
+
+/* Mobile admin layout: same functions, optimized touch layout */
+@media(max-width:520px){
+  .wrap{padding:calc(14px + env(safe-area-inset-top,0px)) 12px calc(96px + env(safe-area-inset-bottom,0px))}
+  h1{font-size:20px}
+  .top{align-items:center;gap:8px}
+  .top>div:last-child{flex-shrink:0}
+  .top .btn.sm{padding:9px 10px;font-size:11px}
+  .tabs{position:sticky;top:0;z-index:20;background:var(--bg);padding:8px 0;margin:8px 0 12px}
+  .tab{min-height:44px}
+  .stats{grid-template-columns:repeat(2,1fr);gap:8px}
+  .stats .stat:last-child{grid-column:1/-1}
+  .stat{padding:10px}
+  .stat b{font-size:17px}
+  .toolbar{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .toolbar input{grid-column:1/-1;min-height:46px}
+  .toolbar select{width:100%;min-height:44px}
+  .toolbar .btn{width:100%;min-height:44px}
+  .row{display:grid;grid-template-columns:58px minmax(0,1fr);gap:10px;padding:10px;margin-bottom:9px;align-items:start}
+  .row img{width:58px;height:72px}
+  .row .name{font-size:14px;white-space:normal;line-height:1.25}
+  .row .sub2{font-size:11px;line-height:1.35}
+  .row .pr{font-size:13px}
+  .acts{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;padding-top:2px}
+  .acts .btn{min-height:40px;padding:9px 8px;font-size:12px}
+  #listBox>.btn,#formBox>.btn,#setBox>.btn{min-height:46px}
+  .g2,.settings-grid{grid-template-columns:1fr;gap:0}
+  label{margin-top:12px}
+  input,textarea,select{min-height:44px;font-size:16px}
+  textarea{min-height:180px}
+  .photos{gap:10px}
+  .ph{width:82px;height:104px}
+  .ph .x{width:26px;height:26px;font-size:13px}
+  .ph .mv{font-size:12px;padding:3px 7px}
+  .char-required{margin-top:12px}
+  .desc-required{margin-top:14px}
+  #fPhotos{padding:9px;font-size:14px}
+  #photoViewer{padding:8px}
+  #photoViewerImg{max-width:100%;max-height:78vh;border-radius:10px}
+  #photoViewer .pvBtn{width:44px;height:44px;line-height:44px}
+  #photoViewerClose{right:10px;top:10px}
+  #photoViewerPrev{left:7px}
+  #photoViewerNext{right:7px}
+  #photoViewerCount{bottom:10px}
+  #toast{bottom:calc(14px + env(safe-area-inset-bottom,0px));max-width:calc(100vw - 24px);text-align:center}
+  #saveBtn,#saveSetBtn{position:sticky;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:15;box-shadow:0 6px 24px rgba(0,0,0,.35)}
+}
 </style>
 </head>
 <body>

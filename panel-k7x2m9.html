@@ -417,6 +417,10 @@ if(st&&sr){$('ghToken').value=st;$('ghRepo').value=sr;login()}
   if(standalone){btn.style.display='none';return;}
   function isIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent);}
   window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;btn.style.display='inline-block';});
+  // Не скрываем кнопку на ПК, если Chrome пока не прислал beforeinstallprompt.
+  // Если событие доступно — ниже будет вызвано именно системное окно установки.
+  if(!isIOS()) btn.style.display='inline-block';
+  window.addEventListener('appinstalled',()=>{deferredPrompt=null;btn.style.display='none';});
   btn.onclick=async()=>{
     if(deferredPrompt){
       deferredPrompt.prompt();

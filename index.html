@@ -4,6 +4,16 @@
 <meta charset="UTF-8">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#0b0b0b">
+<link rel="manifest" href="manifest.webmanifest?v=20261004-1">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png?v=20261004-1">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png?v=20261004-1">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png?v=20261004-1">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="icon" href="icons/icon-192.png?v=2" sizes="192x192" type="image/png">
+<link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BRENDSHOP">
 <style>html,body{background:#0b0b0b;color-scheme:dark}
 @media(min-width:900px){
   #overlay{background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:34px;overflow:auto;transform:translateY(100%)}
@@ -50,7 +60,6 @@
 </style>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>BRENDSHOP</title>
-<link rel="manifest" href="./manifest.webmanifest">
 <style>
 :root{--bg:#0b0b0b;--card:#141414;--fg:#f5f5f0;--muted:#8a8a85;--accent:#d4ff3f;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);}
@@ -86,6 +95,7 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .topbar{display:flex;justify-content:space-between;align-items:center;padding:5vh 5vw 0;opacity:0}
 .topbar.show{opacity:1;transition:opacity .4s ease}
 .theme-toggle{width:40px;height:40px;border-radius:50%;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer}
+.install-app-btn{width:auto;min-width:40px;padding:0 13px;gap:7px;border-radius:999px;font-size:13px;font-weight:700;white-space:nowrap}.install-app-btn span{display:inline}
 
 header{padding:2vh 5vw 3vh;opacity:0}
 header.show{opacity:1;transition:opacity .4s ease}
@@ -297,14 +307,6 @@ footer .addr{color:var(--muted);font-size:13px;margin-bottom:20px}
 .hero-border-light rect{fill:none;stroke:var(--accent);stroke-width:3;vector-effect:non-scaling-stroke;stroke-linecap:round;stroke-dasharray:90 910;stroke-dashoffset:0;filter:drop-shadow(0 0 5px var(--accent)) drop-shadow(0 0 10px color-mix(in srgb,var(--accent) 45%,transparent));animation:heroFrameRun 5s linear infinite}
 @keyframes heroFrameRun{to{stroke-dashoffset:-1000}}
 </style>
-
-<style id="pwaInstallStyle">
-#installBtn{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:38px;padding:0 12px;border:1px solid var(--line,#333);border-radius:10px;background:var(--card,#141414);color:var(--fg,#f5f5f0);font:inherit;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
-#installBtn[hidden]{display:none!important}
-#installBtn .install-icon{font-size:16px;line-height:1}
-@media(max-width:700px){#installBtn{width:auto;padding:0 12px;border-radius:10px}#installBtn .install-label{display:inline}}
-</style>
-
 </head>
 <body>
 
@@ -318,7 +320,7 @@ footer .addr{color:var(--muted);font-size:13px;margin-bottom:20px}
     <div style="font-weight:800;font-size:14px;letter-spacing:-.01em">BREND<span style="color:var(--accent)">SHOP</span></div>
   </div>
   <div style="display:flex;gap:10px">
-    <button id="installBtn" type="button" title="Установить BRENDSHOP" aria-label="Установить BRENDSHOP"><span class="install-icon">⇩</span><span class="install-label">Установить</span></button>
+    <button class="theme-toggle install-app-btn" id="installAppBtn" type="button" title="Установить BRENDSHOP">⌂ <span>Установить</span></button>
     <div class="theme-toggle" id="soundToggle">🔊</div>
     <div class="theme-toggle" id="themeToggle">🌙</div>
   </div>
@@ -719,21 +721,53 @@ function toggleFav(id,el){
   playTick();
 }
 let modalStack=[];
+let openingFromHash=false;
 function pushModal(name){
   if(modalStack[modalStack.length-1]===name)return;
   modalStack.push(name);
-  history.pushState({bsModal:name},'');
+  if(openingFromHash){
+    history.replaceState({bsModal:name,bsProductId:currentProduct?.id||null},'',location.href);
+    openingFromHash=false;
+    return;
+  }
+  const url=name==='overlay'&&currentProduct?.id ? '#product-'+currentProduct.id : location.href;
+  history.pushState({bsModal:name,bsProductId:currentProduct?.id||null},'',url);
 }
 function popModalIfMine(name){
   const idx=modalStack.lastIndexOf(name);
   if(idx===-1)return;
   modalStack.splice(idx,1);
-  if(history.state&&history.state.bsModal===name) history.back();
+  if(history.state&&history.state.bsModal===name){
+    history.back();
+  }else if(name==='overlay'){
+    const stickyCart=document.getElementById('stickyCart');
+    if(stickyCart)stickyCart.classList.remove('modal-hidden');
+    if(location.hash.indexOf('#product-')===0) history.replaceState(null,'',location.pathname+location.search);
+  }
 }
-window.addEventListener('popstate',()=>{
-  const name=modalStack.pop();
-  if(name==='overlay'){document.getElementById('overlay').classList.remove('open');const stickyCart=document.getElementById('stickyCart');if(stickyCart)stickyCart.classList.remove('modal-hidden');}
-  else if(name==='cart') document.getElementById('cartDrawer').classList.remove('open');
+window.addEventListener('popstate',(e)=>{
+  const state=e.state||{};
+  const name=state.bsModal;
+  if(name==='overlay'){
+    modalStack=modalStack.filter(x=>x!=='overlay');
+    document.getElementById('overlay').classList.remove('open');
+    const stickyCart=document.getElementById('stickyCart');
+    if(stickyCart)stickyCart.classList.remove('modal-hidden');
+    return;
+  }
+  if(name==='cart'){
+    modalStack=modalStack.filter(x=>x!=='cart');
+    document.getElementById('cartDrawer').classList.remove('open');
+    return;
+  }
+  const pending=modalStack.pop();
+  if(pending==='overlay'){
+    document.getElementById('overlay').classList.remove('open');
+    const stickyCart=document.getElementById('stickyCart');
+    if(stickyCart)stickyCart.classList.remove('modal-hidden');
+  }else if(pending==='cart'){
+    document.getElementById('cartDrawer').classList.remove('open');
+  }
 });
 
 function syncOverlayCart(){const p=currentProduct;if(!p)return;const add=document.getElementById('ovAdd'),step=document.getElementById('ovStepper'),qty=document.getElementById('ovQty');const n=cart[p.id]||0;const totalQty=Object.values(cart).reduce((a,b)=>a+b,0);const inCart=n>0;add.style.display=inCart?'none':'block';step.style.display=inCart?'flex':'none';qty.textContent=n||1;add.disabled=p.stock===0;add.textContent=p.stock===0?'Продано':'В корзину';const fc=document.getElementById('overlayCartFloatCount');if(fc)fc.textContent=totalQty}
@@ -878,6 +912,7 @@ function buildChips(id,attr,allLabel,field){
 }
 function syncChips(){/* chips are static, not rebuilt from products */}
 function applySettings(s){
+  try{ const v=s&&s.appLogoVersion; if(v){ const ml=document.querySelector('link[rel=\"manifest\"]'); if(ml) ml.href='manifest.webmanifest?v='+encodeURIComponent(v); const al=document.querySelector('link[rel=\"apple-touch-icon\"]'); if(al) al.href='icons/icon-180.png?v='+encodeURIComponent(v); } }catch(e){}
   if(!s)return;
   siteSettings=Object.assign({},siteSettings,s);
   if(s.about) document.getElementById('aboutText').textContent=s.about;
@@ -899,7 +934,8 @@ function applySettings(s){
 }
 function openFromHash(){
   const m=location.hash.match(/product-(\d+)/); if(!m)return;
-  const p=products.find(x=>x.id===Number(m[1])); if(p) openOverlay(p);
+  const p=products.find(x=>x.id===Number(m[1]));
+  if(p){ openingFromHash=true; openOverlay(p); }
 }
 async function getJSON(url){
   const r=await fetch(url+'?t='+Date.now(),{cache:'no-store'});
@@ -1012,42 +1048,35 @@ if(window.matchMedia('(min-width:900px)').matches){
   });
 }
 </script>
-
-
-
-<script id="pwaServiceWorkerRegister">
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js').catch(function () {});
-  });
-}
-</script>
-
-<script id="pwaInstallScript">
+<script>
 (function(){
-  const btn=document.getElementById('installBtn');
+  const btn=document.getElementById('installAppBtn');
   if(!btn)return;
   let deferredPrompt=null;
-  const standalone=()=>window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;
-  function sync(){ btn.hidden=standalone(); }
-  sync();
-  window.addEventListener('beforeinstallprompt',e=>{
-    e.preventDefault();
-    deferredPrompt=e;
-    sync();
-  });
-  btn.addEventListener('click',async()=>{
-    if(deferredPrompt){
-      deferredPrompt.prompt();
-      try{await deferredPrompt.userChoice}catch(e){}
-      deferredPrompt=null;
-      return;
-    }
-    if(standalone())return;
-    alert('Чтобы установить BRENDSHOP, откройте меню браузера и выберите «Установить приложение» или «Добавить на главный экран».');
-  });
-  window.addEventListener('appinstalled',()=>{deferredPrompt=null;sync();});
+  function isStandalone(){return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;}
+  function browserName(){const ua=navigator.userAgent||'';if(/YaBrowser/i.test(ua))return 'yandex';if(/Edg\//i.test(ua))return 'edge';if(/OPR\//i.test(ua))return 'opera';if(/Chrome\//i.test(ua))return 'chrome';if(/Firefox\//i.test(ua))return 'firefox';if(/Safari\//i.test(ua)&&!/Chrome\//i.test(ua))return 'safari';return 'other';}
+  function showInstallHelp(){
+    const old=document.getElementById('installHelp');if(old)old.remove();
+    const box=document.createElement('div');box.id='installHelp';box.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.72);display:flex;align-items:flex-end;justify-content:center;padding:16px;';
+    const card=document.createElement('div');card.style.cssText='width:min(520px,100%);background:var(--card,#141414);color:var(--fg,#f5f5f0);border:1px solid var(--line,#2a2a2a);border-radius:22px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.5);';
+    const b=browserName();let title='Установить BRENDSHOP';let text='';
+    if(b==='yandex')text='В Яндекс Браузере установка выполняется самим браузером. Если системное окно не открылось, открой меню браузера и выбери «Установить как приложение».';
+    else if(b==='chrome')text='В Chrome установка выполняется самим браузером. Если системное окно не открылось, используй значок установки в адресной строке или меню браузера.';
+    else if(b==='edge')text='В Microsoft Edge установка выполняется самим браузером. Если системное окно не открылось, используй значок приложения в адресной строке или меню браузера.';
+    else if(b==='opera')text='В Opera установка выполняется самим браузером. Если системное окно не открылось, используй пункт установки приложения в меню браузера.';
+    else if(b==='safari'){title='Добавить BRENDSHOP';text='В Safari установку выполняет сам браузер через меню «Поделиться» → «Добавить на Dock» (на Mac) или «На экран Домой» (на iPhone/iPad).';}
+    else if(b==='firefox')text='Этот браузер не всегда предоставляет сайту кнопку автоматической установки PWA. Если пункт установки приложения отсутствует, открой BRENDSHOP в браузере с поддержкой PWA.';
+    else text='Если этот браузер поддерживает установку PWA, он покажет собственную кнопку или пункт установки приложения. Сайт автоматически использует доступный способ.';
+    card.innerHTML='<div style="font-size:22px;font-weight:800;margin-bottom:10px">'+title+'</div><div style="font-size:15px;line-height:1.5;color:var(--muted,#8a8a85);margin-bottom:16px">'+text+'</div><button id="closeInstallHelp" style="width:100%;padding:13px 16px;border:1px solid var(--line,#2a2a2a);border-radius:14px;background:transparent;color:inherit;font-weight:700;font-size:15px">Закрыть</button>';
+    box.appendChild(card);document.body.appendChild(box);document.getElementById('closeInstallHelp').onclick=()=>box.remove();
+  }
+  if(isStandalone()){btn.style.display='none';return;}
+  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;btn.style.display='flex';});
+  window.addEventListener('appinstalled',()=>{deferredPrompt=null;btn.style.display='none';});
+  btn.onclick=async()=>{if(deferredPrompt){try{await deferredPrompt.prompt();await deferredPrompt.userChoice;}catch(e){}deferredPrompt=null;return;}showInstallHelp();};
+  btn.style.display='flex';
 })();
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js?v=4',{scope:'./'}).catch(()=>{});});}
 </script>
 
 </body>

@@ -126,11 +126,13 @@ h1{font-size:22px;font-weight:800}
 
 <div id="login" class="show">
   <h1>Админка BRENDSHOP</h1>
+  <div class="sub">Вход через GitHub: товары и настройки сохраняются прямо в репозиторий сайта</div>
   <label>GitHub Personal Access Token</label>
   <input id="ghToken" type="password" placeholder="github_pat_... или ghp_..." autocomplete="off">
   <label>Репозиторий (пользователь/название)</label>
   <input id="ghRepo" placeholder="например andrei/brendshop">
   <button class="btn" onclick="login()">Войти</button>
+  <div class="hint">Токен создаётся один раз: GitHub → Settings → Developer settings → Personal access tokens. Права: доступ к этому репозиторию, Contents: Read and write. Токен хранится только в этом браузере.</div>
 </div>
 
 <div id="app">
@@ -359,14 +361,14 @@ function onBadgeSel(){$('fBadgeCustom').style.display=$('fBadge').value==='__cus
 function descTemplate(type){
   if(type==='shoe') return `Описание:
 Цвет:
-Страна производитель:
+Страна производитель:Вьетнам 🇻🇳
 Размер:
-Наружный материал:
-Внутренний материал:
-Материал стельки:
-Материал подошвы:
-Сезон:
-Комплект:
+Наружный материал:натуральная кожа
+Внутренний материал:текстиль
+Материал стельки:текстиль
+Материал подошвы:резина
+Сезон:демисезон
+Комплект:коробка, навесная бирка
 По необходимости можно запросить замеры.
 Так же возможно сделать видео.
 Ещё больше моделей, размеров и цветов смотрите на нашем сайте.`;
@@ -499,7 +501,8 @@ async function saveProduct(){
       imgs.push(path);
     }
     btn.textContent='Сохраняю…';
-    // Характеристики необязательны: пустые поля не блокируют сохранение товара.\n    const brand=$('fBrand').value.trim(),type=$('fType').value.trim(),sizes=$('fSizes').value.split(',').map(x=>x.trim()).filter(Boolean),material=$('fMaterial').value.trim(),color=$('fColor').value.trim(),season=$('fSeason').value.trim(),condition=$('fCondition').value.trim();
+    // Характеристики необязательны: пустые поля не блокируют сохранение товара.
+    const brand=$('fBrand').value.trim(),type=$('fType').value.trim(),sizes=$('fSizes').value.split(',').map(x=>x.trim()).filter(Boolean),material=$('fMaterial').value.trim(),color=$('fColor').value.trim(),season=$('fSeason').value.trim(),condition=$('fCondition').value.trim();
     const prod={id:editing==null?Date.now():products[editing].id,name,brand,type,
       price,oldPrice:old,sizes,material,color,season,condition,featured:$('fFeatured').checked,stock:Math.max(0,parseInt($('fStock').value,10)||0),badge:badgeValue(),desc:$('fDesc').value.trim(),description:$('fDesc').value.trim(),imgs};
     const next=products.slice();
@@ -691,7 +694,7 @@ if(st&&sr){$('ghToken').value=st;$('ghRepo').value=sr;login()}
   if(isIOS())btn.style.display='inline-block';
 })();
 if('serviceWorker' in navigator){
-  const ADMIN_SW_VERSION='20261004-11';
+  const ADMIN_SW_VERSION='20261004-12';
   window.addEventListener('load',async()=>{
     try{
       const reg=await navigator.serviceWorker.register('admin-sw.js?v='+ADMIN_SW_VERSION,{updateViaCache:'none'});

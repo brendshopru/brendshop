@@ -5,6 +5,8 @@
 <meta name="robots" content="noindex,nofollow">
 <meta name="color-scheme" content="dark">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="admin-manifest.webmanifest">
+<meta name="theme-color" content="#0b0b0b">
 <title>BRENDSHOP — Админка</title>
 <style>
 :root{--bg:#0b0b0b;--card:#141414;--fg:#f5f5f0;--muted:#8a8a85;--accent:#d4ff3f;--line:#2a2a2a;--red:#ff5c5c;box-sizing:border-box}
@@ -89,6 +91,7 @@ h1{font-size:22px;font-weight:800}
     <button class="tab on" id="tabP" onclick="tab('p')">Товары</button>
     <button class="tab" id="tabS" onclick="tab('s')">Настройки сайта</button>
   </div>
+  <button class="btn sec" id="adminInstallBtn" type="button" style="display:none;margin:0 0 14px">Установить админку</button>
 
   <div id="listBox">
     <div class="stats"><div class="stat"><b id="statAll">0</b><span>товаров</span></div><div class="stat"><b id="statStock">0</b><span>в наличии</span></div><div class="stat"><b id="statSum">0 ₽</b><span>стоимость каталога</span></div></div>
@@ -168,6 +171,14 @@ h1{font-size:22px;font-weight:800}
 </div>
 </div>
 <div id="toast"></div>
+
+<div id="photoViewer" aria-hidden="true">
+<button type="button" class="pvBtn" id="photoViewerClose" aria-label="Закрыть">×</button>
+<button type="button" class="pvBtn" id="photoViewerPrev" aria-label="Предыдущее фото">‹</button>
+<img id="photoViewerImg" alt="Фото товара">
+<button type="button" class="pvBtn" id="photoViewerNext" aria-label="Следующее фото">›</button>
+<div id="photoViewerCount"></div>
+</div>
 
 <script>
 const API='https://api.github.com';
@@ -424,14 +435,34 @@ async function saveSettings(){
 const st=localStorage.getItem('bs_admin_token'),sr=localStorage.getItem('bs_admin_repo');
 if(st&&sr){$('ghToken').value=st;$('ghRepo').value=sr;login()}
 window.addEventListener('popstate',()=>{if($('formBox').classList.contains('show'))closeForm(true)});
+
+// Установка админки как отдельного приложения
+let adminInstallPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();
+  adminInstallPrompt=e;
+  const b=$('adminInstallBtn');
+  if(b)b.style.display='block';
+});
+window.addEventListener('appinstalled',()=>{
+  adminInstallPrompt=null;
+  const b=$('adminInstallBtn');
+  if(b)b.style.display='none';
+});
+$('adminInstallBtn')?.addEventListener('click',async()=>{
+  if(!adminInstallPrompt){
+    toast('Установка пока недоступна в этом браузере. Откройте админку по HTTPS и попробуйте ещё раз.',1);
+    return;
+  }
+  adminInstallPrompt.prompt();
+  const r=await adminInstallPrompt.userChoice;
+  if(r.outcome==='accepted') $('adminInstallBtn').style.display='none';
+  adminInstallPrompt=null;
+});
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('./admin-sw.js',{scope:'./'}).catch(()=>{}));
+}
 </script>
 
-<div id="photoViewer" aria-hidden="true">
-<button type="button" class="pvBtn" id="photoViewerClose" aria-label="Закрыть">×</button>
-<button type="button" class="pvBtn" id="photoViewerPrev" aria-label="Предыдущее фото">‹</button>
-<img id="photoViewerImg" alt="Фото товара">
-<button type="button" class="pvBtn" id="photoViewerNext" aria-label="Следующее фото">›</button>
-<div id="photoViewerCount"></div>
-</div>
 </body>
 </html>

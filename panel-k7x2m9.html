@@ -5,8 +5,11 @@
 <meta name="robots" content="noindex,nofollow">
 <meta name="color-scheme" content="dark">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<link rel="manifest" href="admin-manifest.webmanifest?v=2">
-<link rel="icon" href="icons/admin-icon-192.png?v=2" sizes="192x192" type="image/png">
+<link rel="manifest" href="admin-manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/admin-icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BRENDSHOP Admin">
 <title>BRENDSHOP — Админка</title>
 <style>
 :root{--bg:#0b0b0b;--card:#141414;--fg:#f5f5f0;--muted:#8a8a85;--accent:#d4ff3f;--line:#2a2a2a;--red:#ff5c5c;box-sizing:border-box}
@@ -47,7 +50,6 @@ h1{font-size:22px;font-weight:800}
 .ph .x{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:var(--red);color:#fff;border:none;font-size:12px}
 .ph .n{position:absolute;bottom:3px;left:3px;background:rgba(0,0,0,.65);font-size:10px;padding:1px 5px;border-radius:4px}
 .ph .mv{position:absolute;bottom:3px;right:3px;background:rgba(0,0,0,.65);color:#fff;border:none;font-size:11px;padding:1px 6px;border-radius:4px}
-
 /* Product photo viewer */
 #photoViewer{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:1000;align-items:center;justify-content:center;padding:24px;touch-action:none}
 #photoViewer.open{display:flex}
@@ -59,6 +61,7 @@ h1{font-size:22px;font-weight:800}
 #photoViewerCount{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);color:#fff;background:rgba(0,0,0,.55);padding:6px 10px;border-radius:999px;font-size:12px}
 .ph img,.row img{cursor:pointer}
 @media(max-width:520px){#photoViewer{padding:12px}#photoViewerImg{max-width:94vw;max-height:82vh}#photoViewer .pvBtn{width:42px;height:42px;font-size:24px;line-height:42px}#photoViewerPrev{left:8px}#photoViewerNext{right:8px}}
+
 #login,#app,#formBox,#setBox{display:none}
 #login.show,#app.show,#formBox.show,#setBox.show{display:block}
 #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--line);padding:12px 18px;border-radius:12px;font-size:13px;z-index:50;opacity:0;transition:opacity .25s;pointer-events:none;max-width:90vw}
@@ -87,7 +90,7 @@ h1{font-size:22px;font-weight:800}
 <div id="app">
   <div class="top">
     <div><h1>BRENDSHOP</h1><div class="sub" id="repoLabel"></div></div>
-    <button class="btn sec sm" onclick="logout()">Выйти</button>
+    <div style="display:flex;gap:8px;align-items:center"><button class="btn sec sm" id="installAdminBtn" type="button" style="display:none">⌂ Установить</button><button class="btn sec sm" onclick="logout()">Выйти</button></div>
   </div>
   <div class="tabs">
     <button class="tab on" id="tabP" onclick="tab('p')">Товары</button>
@@ -115,7 +118,7 @@ h1{font-size:22px;font-weight:800}
       <div><label>Размеры</label><input id="fSizes" placeholder="M, L, XL или 42, 43, 44"></div>
       <div><label>Витрина</label><label class="switch"><input type="checkbox" id="fFeatured"> Показывать как рекомендованный товар</label></div>
     </div>
-    <div class="char-required"><div class="char-required-title">Характеристики товара <span style="color:var(--muted);font-weight:500">(необязательно)</span></div><div class="hint" style="margin-top:4px">Можно заполнить при необходимости. Сохранение товара без характеристик разрешено.</div></div>
+    <div class="char-required"><div class="char-required-title">Характеристики товара</div><div class="hint" style="margin-top:4px">Заполни эти поля — они будут показаны покупателю в карточке товара.</div></div>
     <div class="g2">
       <div><label>Материал</label><input id="fMaterial" placeholder="Хлопок"></div>
       <div><label>Цвет</label><input id="fColor" placeholder="Коричневый"></div>
@@ -303,6 +306,7 @@ function onBadgeSel(){$('fBadgeCustom').style.display=$('fBadge').value==='__cus
 function descTemplate(type){
   if(type==='shoe') return `Описание:
 Цвет:
+Качество:
 Страна производитель:
 Размер:
 Наружный материал:
@@ -316,6 +320,7 @@ function descTemplate(type){
 Ещё больше моделей, размеров и цветов смотрите на нашем сайте.`;
   return `Описание:
 Цвет:
+Качество:
 Страна производитель:
 Размер:
 Состав:
@@ -419,7 +424,6 @@ function compress(file){
 }
 
 async function saveProduct(){
-  // Характеристики товара НЕ являются обязательными: material/color/season/condition/sizes/brand/type могут быть пустыми.
   const name=$('fName').value.trim(),price=+$('fPrice').value,old=+$('fOld').value||null;
   if(!name){toast('Введите название',1);return}
   if(!price){toast('Введите цену',1);return}
@@ -440,7 +444,7 @@ async function saveProduct(){
     const prod={id:editing==null?Date.now():products[editing].id,name,brand,type,
       price,oldPrice:old,sizes,material,color,season,condition,featured:$('fFeatured').checked,stock:Math.max(0,parseInt($('fStock').value,10)||0),badge:badgeValue(),desc:$('fDesc').value.trim(),description:$('fDesc').value.trim(),imgs};
     const next=products.slice();
-    if(editing==null) next.push(prod); else next[editing]=prod;
+    if(editing==null) next.unshift(prod); else next[editing]=prod;
     pSha=await saveJSON('products.json',next,pSha,editing==null?'add product':'edit product');
     products=next;
     toast('Сохранено. На сайте появится через 1–2 минуты');
@@ -583,6 +587,36 @@ async function saveSettings(){
 
 const st=localStorage.getItem('bs_admin_token'),sr=localStorage.getItem('bs_admin_repo');
 if(st&&sr){$('ghToken').value=st;$('ghRepo').value=sr;login()}
+</script>
+<script>
+(function(){
+  const btn=document.getElementById('installAdminBtn');
+  if(!btn)return;
+  let deferredPrompt=null;
+  const standalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
+  if(standalone){btn.style.display='none';return;}
+  function isIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent);}
+  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;btn.style.display='inline-block';});
+  // Не скрываем кнопку на ПК, если Chrome пока не прислал beforeinstallprompt.
+  // Если событие доступно — ниже будет вызвано именно системное окно установки.
+  if(!isIOS()) btn.style.display='inline-block';
+  window.addEventListener('appinstalled',()=>{deferredPrompt=null;btn.style.display='none';});
+  btn.onclick=async()=>{
+    if(deferredPrompt){
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt=null;
+      return;
+    }
+    if(isIOS()){
+      alert('На iPhone: нажмите «Поделиться» в Safari → «Ещё» → «На экран Домой» → «Добавить».');
+    }else{
+      alert('Откройте меню браузера и выберите «Установить приложение» или «Добавить на главный экран».');
+    }
+  };
+  if(isIOS())btn.style.display='inline-block';
+})();
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('admin-sw.js').catch(()=>{}));}
 </script>
 </body>
 </html>

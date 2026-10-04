@@ -256,20 +256,8 @@ function renderList(){
       </div></div>`}).join('')||'<div class="sub">Ничего не найдено</div>';
 }
 
-let adminHistoryReady=false;
-function ensureAdminHistory(){
-  if(adminHistoryReady)return;
-  const st=(history.state&&typeof history.state==='object')?history.state:{};
-  if(!st.bsAdminBase){try{history.replaceState({...st,bsAdminBase:true},'')}catch(e){}}
-  adminHistoryReady=true;
-}
-function pushAdminHistory(view){
-  ensureAdminHistory();
-  try{history.pushState({bsAdmin:view},'')}catch(e){}
-}
+let adminFormHistory=false;
 function openForm(i){
-  ensureAdminHistory();
-  if(!(history.state&&history.state.bsAdmin==='form'))pushAdminHistory('form');
   editing=i;const p=i==null?{}:products[i];
   $('formTitle').textContent=i==null?'Новый товар':'Изменить товар';
   $('fName').value=p.name||'';$('fBrand').value=p.brand||'';$('fType').value=p.type||'';
@@ -282,11 +270,9 @@ function openForm(i){
   formImgs=(p.imgs||[]).filter(u=>!u.startsWith('data:')).map(u=>({url:u}));
   $('fPhotos').value='';renderPhotos();discHint();
   $('listBox').style.display='none';$('formBox').classList.add('show');scrollTo(0,0);
+  try{history.pushState({bsAdmin:'form'},'',location.href);adminFormHistory=true}catch(e){adminFormHistory=false}
 }
-function closeForm(fromPop){
-  $('formBox').classList.remove('show');$('listBox').style.display='block';
-  if(!fromPop&&history.state&&history.state.bsAdmin==='form'){try{history.back()}catch(e){}}
-}
+function closeForm(fromPop){$('formBox').classList.remove('show');$('listBox').style.display='block';if(!fromPop&&adminFormHistory){adminFormHistory=false;try{history.back()}catch(e){}}}
 function onBadgeSel(){$('fBadgeCustom').style.display=$('fBadge').value==='__custom'?'block':'none'}
 function descTemplate(type){
   if(type==='shoe') return `Описание:
@@ -418,12 +404,7 @@ async function saveSettings(){
 
 const st=localStorage.getItem('bs_admin_token'),sr=localStorage.getItem('bs_admin_repo');
 if(st&&sr){$('ghToken').value=st;$('ghRepo').value=sr;login()}
-
-window.addEventListener('popstate',e=>{
-  const view=e.state&&e.state.bsAdmin;
-  if(view==='form')return;
-  if($('formBox').classList.contains('show'))closeForm(true);
-});
+window.addEventListener('popstate',()=>{if($('formBox').classList.contains('show'))closeForm(true)});
 </script>
 </body>
 </html>

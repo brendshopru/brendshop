@@ -38,7 +38,7 @@ h1{font-size:22px;font-weight:800}
 .row img{width:54px;height:68px;object-fit:cover;border-radius:8px;background:#1c1c1c;flex-shrink:0}
 .row .meta{flex:1;min-width:0}
 .row .name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.row .sub2{font-size:12px;color:var(--muted);margin-top:2px}
+.row .sub2{font-size:12px;color:var(--muted);margin-top:2px}.row .edited{font-size:10px;color:var(--muted);margin-top:4px;opacity:.9}
 .row .pr{font-size:13px;color:var(--accent);font-weight:700;margin-top:3px}
 .row .pr s{color:var(--muted);font-weight:400;margin-right:6px}
 .acts{display:flex;flex-direction:column;gap:6px}
@@ -93,7 +93,7 @@ h1{font-size:22px;font-weight:800}
   .row{display:grid;grid-template-columns:58px minmax(0,1fr);gap:10px;padding:10px;margin-bottom:9px;align-items:start}
   .row img{width:58px;height:72px}
   .row .name{font-size:14px;white-space:normal;line-height:1.25}
-  .row .sub2{font-size:11px;line-height:1.35}
+  .row .sub2{font-size:11px;line-height:1.35}.row .edited{font-size:10px;line-height:1.3}
   .row .pr{font-size:13px}
   .acts{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;padding-top:2px}
   .acts .btn{min-height:40px;padding:9px 8px;font-size:12px}
@@ -316,6 +316,12 @@ function fillLists(){
   $('types').innerHTML=[...new Set([...base.types,...u('type')])].map(x=>`<option value="${esc(x)}">`).join('');
 }
 const fmt=n=>Number(n).toLocaleString('ru-RU')+' ₽';
+function editedLabel(v){
+  if(!v)return '';
+  const d=new Date(v);
+  if(Number.isNaN(d.getTime()))return '';
+  return '🕒 Изменён '+d.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'})+' в '+d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+}
 function renderList(){
   const q=$('q').value.toLowerCase().trim();
   const status=$('statusFilter')?.value||'all'; const list=products.map((p,i)=>({p,i})).filter(({p})=>{const hay=(p.name+' '+(p.brand||'')+' '+(p.type||'')).toLowerCase(); if(!hay.includes(q))return false; if(status==='stock'&&!(p.stock>0))return false; if(status==='sold'&&p.stock!==0)return false; if(status==='sale'&&!(p.oldPrice&&p.oldPrice>p.price))return false; if(status==='featured'&&!p.featured)return false; return true;});
@@ -325,7 +331,7 @@ function renderList(){
     return `<div class="row">
       <img loading="lazy" src="${esc(photoUrl(p.imgs&&p.imgs[0]))}" alt="" onclick="event.stopPropagation();openListPhotoViewer(${i})" style="cursor:pointer">
       <div class="meta"><div class="name">${esc(p.name)}${st}</div>
-        <div class="sub2">${esc(p.brand||'—')} · ${esc(p.type||'—')}</div>${p.featured?'<div class="featured">★ В рекомендациях</div>': ''}
+        <div class="sub2">${esc(p.brand||'—')} · ${esc(p.type||'—')}</div>${p.editedAt?`<div class="edited">${esc(editedLabel(p.editedAt))}</div>`:''}${p.featured?'<div class="featured">★ В рекомендациях</div>': ''}
         <div class="pr">${p.oldPrice?`<s>${fmt(p.oldPrice)}</s>`:''}${fmt(p.price)}</div></div>
       <div class="acts">
         <button class="btn sm" onclick="openForm(${i})">Изменить</button>
@@ -344,6 +350,7 @@ function resetFilters(){
 
 function openForm(i){
   editing=i;const p=i==null?{}:products[i];
+  if(!formHistory){history.pushState({brendshopForm:true},'');formHistory=true;}
   $('formTitle').textContent=i==null?'Новый товар':'Изменить товар';
   $('fName').value=p.name||'';$('fBrand').value=p.brand||'';$('fType').value=p.type||'';
   $('fPrice').value=p.price||'';$('fOld').value=p.oldPrice||'';$('fSizes').value=Array.isArray(p.sizes)?p.sizes.join(', '):'';$('fFeatured').checked=!!p.featured;
@@ -356,7 +363,11 @@ function openForm(i){
   $('fPhotos').value='';renderPhotos();discHint();
   $('listBox').style.display='none';$('formBox').classList.add('show');scrollTo(0,0);
 }
-function closeForm(){$('formBox').classList.remove('show');$('listBox').style.display='block'}
+function closeForm(fromPop=false){
+  if(!$('formBox').classList.contains('show'))return;
+  $('formBox').classList.remove('show');$('listBox').style.display='block';
+  if(!fromPop && formHistory){formHistory=false;history.back();}else{formHistory=false;}
+}
 function onBadgeSel(){$('fBadgeCustom').style.display=$('fBadge').value==='__custom'?'block':'none'}
 function descTemplate(type){
   if(type==='shoe') return `Описание:
@@ -398,6 +409,7 @@ function renderPhotos(){
 }
 let photoViewerIndex=0;
 let photoViewerHistory=false;
+let formHistory=false;
 function photoUrl(v){
   const u=typeof v==='string'?v:(v&&typeof v==='object'?(v.url||v.src||v.preview||''):'');
   if(!u)return '';
@@ -456,7 +468,8 @@ document.addEventListener('keydown',e=>{
   else if(e.key==='ArrowRight')photoViewerNav(1);
 });
 window.addEventListener('popstate',()=>{
-  if($('photoViewer').classList.contains('open'))closePhotoViewer(true);
+  if($('photoViewer').classList.contains('open')){closePhotoViewer(true);return;}
+  if($('formBox').classList.contains('show'))closeForm(true);
 });
 let pvTouchX=0;
 $('photoViewer').addEventListener('touchstart',e=>{pvTouchX=e.changedTouches[0].clientX},{passive:true});
@@ -504,7 +517,7 @@ async function saveProduct(){
     // Характеристики необязательны: пустые поля не блокируют сохранение товара.
     const brand=$('fBrand').value.trim(),type=$('fType').value.trim(),sizes=$('fSizes').value.split(',').map(x=>x.trim()).filter(Boolean),material=$('fMaterial').value.trim(),color=$('fColor').value.trim(),season=$('fSeason').value.trim(),condition=$('fCondition').value.trim();
     const prod={id:editing==null?Date.now():products[editing].id,name,brand,type,
-      price,oldPrice:old,sizes,material,color,season,condition,featured:$('fFeatured').checked,stock:Math.max(0,parseInt($('fStock').value,10)||0),badge:badgeValue(),desc:$('fDesc').value.trim(),description:$('fDesc').value.trim(),imgs};
+      price,oldPrice:old,sizes,material,color,season,condition,featured:$('fFeatured').checked,stock:Math.max(0,parseInt($('fStock').value,10)||0),badge:badgeValue(),desc:$('fDesc').value.trim(),description:$('fDesc').value.trim(),imgs,editedAt:new Date().toISOString()};
     const next=products.slice();
     if(editing==null) next.push(prod); else next[editing]=prod;
     pSha=await saveJSON('products.json',next,pSha,editing==null?'add product':'edit product');
@@ -694,7 +707,7 @@ if(st&&sr){$('ghToken').value=st;$('ghRepo').value=sr;login()}
   if(isIOS())btn.style.display='inline-block';
 })();
 if('serviceWorker' in navigator){
-  const ADMIN_SW_VERSION='20261004-12';
+  const ADMIN_SW_VERSION='20261004-13';
   window.addEventListener('load',async()=>{
     try{
       const reg=await navigator.serviceWorker.register('admin-sw.js?v='+ADMIN_SW_VERSION,{updateViaCache:'none'});

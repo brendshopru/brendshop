@@ -51,7 +51,7 @@ h1{font-size:22px;font-weight:800}
 /* Product photo viewer */
 #photoViewer{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:1000;align-items:center;justify-content:center;padding:24px;touch-action:none}
 #photoViewer.open{display:flex}
-#photoViewerImg{max-width:min(88vw,1100px);max-height:86vh;width:auto;height:auto;object-fit:contain;border-radius:12px;user-select:none;-webkit-user-drag:none}
+#photoViewerImg{pointer-events:none;max-width:min(88vw,1100px);max-height:86vh;width:auto;height:auto;object-fit:contain;border-radius:12px;user-select:none;-webkit-user-drag:none}
 #photoViewer .pvBtn{position:absolute;border:0;background:rgba(255,255,255,.12);color:#fff;width:46px;height:46px;border-radius:50%;font-size:28px;line-height:46px;text-align:center;cursor:pointer}
 #photoViewerClose{right:18px;top:18px}
 #photoViewerPrev{left:18px;top:50%;transform:translateY(-50%)}
@@ -336,7 +336,7 @@ function discHint(){
 $('fPrice').oninput=$('fOld').oninput=discHint;
 function renderPhotos(){
   $('photoCount').textContent=formImgs.length?`Фото добавлено: ${formImgs.length}`:'Фото ещё не добавлены';
-  $('photos').innerHTML=formImgs.map((im,i)=>`<div class="ph"><img src="${esc(im.preview||im.url)}" alt="Фото ${i+1}" onclick="openPhotoViewer(${i})"><button type="button" class="x" onclick="rmPhoto(${i})">✕</button><span class="n">${i+1}</span>${i>0?`<button type="button" class="mv" onclick="mvPhoto(${i})">◀</button>`:''}</div>`).join('');
+  $('photos').innerHTML=formImgs.map((im,i)=>`<div class="ph"><img class="photoThumb" data-photo-index="${i}" src="${esc(im.preview||im.url)}" alt="Фото ${i+1}"><button type="button" class="x" data-photo-remove="${i}">✕</button><span class="n">${i+1}</span>${i>0?`<button type="button" class="mv" data-photo-move="${i}">◀</button>`:''}</div>`).join('');
 }
 let photoViewerIndex=0;
 function openPhotoViewer(i){
@@ -368,6 +368,26 @@ $('photoViewerClose').onclick=closePhotoViewer;
 $('photoViewerPrev').onclick=()=>photoViewerNav(-1);
 $('photoViewerNext').onclick=()=>photoViewerNav(1);
 $('photoViewer').onclick=e=>{if(e.target===$('photoViewer'))closePhotoViewer()};
+$('photos').addEventListener('click',e=>{
+  const thumb=e.target.closest('[data-photo-index]');
+  if(thumb){e.preventDefault();e.stopPropagation();openPhotoViewer(Number(thumb.dataset.photoIndex));return}
+  const rm=e.target.closest('[data-photo-remove]');
+  if(rm){e.preventDefault();e.stopPropagation();rmPhoto(Number(rm.dataset.photoRemove));return}
+  const mv=e.target.closest('[data-photo-move]');
+  if(mv){e.preventDefault();e.stopPropagation();mvPhoto(Number(mv.dataset.photoMove));return}
+});
+$('list').addEventListener('click',e=>{
+  const img=e.target.closest('.row img');
+  if(!img)return;
+  const row=img.closest('.row');
+  const rows=[...$('list').querySelectorAll('.row')];
+  const idx=rows.indexOf(row);
+  const item=products.find((p)=>p.imgs&&p.imgs[0]===img.getAttribute('src'));
+  if(item&&item.imgs&&item.imgs.length){
+    formImgs=item.imgs.filter(u=>typeof u==='string'&&u).map(u=>({url:u}));
+    photoViewerIndex=0;updatePhotoViewer();$('photoViewer').classList.add('open');$('photoViewer').setAttribute('aria-hidden','false');document.body.style.overflow='hidden';
+  }else if(idx>=0){openForm(idx)}
+});
 document.addEventListener('keydown',e=>{
   if(!$('photoViewer').classList.contains('open'))return;
   if(e.key==='Escape')closePhotoViewer();

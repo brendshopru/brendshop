@@ -99,7 +99,7 @@ h1{font-size:22px;font-weight:800}
 
   <div id="listBox">
     <div class="stats"><div class="stat"><b id="statAll">0</b><span>товаров</span></div><div class="stat"><b id="statStock">0</b><span>в наличии</span></div><div class="stat"><b id="statSum">0 ₽</b><span>стоимость каталога</span></div></div>
-    <div class="toolbar"><input id="q" placeholder="Поиск по названию, бренду или типу" oninput="renderList()"> <select id="statusFilter" onchange="renderList()"><option value="all">Все товары</option><option value="stock">В наличии</option><option value="sold">Проданные</option><option value="sale">Со скидкой</option><option value="featured">Рекомендованные</option></select><select id="sort" onchange="renderList()"><option value="order">Порядок сайта</option><option value="new">Сначала новые</option><option value="priceUp">Цена ↑</option><option value="priceDown">Цена ↓</option><option value="stock">Остаток ↑</option></select></div>
+    <div class="toolbar"><input id="q" placeholder="Поиск по названию, бренду или типу" oninput="renderList()"> <select id="statusFilter" onchange="renderList()"><option value="all">Все товары</option><option value="stock">В наличии</option><option value="sold">Проданные</option><option value="sale">Со скидкой</option><option value="featured">Рекомендованные</option></select><select id="sort" onchange="renderList()"><option value="order">Порядок сайта</option><option value="new">Сначала новые</option><option value="priceUp">Цена ↑</option><option value="priceDown">Цена ↓</option><option value="stock">Остаток ↑</option></select><button class="btn sec sm" type="button" onclick="resetFilters()">Сбросить</button></div>
     <div class="count" id="count"></div>
     <div id="list"></div>
     <button class="btn" onclick="openForm(null)">+ Добавить товар</button>
@@ -118,7 +118,7 @@ h1{font-size:22px;font-weight:800}
       <div><label>Размеры</label><input id="fSizes" placeholder="M, L, XL или 42, 43, 44"></div>
       <div><label>Витрина</label><label class="switch"><input type="checkbox" id="fFeatured"> Показывать как рекомендованный товар</label></div>
     </div>
-    <div class="char-required"><div class="char-required-title">Характеристики товара</div><div class="hint" style="margin-top:4px">Заполни эти поля — они будут показаны покупателю в карточке товара.</div></div>
+    <div class="char-required"><div class="char-required-title">Характеристики товара <span style="color:var(--muted);font-weight:500">(необязательно)</span></div><div class="hint" style="margin-top:4px">Заполни эти поля — они будут показаны покупателю в карточке товара.</div></div>
     <div class="g2">
       <div><label>Материал</label><input id="fMaterial" placeholder="Хлопок"></div>
       <div><label>Цвет</label><input id="fColor" placeholder="Коричневый"></div>
@@ -287,6 +287,13 @@ function renderList(){
       </div></div>`}).join('')||'<div class="sub">Ничего не найдено</div>';
 }
 
+function resetFilters(){
+  $('q').value='';
+  $('statusFilter').value='all';
+  $('sort').value='order';
+  renderList();
+}
+
 function openForm(i){
   editing=i;const p=i==null?{}:products[i];
   $('formTitle').textContent=i==null?'Новый товар':'Изменить товар';
@@ -306,7 +313,6 @@ function onBadgeSel(){$('fBadgeCustom').style.display=$('fBadge').value==='__cus
 function descTemplate(type){
   if(type==='shoe') return `Описание:
 Цвет:
-Качество:
 Страна производитель:
 Размер:
 Наружный материал:
@@ -320,7 +326,6 @@ function descTemplate(type){
 Ещё больше моделей, размеров и цветов смотрите на нашем сайте.`;
   return `Описание:
 Цвет:
-Качество:
 Страна производитель:
 Размер:
 Состав:
@@ -444,7 +449,7 @@ async function saveProduct(){
     const prod={id:editing==null?Date.now():products[editing].id,name,brand,type,
       price,oldPrice:old,sizes,material,color,season,condition,featured:$('fFeatured').checked,stock:Math.max(0,parseInt($('fStock').value,10)||0),badge:badgeValue(),desc:$('fDesc').value.trim(),description:$('fDesc').value.trim(),imgs};
     const next=products.slice();
-    if(editing==null) next.unshift(prod); else next[editing]=prod;
+    if(editing==null) next.push(prod); else next[editing]=prod;
     pSha=await saveJSON('products.json',next,pSha,editing==null?'add product':'edit product');
     products=next;
     toast('Сохранено. На сайте появится через 1–2 минуты');

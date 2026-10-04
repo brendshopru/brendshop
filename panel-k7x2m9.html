@@ -5,8 +5,11 @@
 <meta name="robots" content="noindex,nofollow">
 <meta name="color-scheme" content="dark">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<link rel="manifest" href="admin-manifest.webmanifest?v=2">
-<link rel="icon" href="icons/admin-icon-192.png?v=2" sizes="192x192" type="image/png">
+<link rel="manifest" href="admin-manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/admin-icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BRENDSHOP Admin">
 <title>BRENDSHOP — Админка</title>
 <style>
 :root{--bg:#0b0b0b;--card:#141414;--fg:#f5f5f0;--muted:#8a8a85;--accent:#d4ff3f;--line:#2a2a2a;--red:#ff5c5c;box-sizing:border-box}
@@ -47,18 +50,6 @@ h1{font-size:22px;font-weight:800}
 .ph .x{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:var(--red);color:#fff;border:none;font-size:12px}
 .ph .n{position:absolute;bottom:3px;left:3px;background:rgba(0,0,0,.65);font-size:10px;padding:1px 5px;border-radius:4px}
 .ph .mv{position:absolute;bottom:3px;right:3px;background:rgba(0,0,0,.65);color:#fff;border:none;font-size:11px;padding:1px 6px;border-radius:4px}
-
-/* Product photo viewer */
-#photoViewer{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:1000;align-items:center;justify-content:center;padding:24px;touch-action:none}
-#photoViewer.open{display:flex}
-#photoViewerImg{max-width:min(88vw,1100px);max-height:86vh;width:auto;height:auto;object-fit:contain;border-radius:12px;user-select:none;-webkit-user-drag:none}
-#photoViewer .pvBtn{position:absolute;border:0;background:rgba(255,255,255,.12);color:#fff;width:46px;height:46px;border-radius:50%;font-size:28px;line-height:46px;text-align:center;cursor:pointer}
-#photoViewerClose{right:18px;top:18px}
-#photoViewerPrev{left:18px;top:50%;transform:translateY(-50%)}
-#photoViewerNext{right:18px;top:50%;transform:translateY(-50%)}
-#photoViewerCount{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);color:#fff;background:rgba(0,0,0,.55);padding:6px 10px;border-radius:999px;font-size:12px}
-.ph img,.row img{cursor:pointer}
-@media(max-width:520px){#photoViewer{padding:12px}#photoViewerImg{max-width:94vw;max-height:82vh}#photoViewer .pvBtn{width:42px;height:42px;font-size:24px;line-height:42px}#photoViewerPrev{left:8px}#photoViewerNext{right:8px}}
 #login,#app,#formBox,#setBox{display:none}
 #login.show,#app.show,#formBox.show,#setBox.show{display:block}
 #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--line);padding:12px 18px;border-radius:12px;font-size:13px;z-index:50;opacity:0;transition:opacity .25s;pointer-events:none;max-width:90vw}
@@ -87,7 +78,7 @@ h1{font-size:22px;font-weight:800}
 <div id="app">
   <div class="top">
     <div><h1>BRENDSHOP</h1><div class="sub" id="repoLabel"></div></div>
-    <button class="btn sec sm" onclick="logout()">Выйти</button>
+    <div style="display:flex;gap:8px;align-items:center"><button class="btn sec sm" id="installAdminBtn" type="button" style="display:none">⌂ Установить</button><button class="btn sec sm" onclick="logout()">Выйти</button></div>
   </div>
   <div class="tabs">
     <button class="tab on" id="tabP" onclick="tab('p')">Товары</button>
@@ -164,26 +155,12 @@ h1{font-size:22px;font-weight:800}
     <label>Текст «О магазине»</label>
     <textarea id="sAbout" rows="4" placeholder="BRENDSHOP — это оригинальная одежда..."></textarea>
     <label>Текст блока «Как заказать»</label><textarea id="sHow" rows="4" placeholder="Выберите товар → добавьте в корзину → напишите нам → получите заказ"></textarea>
-    <label>Название приложения</label>
-    <input id="sAppName" value="BRENDSHOP" placeholder="BRENDSHOP">
-    <label>Логотип приложения</label>
-    <input id="sLogoFile" type="file" accept="image/png,image/jpeg,image/webp">
-    <div id="sLogoPreview" style="margin-top:8px;width:96px;height:96px;border-radius:18px;overflow:hidden;background:#0b0b0b;border:1px solid var(--line);display:flex;align-items:center;justify-content:center"><img src="icons/icon-192.png?v=2" alt="Логотип" style="width:100%;height:100%;object-fit:cover"></div>
-    <div class="hint">Выберите иконку приложения здесь. После сохранения она автоматически станет иконкой BRENDSHOP при установке на телефон и обновит иконку админки.</div>
-    <div id="logoSaveStatus" class="admin-note" style="display:none;margin-top:8px"></div>
     <label>Строка с рейтингом/отзывами</label>
     <input id="sReviews" placeholder="39 отзывов на Авито · 108 подписчиков">
     <button class="btn" id="saveSetBtn" onclick="saveSettings()">Сохранить настройки</button>
     <div class="hint">Изменения появляются на сайте через 1–2 минуты после сохранения.</div>
   </div>
 </div>
-</div>
-<div id="photoViewer" aria-hidden="true">
-  <button type="button" class="pvBtn" id="photoViewerClose" aria-label="Закрыть">×</button>
-  <button type="button" class="pvBtn" id="photoViewerPrev" aria-label="Предыдущее фото">‹</button>
-  <img id="photoViewerImg" alt="Фото товара">
-  <button type="button" class="pvBtn" id="photoViewerNext" aria-label="Следующее фото">›</button>
-  <div id="photoViewerCount"></div>
 </div>
 <div id="toast"></div>
 
@@ -272,7 +249,7 @@ function renderList(){
   $('list').innerHTML=list.map(({p,i})=>{
     const st=p.stock===0?'<span class="tag sold">Продано</span>':(p.stock!=null&&p.stock<=2?`<span class="tag low">Осталось ${p.stock}</span>`:'');
     return `<div class="row">
-      <img loading="lazy" src="${esc((p.imgs&&p.imgs[0])||'')}" alt="" onclick="event.stopPropagation();openListPhotoViewer(${i})" style="cursor:pointer">
+      <img loading="lazy" src="${esc((p.imgs&&p.imgs[0])||'')}" alt="">
       <div class="meta"><div class="name">${esc(p.name)}${st}</div>
         <div class="sub2">${esc(p.brand||'—')} · ${esc(p.type||'—')}</div>${p.featured?'<div class="featured">★ В рекомендациях</div>': ''}
         <div class="pr">${p.oldPrice?`<s>${fmt(p.oldPrice)}</s>`:''}${fmt(p.price)}</div></div>
@@ -303,6 +280,7 @@ function onBadgeSel(){$('fBadgeCustom').style.display=$('fBadge').value==='__cus
 function descTemplate(type){
   if(type==='shoe') return `Описание:
 Цвет:
+Качество:
 Страна производитель:
 Размер:
 Наружный материал:
@@ -316,6 +294,7 @@ function descTemplate(type){
 Ещё больше моделей, размеров и цветов смотрите на нашем сайте.`;
   return `Описание:
 Цвет:
+Качество:
 Страна производитель:
 Размер:
 Состав:
@@ -336,65 +315,8 @@ function discHint(){
 $('fPrice').oninput=$('fOld').oninput=discHint;
 function renderPhotos(){
   $('photoCount').textContent=formImgs.length?`Фото добавлено: ${formImgs.length}`:'Фото ещё не добавлены';
-  $('photos').innerHTML=formImgs.map((im,i)=>`<div class="ph"><img src="${esc(im.preview||im.url)}" alt="Фото ${i+1}" onclick="openPhotoViewer(${i})"><button type="button" class="x" onclick="rmPhoto(${i})">✕</button><span class="n">${i+1}</span>${i>0?`<button type="button" class="mv" onclick="mvPhoto(${i})">◀</button>`:''}</div>`).join('');
+  $('photos').innerHTML=formImgs.map((im,i)=>`<div class="ph"><img src="${esc(im.preview||im.url)}"><button class="x" onclick="rmPhoto(${i})">✕</button><span class="n">${i+1}</span>${i>0?`<button class="mv" onclick="mvPhoto(${i})">◀</button>`:''}</div>`).join('');
 }
-let photoViewerIndex=0;
-let photoViewerHistory=false;
-function openListPhotoViewer(i){
-  const p=products[i];
-  if(!p||!Array.isArray(p.imgs)||!p.imgs.length)return;
-  formImgs=p.imgs.filter(u=>typeof u==='string'&&u).map(u=>({url:u}));
-  openPhotoViewer(0);
-}
-function openPhotoViewer(i){
-  if(!formImgs.length)return;
-  photoViewerIndex=Math.max(0,Math.min(i,formImgs.length-1));
-  updatePhotoViewer();
-  $('photoViewer').classList.add('open');
-  $('photoViewer').setAttribute('aria-hidden','false');
-  document.body.style.overflow='hidden';
-  if(!photoViewerHistory){history.pushState({brendshopPhotoViewer:true},'');photoViewerHistory=true;}
-}
-function updatePhotoViewer(){
-  const im=formImgs[photoViewerIndex];
-  if(!im)return;
-  $('photoViewerImg').src=im.preview||im.url||'';
-  $('photoViewerCount').textContent=`${photoViewerIndex+1} / ${formImgs.length}`;
-}
-function closePhotoViewer(fromPop=false){
-  if(!$('photoViewer').classList.contains('open'))return;
-  $('photoViewer').classList.remove('open');
-  $('photoViewer').setAttribute('aria-hidden','true');
-  $('photoViewerImg').removeAttribute('src');
-  document.body.style.overflow='';
-  if(!fromPop && photoViewerHistory){
-    photoViewerHistory=false;
-    history.back();
-  }else{
-    photoViewerHistory=false;
-  }
-}
-function photoViewerNav(dir){
-  if(!formImgs.length)return;
-  photoViewerIndex=(photoViewerIndex+dir+formImgs.length)%formImgs.length;
-  updatePhotoViewer();
-}
-$('photoViewerClose').onclick=closePhotoViewer;
-$('photoViewerPrev').onclick=()=>photoViewerNav(-1);
-$('photoViewerNext').onclick=()=>photoViewerNav(1);
-$('photoViewer').onclick=e=>{if(e.target===$('photoViewer'))closePhotoViewer()};
-document.addEventListener('keydown',e=>{
-  if(!$('photoViewer').classList.contains('open'))return;
-  if(e.key==='Escape')closePhotoViewer();
-  else if(e.key==='ArrowLeft')photoViewerNav(-1);
-  else if(e.key==='ArrowRight')photoViewerNav(1);
-});
-window.addEventListener('popstate',()=>{
-  if($('photoViewer').classList.contains('open'))closePhotoViewer(true);
-});
-let pvTouchX=0;
-$('photoViewer').addEventListener('touchstart',e=>{pvTouchX=e.changedTouches[0].clientX},{passive:true});
-$('photoViewer').addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-pvTouchX;if(Math.abs(dx)>50)photoViewerNav(dx<0?1:-1)},{passive:true});
 function rmPhoto(i){formImgs.splice(i,1);renderPhotos()}
 function mvPhoto(i){const t=formImgs[i];formImgs[i]=formImgs[i-1];formImgs[i-1]=t;renderPhotos()}
 $('fPhotos').onchange=async e=>{
@@ -436,10 +358,12 @@ async function saveProduct(){
     }
     btn.textContent='Сохраняю…';
     const brand=$('fBrand').value.trim(),type=$('fType').value.trim(),sizes=$('fSizes').value.split(',').map(x=>x.trim()).filter(Boolean),material=$('fMaterial').value.trim(),color=$('fColor').value.trim(),season=$('fSeason').value.trim(),condition=$('fCondition').value.trim();
+    const missing=[['Бренд',brand],['Тип',type],['Размеры',sizes.join(', ')],['Материал',material],['Цвет',color],['Сезон',season],['Состояние',condition]].filter(x=>!x[1]).map(x=>x[0]);
+    if(missing.length){toast('Заполни характеристики: '+missing.join(', '),1);btn.disabled=false;btn.textContent='Сохранить товар';return}
     const prod={id:editing==null?Date.now():products[editing].id,name,brand,type,
       price,oldPrice:old,sizes,material,color,season,condition,featured:$('fFeatured').checked,stock:Math.max(0,parseInt($('fStock').value,10)||0),badge:badgeValue(),desc:$('fDesc').value.trim(),description:$('fDesc').value.trim(),imgs};
     const next=products.slice();
-    if(editing==null) next.push(prod); else next[editing]=prod;
+    if(editing==null) next.unshift(prod); else next[editing]=prod;
     pSha=await saveJSON('products.json',next,pSha,editing==null?'add product':'edit product');
     products=next;
     toast('Сохранено. На сайте появится через 1–2 минуты');
@@ -471,117 +395,44 @@ function fillSettings(){
   $('sText').value=settings.discountText||'Скидка 20% при заказе от 3 товаров';
   $('sDiscountPercent').value=settings.discountPercent==null?20:settings.discountPercent; $('sDiscountMinQty').value=settings.discountMinQty==null?3:settings.discountMinQty;
   $('sColor').value=/^#[0-9a-f]{6}$/i.test(settings.accent||'')?settings.accent:'#d4ff3f';
-  $('sSound').checked=settings.sound!==false;$('sAbout').value=settings.about||'';$('sHow').value=settings.howOrder||'';$('sReviews').value=settings.reviewsLine||'';$('sAppName').value=settings.appName||'BRENDSHOP';$('sLogoPreview').querySelector('img').src='icons/icon-192.png?v='+(settings.appLogoVersion||Date.now());
+  $('sSound').checked=settings.sound!==false;$('sAbout').value=settings.about||'';$('sHow').value=settings.howOrder||'';$('sReviews').value=settings.reviewsLine||'';
 }
-async function getMeta(path){
-  const r=await gh('/contents/'+path+'?t='+Date.now());
-  if(r.status===404)return {sha:''};
-  if(!r.ok)throw new Error('GitHub '+r.status);
-  const d=await r.json();return {sha:d.sha};
-}
-function fileToIconB64(file,size){
-  return new Promise((resolve,reject)=>{
-    const fr=new FileReader();
-    fr.onload=()=>{
-      const im=new Image();
-      im.onload=()=>{
-        const cv=document.createElement('canvas');cv.width=size;cv.height=size;
-        const c=cv.getContext('2d');
-        c.fillStyle='#0b0b0b';c.fillRect(0,0,size,size);
-        const pad=Math.round(size*.10),scale=Math.min((size-pad*2)/im.width,(size-pad*2)/im.height);
-        const w=Math.round(im.width*scale),h=Math.round(im.height*scale);
-        c.drawImage(im,Math.round((size-w)/2),Math.round((size-h)/2),w,h);
-        resolve(cv.toDataURL('image/png').split(',')[1]);
-      };
-      im.onerror=()=>reject(new Error('Не удалось прочитать логотип'));
-      im.src=fr.result;
-    };
-    fr.onerror=()=>reject(new Error('Не удалось прочитать файл'));
-    fr.readAsDataURL(file);
-  });
-}
-function logoStatus(msg,err=false){
-  const el=$('logoSaveStatus');
-  if(!el)return;
-  el.style.display='block';el.textContent=msg;el.style.color=err?'var(--red)':'var(--fg)';
-}
-async function updateIndexVersion(v){
-  const r=await gh('/contents/index.html?t='+Date.now());
-  if(!r.ok)throw new Error('Не удалось обновить index.html: GitHub '+r.status);
-  const d=await r.json();
-  let html=dec(d.content);
-  const re=/(<link\s+rel=["']manifest["']\s+href=["']manifest\.webmanifest)(?:\?[^"']*)?(["'])/i;
-  if(!re.test(html))throw new Error('В index.html не найден manifest.webmanifest');
-  html=html.replace(re,'$1?v='+v+'$2');
-  const iconRe=/(<link\s+rel=["']apple-touch-icon["']\s+href=["']icons\/icon-180\.png)(?:\?[^"']*)?(["'])/i;
-  if(iconRe.test(html))html=html.replace(iconRe,'$1?v='+v+'$2');
-  await putFile('index.html',enc(html),d.sha,'refresh BRENDSHOP PWA version');
-}
-async function uploadAppLogo(file){
-  const b512=await fileToIconB64(file,512),b192=await fileToIconB64(file,192),b180=await fileToIconB64(file,180);
-  const files=[['icons/icon-512.png',b512],['icons/icon-192.png',b192],['icons/icon-180.png',b180],['icons/admin-icon-512.png',b512],['icons/admin-icon-192.png',b192],['icons/admin-icon-180.png',b180]];
-  for(const [path,b64] of files){
-    logoStatus('Сохраняю '+path+'…');
-    const meta=await getMeta(path);
-    await putFile(path,b64,meta.sha,'update BRENDSHOP app icon');
-  }
-  const v=Date.now();
-  const m=await gh('/contents/manifest.webmanifest?t='+Date.now());
-  if(!m.ok)throw new Error('Не найден manifest.webmanifest в репозитории');
-  const d=await m.json();
-  const man=JSON.parse(dec(d.content));
-  man.name=$('sAppName').value.trim()||'BRENDSHOP';
-  man.short_name=man.name;
-  man.id='./';man.scope='./';man.start_url='./';man.display='standalone';man.display_override=['standalone'];man.prefer_related_applications=false;
-  man.icons=[
-    {src:'icons/icon-192.png',sizes:'192x192',type:'image/png',purpose:'any'},
-    {src:'icons/icon-512.png',sizes:'512x512',type:'image/png',purpose:'any'},
-    {src:'icons/icon-192.png',sizes:'192x192',type:'image/png',purpose:'maskable'},
-    {src:'icons/icon-512.png',sizes:'512x512',type:'image/png',purpose:'maskable'}
-  ];
-  logoStatus('Сохраняю manifest…');
-  await putFile('manifest.webmanifest',enc(JSON.stringify(man,null,2)),d.sha,'update BRENDSHOP manifest');
-  const am=await gh('/contents/admin-manifest.webmanifest?t='+Date.now());
-  if(am.ok){
-    const ad=await am.json();const aman=JSON.parse(dec(ad.content));
-    aman.name=(($('sAppName').value.trim()||'BRENDSHOP')+' Admin').trim();aman.short_name='BS Admin';aman.id='./panel-k7x2m9.html';aman.scope='./';aman.start_url='./panel-k7x2m9.html';aman.display='standalone';aman.icons=[{src:'icons/admin-icon-192.png',sizes:'192x192',type:'image/png',purpose:'any'},{src:'icons/admin-icon-512.png',sizes:'512x512',type:'image/png',purpose:'any'},{src:'icons/admin-icon-192.png',sizes:'192x192',type:'image/png',purpose:'maskable'},{src:'icons/admin-icon-512.png',sizes:'512x512',type:'image/png',purpose:'maskable'}];
-    await putFile('admin-manifest.webmanifest',enc(JSON.stringify(aman,null,2)),ad.sha,'update BRENDSHOP admin manifest');
-  }
-  logoStatus('Обновляю версию установки…');
-  await updateIndexVersion(v);
-  return v;
-}
-$('sLogoFile').onchange=()=>{
-  const f=$('sLogoFile').files[0];
-  if(!f)return;
-  try{$('sLogoPreview').querySelector('img').src=URL.createObjectURL(f)}catch(e){}
-  logoStatus('✓ Иконка выбрана. Нажми «Сохранить настройки».');
-};
 async function saveSettings(){
-  const s={discountEnabled:$('sBanner').checked,discountText:$('sText').value.trim(),discountPercent:Math.max(0,Math.min(100,+$('sDiscountPercent').value||20)),discountMinQty:Math.max(1,parseInt($('sDiscountMinQty').value,10)||3),accent:$('sColor').value,sound:$('sSound').checked,about:$('sAbout').value.trim(),howOrder:$('sHow').value.trim(),reviewsLine:$('sReviews').value.trim(),appName:$('sAppName').value.trim()||'BRENDSHOP',appLogoVersion:settings.appLogoVersion||0};
-  const b=$('saveSetBtn');b.disabled=true;b.textContent='Сохраняю…';
-  try{
-    const logo=$('sLogoFile').files[0];
-    if(logo){
-      logoStatus('Начинаю сохранение логотипа…');
-      s.appLogoVersion=await uploadAppLogo(logo);
-    }else{
-      const m=await gh('/contents/manifest.webmanifest?t='+Date.now());
-      if(m.ok){const d=await m.json();const man=JSON.parse(dec(d.content));man.name=s.appName;man.short_name=s.appName;await putFile('manifest.webmanifest',enc(JSON.stringify(man,null,2)),d.sha,'update app name');}
-    }
-    sSha=await saveJSON('settings.json',s,sSha,'update settings');
-    settings=s;fillSettings();$('sLogoFile').value='';
-    logoStatus(logo?'✓ Логотип и настройки СОХРАНЕНЫ в GitHub.':'✓ Настройки СОХРАНЕНЫ в GitHub.');
-    toast(logo?'✓ Логотип и настройки сохранены':'✓ Настройки сохранены');
-  }catch(e){
-    logoStatus('✕ Не сохранено: '+e.message,true);
-    toast('Ошибка сохранения: '+e.message,1);
-  }
-  b.disabled=false;b.textContent='Сохранить настройки';
+  const s={discountEnabled:$('sBanner').checked,discountText:$('sText').value.trim(),discountPercent:Math.max(0,Math.min(100,+$('sDiscountPercent').value||20)),discountMinQty:Math.max(1,parseInt($('sDiscountMinQty').value,10)||3),accent:$('sColor').value,sound:$('sSound').checked,about:$('sAbout').value.trim(),howOrder:$('sHow').value.trim(),reviewsLine:$('sReviews').value.trim()};
+  const b=$('saveSetBtn');b.disabled=true;
+  try{sSha=await saveJSON('settings.json',s,sSha,'update settings');settings=s;toast('Настройки сохранены')}
+  catch(e){toast('Ошибка: '+e.message,1)}
+  b.disabled=false;
 }
 
 const st=localStorage.getItem('bs_admin_token'),sr=localStorage.getItem('bs_admin_repo');
 if(st&&sr){$('ghToken').value=st;$('ghRepo').value=sr;login()}
+</script>
+<script>
+(function(){
+  const btn=document.getElementById('installAdminBtn');
+  if(!btn)return;
+  let deferredPrompt=null;
+  const standalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
+  if(standalone){btn.style.display='none';return;}
+  function isIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent);}
+  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;btn.style.display='inline-block';});
+  btn.onclick=async()=>{
+    if(deferredPrompt){
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt=null;
+      return;
+    }
+    if(isIOS()){
+      alert('На iPhone: нажмите «Поделиться» в Safari → «Ещё» → «На экран Домой» → «Добавить».');
+    }else{
+      alert('Откройте меню браузера и выберите «Установить приложение» или «Добавить на главный экран».');
+    }
+  };
+  if(isIOS())btn.style.display='inline-block';
+})();
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('admin-sw.js').catch(()=>{}));}
 </script>
 </body>
 </html>

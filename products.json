@@ -939,7 +939,9 @@
     "type": "Пуховик",
     "price": 13050,
     "oldPrice": 14500,
-    "sizes": [],
+    "sizes": [
+      "48 50"
+    ],
     "material": "",
     "color": "",
     "season": "",
@@ -953,7 +955,7 @@
       "images/1790606314305_zg7vi.jpg",
       "images/1790606316651_cqugf.jpg"
     ],
-    "editedAt": "2026-10-05T08:20:35.243Z"
+    "editedAt": "2026-10-05T10:21:59.485Z"
   },
   {
     "id": 1790606124544,

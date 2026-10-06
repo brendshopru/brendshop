@@ -500,12 +500,21 @@ function fmt(n){return Number(n).toLocaleString('ru-RU')+' ₽'}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 const PH='data:image/svg+xml;utf8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="500"><rect width="400" height="500" fill="#141414"/></svg>');
 const PAGE=12; let shown=PAGE, lastList=[];
+function imageUrl(v){
+  const u=typeof v==='string'?v:(v&&typeof v==='object'?(v.url||v.src||v.preview||''):'');
+  if(!u)return '';
+  if(/^data:|^blob:|^https?:\/\//i.test(u))return u;
+  const clean=u.replace(/^\.\//,'').replace(/^\/+/,'');
+  try{return new URL(clean,location.href).href}catch(e){return clean}
+}
 function normalize(p){
+  const rawImgs=Array.isArray(p.imgs)?p.imgs:[];
+  const imgs=rawImgs.map(imageUrl).filter(Boolean);
   return {id:p.id,brand:p.brand||'',type:p.type||'',name:p.name||'',price:Number(p.price)||0,
     oldPrice:p.oldPrice?Number(p.oldPrice):null,badge:p.badge||null,sizes:Array.isArray(p.sizes)?p.sizes:[],featured:!!p.featured,priority:!!p.priority,
     condition:p.condition||'',season:p.season||'',material:p.material||'',color:p.color||'',
     stock:(p.stock===undefined||p.stock===null||p.stock==='')?99:Number(p.stock),
-    desc:(p.desc||p.description||p.descriptionText||p.text||''),imgs:(p.imgs&&p.imgs.length)?p.imgs:[PH]};
+    desc:(p.desc||p.description||p.descriptionText||p.text||''),avitoUrl:p.avitoUrl||'',imgs:imgs.length?imgs:[PH]};
 }
 products=products.map(normalize);
 

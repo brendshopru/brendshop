@@ -416,7 +416,8 @@ function photoUrl(v){
   const u=typeof v==='string'?v:(v&&typeof v==='object'?(v.url||v.src||v.preview||''):'');
   if(!u)return '';
   if(/^data:|^blob:|^https?:\/\//i.test(u))return u;
-  try{return new URL(u,location.href).href}catch(e){return u}
+  const clean=u.replace(/^\.\//,'').replace(/^\/+/,'');
+  try{return new URL(clean,location.href).href}catch(e){return clean}
 }
 function openListPhotoViewer(i){
   const p=products[i];

@@ -164,7 +164,7 @@ h1{font-size:22px;font-weight:800}
     <datalist id="brands"></datalist><datalist id="types"></datalist>
     <div class="g2">
       <div><label>Размеры</label><input id="fSizes" placeholder="M, L, XL или 42, 43, 44"></div>
-      <div><label>Витрина</label><label class="switch"><input type="checkbox" id="fFeatured"> Показывать как рекомендованный товар</label></div>
+      <div><label>Витрина</label><label class="switch"><input type="checkbox" id="fFeatured"> Показывать как рекомендованный товар</label><label class="switch"><input type="checkbox" id="fPriority"> ⭐ Показывать первым</label></div>
     </div>
     <div class="char-required"><div class="char-required-title">Характеристики товара <span style="color:var(--muted);font-weight:500">(необязательно)</span></div><div class="hint" style="margin-top:4px">Заполни эти поля — они будут показаны покупателю в карточке товара.</div></div>
     <div class="g2">
@@ -331,7 +331,7 @@ function renderList(){
     return `<div class="row">
       <img loading="lazy" src="${esc(photoUrl(p.imgs&&p.imgs[0]))}" alt="" onclick="event.stopPropagation();openListPhotoViewer(${i})" style="cursor:pointer">
       <div class="meta"><div class="name">${esc(p.name)}${st}</div>
-        <div class="sub2">${esc(p.brand||'—')} · ${esc(p.type||'—')}</div>${p.editedAt?`<div class="edited">${esc(editedLabel(p.editedAt))}</div>`:''}${p.featured?'<div class="featured">★ В рекомендациях</div>': ''}
+        <div class="sub2">${esc(p.brand||'—')} · ${esc(p.type||'—')}</div>${p.editedAt?`<div class="edited">${esc(editedLabel(p.editedAt))}</div>`:''}${p.priority?'<div class="featured">⭐ Показывается первым</div>':''}${p.featured?'<div class="featured">★ В рекомендациях</div>': ''}
         <div class="pr">${p.oldPrice?`<s>${fmt(p.oldPrice)}</s>`:''}${fmt(p.price)}</div></div>
       <div class="acts">
         <button class="btn sm" onclick="openForm(${i})">Изменить</button>
@@ -353,7 +353,7 @@ function openForm(i){
   if(!formHistory){history.pushState({brendshopForm:true},'');formHistory=true;}
   $('formTitle').textContent=i==null?'Новый товар':'Изменить товар';
   $('fName').value=p.name||'';$('fBrand').value=p.brand||'';$('fType').value=p.type||'';
-  $('fPrice').value=p.price||'';$('fOld').value=p.oldPrice||'';$('fSizes').value=Array.isArray(p.sizes)?p.sizes.join(', '):'';$('fFeatured').checked=!!p.featured;
+  $('fPrice').value=p.price||'';$('fOld').value=p.oldPrice||'';$('fSizes').value=Array.isArray(p.sizes)?p.sizes.join(', '):'';$('fFeatured').checked=!!p.featured;$('fPriority').checked=!!p.priority;
   $('fStock').value=p.stock==null?1:p.stock;$('fMaterial').value=p.material||'';$('fColor').value=p.color||'';$('fSeason').value=p.season||'';$('fCondition').value=p.condition||'';$('fDesc').value=p.desc||p.description||p.descriptionText||(i==null?descTemplate(descTemplateType(p.type)):'' );
   const known=['','Новинка','Скидка','Хит продаж','Топ','Эксклюзив','Ограниченная серия','Последний размер'];
   if(p.badge&&!known.includes(p.badge)){$('fBadge').value='__custom';$('fBadgeCustom').value=p.badge}
@@ -519,7 +519,7 @@ async function saveProduct(){
     // Характеристики необязательны: пустые поля не блокируют сохранение товара.
     const brand=$('fBrand').value.trim(),type=$('fType').value.trim(),sizes=$('fSizes').value.split(',').map(x=>x.trim()).filter(Boolean),material=$('fMaterial').value.trim(),color=$('fColor').value.trim(),season=$('fSeason').value.trim(),condition=$('fCondition').value.trim();
     const prod={id:editing==null?Date.now():products[editing].id,name,brand,type,
-      price,oldPrice:old,sizes,material,color,season,condition,featured:$('fFeatured').checked,stock:Math.max(0,parseInt($('fStock').value,10)||0),badge:badgeValue(),desc:$('fDesc').value.trim(),description:$('fDesc').value.trim(),imgs,editedAt:new Date().toISOString()};
+      price,oldPrice:old,sizes,material,color,season,condition,featured:$('fFeatured').checked,priority:$('fPriority').checked,stock:Math.max(0,parseInt($('fStock').value,10)||0),badge:badgeValue(),desc:$('fDesc').value.trim(),description:$('fDesc').value.trim(),imgs,editedAt:new Date().toISOString()};
     const next=products.slice();
     if(editing==null) next.push(prod); else next[editing]=prod;
     pSha=await saveJSON('products.json',next,pSha,editing==null?'add product':'edit product');

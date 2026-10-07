@@ -164,7 +164,7 @@ h1{font-size:22px;font-weight:800}
     <datalist id="brands"></datalist><datalist id="types"></datalist>
     <div class="g2">
       <div><label>Размеры</label><input id="fSizes" placeholder="M, L, XL или 42, 43, 44"></div>
-      <div><label>Витрина</label><label class="switch"><input type="checkbox" id="fFeatured"> Показывать как рекомендованный товар</label></div>
+      <div><label>Витрина</label><label class="switch"><input type="checkbox" id="fFeatured"> Показывать как рекомендованный товар</label><label class="switch"><input type="checkbox" id="fPriority"> Показывать первым на сайте</label></div>
     </div>
     <div class="char-required"><div class="char-required-title">Характеристики товара <span style="color:var(--muted);font-weight:500">(необязательно)</span></div><div class="hint" style="margin-top:4px">Заполни эти поля — они будут показаны покупателю в карточке товара.</div></div>
     <div class="g2">
@@ -191,6 +191,9 @@ h1{font-size:22px;font-weight:800}
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn sec sm" type="button" onclick="setDescTemplate('shoe')">Шаблон для обуви</button><button class="btn sec sm" type="button" onclick="setDescTemplate('clothes')">Шаблон для вещей</button></div>
     </div>
     <textarea id="fDesc" rows="12" placeholder="Выбери шаблон выше и заполни значения после двоеточия."></textarea>
+    <label>Ссылка на объявление Авито <span style="color:var(--muted);font-weight:500">(необязательно)</span></label>
+    <input id="fAvitoUrl" type="url" placeholder="https://www.avito.ru/...">
+    <div class="hint">Если ссылку не указать, кнопка «Оформить через Авито» откроет магазин BRENDSHOP на Авито.</div>
     <label>Фото — можно выбрать сразу много или добавлять по одному. Первое фото спереди, второе сзади, остальные в любом порядке</label>
     <input id="fPhotos" type="file" accept="image/*" multiple>
     <button class="btn sec sm" type="button" onclick="$('fPhotos').click()" style="margin-top:8px">+ Добавить ещё фото</button>
@@ -353,8 +356,8 @@ function openForm(i){
   if(!formHistory){history.pushState({brendshopForm:true},'');formHistory=true;}
   $('formTitle').textContent=i==null?'Новый товар':'Изменить товар';
   $('fName').value=p.name||'';$('fBrand').value=p.brand||'';$('fType').value=p.type||'';
-  $('fPrice').value=p.price||'';$('fOld').value=p.oldPrice||'';$('fSizes').value=Array.isArray(p.sizes)?p.sizes.join(', '):'';$('fFeatured').checked=!!p.featured;
-  $('fStock').value=p.stock==null?1:p.stock;$('fMaterial').value=p.material||'';$('fColor').value=p.color||'';$('fSeason').value=p.season||'';$('fCondition').value=p.condition||'';$('fDesc').value=p.desc||p.description||p.descriptionText||(i==null?descTemplate(descTemplateType(p.type)):'' );
+  $('fPrice').value=p.price||'';$('fOld').value=p.oldPrice||'';$('fSizes').value=Array.isArray(p.sizes)?p.sizes.join(', '):'';$('fFeatured').checked=!!p.featured;$('fPriority').checked=!!p.priority;
+  $('fStock').value=p.stock==null?1:p.stock;$('fAvitoUrl').value=p.avitoUrl||'';$('fMaterial').value=p.material||'';$('fColor').value=p.color||'';$('fSeason').value=p.season||'';$('fCondition').value=p.condition||'';$('fDesc').value=p.desc||p.description||p.descriptionText||(i==null?descTemplate(descTemplateType(p.type)):'' );
   const known=['','Новинка','Скидка','Хит продаж','Топ','Эксклюзив','Ограниченная серия','Последний размер'];
   if(p.badge&&!known.includes(p.badge)){$('fBadge').value='__custom';$('fBadgeCustom').value=p.badge}
   else{$('fBadge').value=p.badge||'';$('fBadgeCustom').value=''}
@@ -519,7 +522,7 @@ async function saveProduct(){
     // Характеристики необязательны: пустые поля не блокируют сохранение товара.
     const brand=$('fBrand').value.trim(),type=$('fType').value.trim(),sizes=$('fSizes').value.split(',').map(x=>x.trim()).filter(Boolean),material=$('fMaterial').value.trim(),color=$('fColor').value.trim(),season=$('fSeason').value.trim(),condition=$('fCondition').value.trim();
     const prod={id:editing==null?Date.now():products[editing].id,name,brand,type,
-      price,oldPrice:old,sizes,material,color,season,condition,featured:$('fFeatured').checked,stock:Math.max(0,parseInt($('fStock').value,10)||0),badge:badgeValue(),desc:$('fDesc').value.trim(),description:$('fDesc').value.trim(),imgs,editedAt:new Date().toISOString()};
+      price,oldPrice:old,sizes,material,color,season,condition,featured:$('fFeatured').checked,priority:$('fPriority').checked,avitoUrl:$('fAvitoUrl').value.trim(),stock:Math.max(0,parseInt($('fStock').value,10)||0),badge:badgeValue(),desc:$('fDesc').value.trim(),description:$('fDesc').value.trim(),imgs,editedAt:new Date().toISOString()};
     const next=products.slice();
     if(editing==null) next.push(prod); else next[editing]=prod;
     pSha=await saveJSON('products.json',next,pSha,editing==null?'add product':'edit product');
